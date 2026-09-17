@@ -1,5 +1,6 @@
 package com.github.alexthe666.iceandfire.entity;
 
+import com.github.alexthe666.iceandfire.compat.LycanitesMobsCompat;
 import com.github.alexthe666.iceandfire.entity.util.DragonUtils;
 import com.github.alexthe666.iceandfire.entity.util.IDragonProjectile;
 import net.minecraft.core.BlockPos;
@@ -118,7 +119,10 @@ public abstract class EntityDragonCharge extends Fireball implements IDragonProj
                         Entity cause = shootingDragon.getRidingPlayer() != null ? shootingDragon.getRidingPlayer() : shootingDragon;
                         DamageSource source = causeDamage(cause);
 
-                        entity.hurt(source, damageAmount);
+                        boolean damaged = entity.hurt(source, damageAmount);
+                        if (damaged && this instanceof EntityDragonLightningCharge && entity instanceof LivingEntity livingTarget) {
+                            LycanitesMobsCompat.applyParalysis(livingTarget);
+                        }
                         if (entity instanceof Player player) {
                             DragonUtils.fillBottleWithDragonBreath(player, shootingDragon.dragonType);
                         }

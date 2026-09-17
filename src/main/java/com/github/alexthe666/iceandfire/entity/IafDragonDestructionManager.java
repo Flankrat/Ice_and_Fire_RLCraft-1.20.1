@@ -6,7 +6,7 @@ import com.github.alexthe666.iceandfire.api.VoltageConfig;
 import com.github.alexthe666.iceandfire.api.event.DragonFireDamageWorldEvent;
 import com.github.alexthe666.iceandfire.block.*;
 import com.github.alexthe666.iceandfire.effect.MobEffectMelt;
-import com.github.alexthe666.iceandfire.effect.MobEffectVoltage;
+import com.github.alexthe666.iceandfire.compat.LycanitesMobsCompat;
 import com.github.alexthe666.iceandfire.entity.props.EntityDataProvider;
 import com.github.alexthe666.iceandfire.entity.tile.TileEntityDragonforgeInput;
 import com.github.alexthe666.iceandfire.entity.util.BlockLaunchExplosion;
@@ -412,7 +412,7 @@ public class IafDragonDestructionManager {
             if (com.github.alexthe666.iceandfire.item.blooded.ItemBloodedArmor.hasFullArmorSet(target,
                     com.github.alexthe666.iceandfire.item.blooded.BloodedDragonType.DragonElement.LIGHTNING))
                 return false;
-            MobEffectVoltage.applyVoltage(target, livingSource, MobEffectVoltage.DURATION_TICKS, baseDamage);
+            LycanitesMobsCompat.applyParalysis(target);
             double x = source.getX() - target.getX();
             double y = source.getZ() - target.getZ();
             target.knockback((double) statusDuration / 10, x, y);
@@ -436,7 +436,7 @@ public class IafDragonDestructionManager {
 
         source.getPersistentData().putLong(BREATH_CHAIN_COOLDOWN,
                 gameTime + VoltageConfig.CHAIN_COOLDOWN_TICKS);
-        ChainLightningUtils.createChainLightning(level, target, source, baseDamage, false, false);
+        ChainLightningUtils.createChainLightning(level, target, source, baseDamage, false, false, true);
     }
 
     private static void causeExplosion(Level world, BlockPos center, EntityDragonBase destroyer, DamageSource source,

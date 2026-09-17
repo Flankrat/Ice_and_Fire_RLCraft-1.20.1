@@ -1,6 +1,7 @@
 package com.github.alexthe666.iceandfire.api;
 
 import com.github.alexthe666.iceandfire.IceAndFire;
+import com.github.alexthe666.iceandfire.compat.LycanitesMobsCompat;
 import com.github.alexthe666.iceandfire.entity.util.IDeadMob;
 import com.github.alexthe666.iceandfire.message.MessageChainLightningFX;
 import net.minecraft.nbt.CompoundTag;
@@ -46,6 +47,17 @@ public final class ChainLightningUtils {
      */
     public static void createChainLightning(Level level, LivingEntity target, Entity attacker,
             float baseWeaponDamage, boolean applyPlayerCooldown, boolean applyVoltageToInitialTarget) {
+        createChainLightning(level, target, attacker, baseWeaponDamage, applyPlayerCooldown,
+                applyVoltageToInitialTarget, false);
+    }
+
+    /**
+     * Internal variant used by lightning-dragon breath. Breath keeps the existing chain damage
+     * and visuals, but substitutes Lycanites Mobs paralysis for Voltage on chained targets.
+     */
+    public static void createChainLightning(Level level, LivingEntity target, Entity attacker,
+            float baseWeaponDamage, boolean applyPlayerCooldown, boolean applyVoltageToInitialTarget,
+            boolean useLycanitesParalysis) {
         if (level.isClientSide)
             return;
         if (!target.isAttackable())
@@ -67,10 +79,14 @@ public final class ChainLightningUtils {
         int hop = 0;
         attackWithLightning(level, attacker, target, damage[hop]);
         if (applyVoltageToInitialTarget) {
-            com.github.alexthe666.iceandfire.effect.MobEffectVoltage.applyVoltage(
-                    target, livingAttacker,
-                    com.github.alexthe666.iceandfire.effect.MobEffectVoltage.DURATION_TICKS,
-                    baseWeaponDamage);
+            if (useLycanitesParalysis) {
+                LycanitesMobsCompat.applyParalysis(target);
+            } else {
+                com.github.alexthe666.iceandfire.effect.MobEffectVoltage.applyVoltage(
+                        target, livingAttacker,
+                        com.github.alexthe666.iceandfire.effect.MobEffectVoltage.DURATION_TICKS,
+                        baseWeaponDamage);
+            }
         }
         target.playSound(SoundEvents.LIGHTNING_BOLT_IMPACT, 0.5F, 1.0F);
 
@@ -99,10 +115,14 @@ public final class ChainLightningUtils {
             LivingEntity next = candidates.get(0);
 
             attackWithLightning(level, attacker, next, damage[hop]);
-            com.github.alexthe666.iceandfire.effect.MobEffectVoltage.applyVoltage(
-                    next, livingAttacker,
-                    com.github.alexthe666.iceandfire.effect.MobEffectVoltage.DURATION_TICKS,
-                    baseWeaponDamage);
+            if (useLycanitesParalysis) {
+                LycanitesMobsCompat.applyParalysis(next);
+            } else {
+                com.github.alexthe666.iceandfire.effect.MobEffectVoltage.applyVoltage(
+                        next, livingAttacker,
+                        com.github.alexthe666.iceandfire.effect.MobEffectVoltage.DURATION_TICKS,
+                        baseWeaponDamage);
+            }
 
             visited.add(next.getId());
             chainPositions.add(next.getBoundingBox().getCenter());

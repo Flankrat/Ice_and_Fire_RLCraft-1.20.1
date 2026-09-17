@@ -1,5 +1,6 @@
 package com.github.alexthe666.iceandfire.entity;
 
+import com.github.alexthe666.iceandfire.compat.LycanitesMobsCompat;
 import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.entity.explosion.BlockBreakExplosion;
 import com.github.alexthe666.iceandfire.entity.util.DragonUtils;
@@ -110,7 +111,10 @@ public class DragonServerTickManager {
 
             if (dragon.isTackling() && dragon.getBoundingBox().inflate(2.0D).intersects(aerialTarget.getBoundingBox())) {
                 dragon.attackDecision = true;
-                aerialTarget.hurt(aerialTarget.level().damageSources().mobAttack(dragon), dragon.getDragonStage() * 3.0F);
+                boolean damaged = aerialTarget.hurt(aerialTarget.level().damageSources().mobAttack(dragon), dragon.getDragonStage() * 3.0F);
+                if (damaged && dragon.dragonType == DragonType.LIGHTNING) {
+                    LycanitesMobsCompat.applyParalysis(aerialTarget);
+                }
                 dragon.spawnGroundEffects();
                 dragon.setTackling(false);
                 dragon.setFlying(false);
