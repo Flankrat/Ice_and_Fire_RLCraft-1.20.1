@@ -83,8 +83,6 @@ public class IceAndFire {
 
                 MinecraftForge.EVENT_BUS.addListener(IceAndFire::onServerStarted);
 
-                com.github.alexthe666.iceandfire.config.FrostShatterConfig.load();
-                com.github.alexthe666.iceandfire.config.VoltageDischargeConfig.load();
 
                 final DeferredRegister<Codec<? extends BiomeModifier>> biomeModifiers = DeferredRegister
                                 .create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, IceAndFire.MODID);
@@ -105,7 +103,6 @@ public class IceAndFire {
                 IafContainerRegistry.CONTAINERS.register(modBus);
                 IafRecipeSerializers.SERIALIZERS.register(modBus);
                 IafProcessors.PROCESSORS.register(modBus);
-                com.github.alexthe666.iceandfire.effect.IafMobEffects.MOB_EFFECTS.register(modBus);
 
                 IafVillagerRegistry.POI_TYPES.register(modBus);
                 IafVillagerRegistry.PROFESSIONS.register(modBus);
@@ -215,12 +212,6 @@ public class IceAndFire {
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageChainLightningFX.class,
                                 MessageChainLightningFX::write, MessageChainLightningFX::read,
                                 MessageHandler.handle(MessageChainLightningFX.Handler::handle));
-                NETWORK_WRAPPER.registerMessage(packetsRegistered++,
-                                com.github.alexthe666.iceandfire.message.MessageVoltageDischargeFX.class,
-                                com.github.alexthe666.iceandfire.message.MessageVoltageDischargeFX::write,
-                                com.github.alexthe666.iceandfire.message.MessageVoltageDischargeFX::read,
-                                MessageHandler.handle(
-                                                com.github.alexthe666.iceandfire.message.MessageVoltageDischargeFX.Handler::handle));
                 event.enqueueWork(() -> {
                         PROXY.setup();
                         IafLootRegistry.init();

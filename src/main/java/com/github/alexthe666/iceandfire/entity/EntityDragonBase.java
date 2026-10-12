@@ -1,6 +1,5 @@
 package com.github.alexthe666.iceandfire.entity;
 
-import com.github.alexthe666.iceandfire.compat.LycanitesMobsCompat;
 import com.github.alexthe666.citadel.animation.Animation;
 import com.github.alexthe666.citadel.animation.AnimationHandler;
 import com.github.alexthe666.citadel.animation.IAnimatedEntity;
@@ -576,7 +575,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     }
 
     @Override
-    public void remove(@NotNull RemovalReason reason) {
+    public void remove(Entity.@NotNull RemovalReason reason) {
         removeParts();
         super.remove(reason);
     }
@@ -792,7 +791,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
             ListTag nbttaglist = compound.getList("Items", 10);
             this.createInventory();
             for (Tag inbt : nbttaglist) {
-                CompoundTag CompoundNBT = (CompoundTag) inbt;
+                CompoundTag CompoundNBT = (net.minecraft.nbt.CompoundTag) inbt;
                 int j = CompoundNBT.getByte("Slot") & 255;
                 if (j <= 4) {
                     dragonInventory.setItem(j, ItemStack.of(CompoundNBT));
@@ -802,7 +801,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
             ListTag nbttaglist = compound.getList("Items", 10);
             this.createInventory();
             for (Tag inbt : nbttaglist) {
-                CompoundTag CompoundNBT = (CompoundTag) inbt;
+                CompoundTag CompoundNBT = (net.minecraft.nbt.CompoundTag) inbt;
                 int j = CompoundNBT.getByte("Slot") & 255;
                 dragonInventory.setItem(j, ItemStack.of(CompoundNBT));
             }
@@ -1626,9 +1625,6 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
             float baseDamage = (float) this.getAttribute(Attributes.ATTACK_DAMAGE).getValue();
             float damage = baseDamage * 2;
             boolean didDamage = prey.hurt(this.level().damageSources().mobAttack(this), damage);
-            if (didDamage && this.dragonType == DragonType.LIGHTNING && prey instanceof LivingEntity livingPrey) {
-                LycanitesMobsCompat.applyParalysis(livingPrey);
-            }
 
             if (didDamage && IafConfig.canDragonsHealFromBiting) {
                 heal(damage * 0.5f);
@@ -2044,25 +2040,15 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
             airTarget = new BlockPos(airTarget.getX(), maxFlightHeight, airTarget.getZ());
         }
 
-        LivingEntity combatTarget = this.getTarget();
-        // 1.12.2 dragons still had normal entity gravity during AI flight. In 1.20.1
-        // Flying/Hovering uses noGravity, so a ranged dragon targeting a mob standing on a
-        // solid block can fail isTargetInAir() and skip the only code that pulls it back down.
-        // Treat a grounded combat target as a valid flight target for every dragon type so the
-        // legacy downward bias below can run for fire, ice, and lightning dragons alike.
-        boolean groundCombatTarget = combatTarget != null
-                && combatTarget.isAlive()
-                && combatTarget.onGround()
-                && !combatTarget.isInWater();
-
-        if ((isTargetInAir() || groundCombatTarget) && this.isFlying()
+        if (isTargetInAir() && this.isFlying()
                 && this.distanceToSqr(new Vec3(airTarget.getX(), this.getY(), airTarget.getZ())) > 3) {
+            LivingEntity combatTarget = this.getTarget();
             boolean rangedCombat = combatTarget != null && combatTarget.isAlive() && !this.attackDecision;
             boolean targetNeedsClimb = rangedCombat
                     && !combatTarget.onGround()
                     && combatTarget.getY() > this.getY() + 3.0D;
             boolean legacyBreathDescent = rangedCombat
-                    && (this.isBreathingFire() || groundCombatTarget)
+                    && this.isBreathingFire()
                     && !targetNeedsClimb;
 
             double desiredY;
@@ -2122,25 +2108,6 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
             float pitch = (float) (-(Mth.atan2(d1, d3) * (180D / Math.PI)));
             this.setXRot(this.updateRotation(this.getXRot(), pitch, 30F));
             this.setYRot(this.updateRotation(this.getYRot(), yaw, 30F));
-        } else if (groundCombatTarget && this.isFlying()) {
-            // When already horizontally close to a grounded target the old code stopped
-            // steering, but 1.12.2 gravity still brought the dragon down. Recreate that for
-            // every dragon type instead of leaving a no-gravity dragon hovering forever above
-            // the target.
-            Vec3 mot = this.getDeltaMovement();
-            double landingY = Math.max(mot.y - 0.08D, -0.28D);
-            this.setDeltaMovement(mot.x * 0.92D, landingY, mot.z * 0.92D);
-
-            if (!this.isOverAir() && !this.isInWater() && this.getControllingPassenger() == null) {
-                this.airTarget = null;
-                this.setFlying(false);
-                this.setHovering(false);
-                this.setNoGravity(false);
-                this.flyTicks = 0;
-                this.hoverTicks = 0;
-                return;
-            }
-            this.airTarget = null;
         } else {
             this.airTarget = null;
         }

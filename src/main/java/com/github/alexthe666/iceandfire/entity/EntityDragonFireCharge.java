@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.level.Level;
@@ -64,6 +65,11 @@ public class EntityDragonFireCharge extends EntityDragonCharge {
     @Override
     public float getDamage() {
         return (float) IafConfig.dragonAttackDamageFire;
+    }
+
+    @Override
+    protected void onDirectHit(LivingEntity target, EntityDragonBase dragon) {
+        target.setSecondsOnFire(5);
     }
 
 }

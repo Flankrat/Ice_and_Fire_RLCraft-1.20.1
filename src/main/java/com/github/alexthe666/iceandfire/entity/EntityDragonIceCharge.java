@@ -4,9 +4,11 @@ import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.IceAndFire;
 import com.github.alexthe666.iceandfire.enums.EnumParticles;
 import com.github.alexthe666.iceandfire.misc.IafDamageRegistry;
+import com.github.alexthe666.iceandfire.entity.props.EntityDataProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.level.Level;
@@ -65,5 +67,9 @@ public class EntityDragonIceCharge extends EntityDragonCharge {
         return false;
     }
 
+    @Override
+    protected void onDirectHit(LivingEntity target, EntityDragonBase dragon) {
+        EntityDataProvider.getCapability(target).ifPresent(data -> data.frozenData.setFrozen(target, 200));
+    }
 
 }

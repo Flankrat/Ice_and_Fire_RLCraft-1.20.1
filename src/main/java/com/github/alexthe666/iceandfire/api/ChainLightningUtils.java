@@ -1,7 +1,6 @@
 package com.github.alexthe666.iceandfire.api;
 
 import com.github.alexthe666.iceandfire.IceAndFire;
-import com.github.alexthe666.iceandfire.compat.LycanitesMobsCompat;
 import com.github.alexthe666.iceandfire.entity.util.IDeadMob;
 import com.github.alexthe666.iceandfire.message.MessageChainLightningFX;
 import net.minecraft.nbt.CompoundTag;
@@ -34,30 +33,10 @@ public final class ChainLightningUtils {
     /**
      * Variant used by legacy projectile ports. The 1.12.2 lightning arrow did not put the
      * bow itself on cooldown, so callers can suppress the held-item cooldown while keeping
-     * the same chain damage and visuals.
+     * the same direct chain damage and visuals.
      */
     public static void createChainLightning(Level level, LivingEntity target, Entity attacker,
             float baseWeaponDamage, boolean applyPlayerCooldown) {
-        createChainLightning(level, target, attacker, baseWeaponDamage, applyPlayerCooldown, true);
-    }
-
-    /**
-     * Allows callers which already applied Voltage to the primary target to avoid adding a
-     * second stack while retaining Voltage on entities reached by later hops.
-     */
-    public static void createChainLightning(Level level, LivingEntity target, Entity attacker,
-            float baseWeaponDamage, boolean applyPlayerCooldown, boolean applyVoltageToInitialTarget) {
-        createChainLightning(level, target, attacker, baseWeaponDamage, applyPlayerCooldown,
-                applyVoltageToInitialTarget, false);
-    }
-
-    /**
-     * Internal variant used by lightning-dragon breath. Breath keeps the existing chain damage
-     * and visuals, but substitutes Lycanites Mobs paralysis for Voltage on chained targets.
-     */
-    public static void createChainLightning(Level level, LivingEntity target, Entity attacker,
-            float baseWeaponDamage, boolean applyPlayerCooldown, boolean applyVoltageToInitialTarget,
-            boolean useLycanitesParalysis) {
         if (level.isClientSide)
             return;
         if (!target.isAttackable())
@@ -69,25 +48,13 @@ public final class ChainLightningUtils {
             }
             player.getCooldowns().addCooldown(
                     player.getMainHandItem().getItem(),
-                    VoltageConfig.CHAIN_COOLDOWN_TICKS);
+                    ChainLightningConfig.CHAIN_COOLDOWN_TICKS);
         }
 
-        float[] damage = VoltageConfig.CHAIN_DAMAGE_PER_HOP;
-        int range = VoltageConfig.CHAIN_RANGE;
-        LivingEntity livingAttacker = attacker instanceof LivingEntity living ? living : null;
-
+        float[] damage = ChainLightningConfig.CHAIN_DAMAGE_PER_HOP;
+        int range = ChainLightningConfig.CHAIN_RANGE;
         int hop = 0;
         attackWithLightning(level, attacker, target, damage[hop]);
-        if (applyVoltageToInitialTarget) {
-            if (useLycanitesParalysis) {
-                LycanitesMobsCompat.applyParalysis(target);
-            } else {
-                com.github.alexthe666.iceandfire.effect.MobEffectVoltage.applyVoltage(
-                        target, livingAttacker,
-                        com.github.alexthe666.iceandfire.effect.MobEffectVoltage.DURATION_TICKS,
-                        baseWeaponDamage);
-            }
-        }
         target.playSound(SoundEvents.LIGHTNING_BOLT_IMPACT, 0.5F, 1.0F);
 
         List<Vec3> chainPositions = new ArrayList<>();
@@ -115,15 +82,6 @@ public final class ChainLightningUtils {
             LivingEntity next = candidates.get(0);
 
             attackWithLightning(level, attacker, next, damage[hop]);
-            if (useLycanitesParalysis) {
-                LycanitesMobsCompat.applyParalysis(next);
-            } else {
-                com.github.alexthe666.iceandfire.effect.MobEffectVoltage.applyVoltage(
-                        next, livingAttacker,
-                        com.github.alexthe666.iceandfire.effect.MobEffectVoltage.DURATION_TICKS,
-                        baseWeaponDamage);
-            }
-
             visited.add(next.getId());
             chainPositions.add(next.getBoundingBox().getCenter());
             source = next;
@@ -138,7 +96,7 @@ public final class ChainLightningUtils {
     private static void attackWithLightning(Level level, Entity attacker,
             LivingEntity target, float dmg) {
         DamageSource src;
-        if (VoltageConfig.CHAIN_BYPASSES_ARMOR) {
+        if (ChainLightningConfig.CHAIN_BYPASSES_ARMOR) {
             src = level.damageSources().magic();
         } else {
             src = level.damageSources().lightningBolt();

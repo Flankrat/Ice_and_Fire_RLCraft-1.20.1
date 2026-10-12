@@ -12,7 +12,6 @@ public class EntityData {
     public SirenData sirenData = new SirenData();
     public ChickenData chickenData = new ChickenData();
     public MiscData miscData = new MiscData();
-    public MeltData meltData = new MeltData();
     public ShivaxiBlazeData shivaxiBlazeData = new ShivaxiBlazeData();
 
     public void tick(final LivingEntity entity) {
@@ -21,14 +20,12 @@ public class EntityData {
         sirenData.tickCharmed(entity);
         chickenData.tickChicken(entity);
         miscData.tickMisc(entity);
-        meltData.tickMelt(entity);
         shivaxiBlazeData.tick(entity);
 
         boolean triggerClientUpdate = frozenData.doesClientNeedUpdate();
         triggerClientUpdate = chainData.doesClientNeedUpdate() || triggerClientUpdate;
         triggerClientUpdate = sirenData.doesClientNeedUpdate() || triggerClientUpdate;
         triggerClientUpdate = miscData.doesClientNeedUpdate() || triggerClientUpdate;
-        triggerClientUpdate = meltData.doesClientNeedUpdate() || triggerClientUpdate;
         triggerClientUpdate = shivaxiBlazeData.doesClientNeedUpdate() || triggerClientUpdate;
 
         if (triggerClientUpdate && !entity.level().isClientSide()) {
@@ -47,7 +44,6 @@ public class EntityData {
         sirenData.serialize(tag);
         chickenData.serialize(tag);
         miscData.serialize(tag);
-        meltData.serialize(tag);
         shivaxiBlazeData.serialize(tag);
         return tag;
     }
@@ -58,7 +54,6 @@ public class EntityData {
         sirenData.deserialize(tag);
         chickenData.deserialize(tag);
         miscData.deserialize(tag);
-        meltData.deserialize(tag);
         shivaxiBlazeData.deserialize(tag);
     }
 }

@@ -4,7 +4,6 @@ import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.IceAndFire;
 import com.github.alexthe666.iceandfire.block.IafBlockRegistry;
 import com.github.alexthe666.iceandfire.datagen.tags.IafItemTags;
-import com.github.alexthe666.iceandfire.effect.MobEffectChaos;
 import com.github.alexthe666.iceandfire.entity.*;
 import com.github.alexthe666.iceandfire.entity.ai.AiDebug;
 import com.github.alexthe666.iceandfire.entity.ai.EntitySheepAIFollowCyclops;
@@ -245,13 +244,6 @@ public class ServerEvents {
 
     @SubscribeEvent
     public void onEntityDamage(LivingHurtEvent event) {
-        if (event.getSource().getEntity() instanceof net.minecraft.world.entity.LivingEntity) {
-            float chaosAmp = MobEffectChaos.getDamageAmplification(event.getEntity());
-            if (chaosAmp > 0) {
-                event.setAmount(event.getAmount() * (1.0f + chaosAmp));
-            }
-        }
-
         if (event.getSource().is(DamageTypeTags.IS_PROJECTILE)) {
             float multi = 1;
             if (event.getEntity().getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof ItemTrollArmor) {

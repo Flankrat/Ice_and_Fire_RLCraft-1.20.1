@@ -195,8 +195,6 @@ public class ClientEvents {
                     event.getPackedLight(), data.chainData.getChainedTo());
         });
 
-        com.github.alexthe666.iceandfire.client.render.MeltEffectRenderer.renderMeltFire(entity, event.getPoseStack(),
-                event.getMultiBufferSource(), event.getPackedLight());
     }
 
     @SubscribeEvent

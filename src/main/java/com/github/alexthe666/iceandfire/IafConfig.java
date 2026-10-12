@@ -26,6 +26,8 @@ public class IafConfig {
     public static double dragonAttackDamageFire = 2F;
     public static double dragonAttackDamageIce = 2.5F;
     public static double dragonAttackDamageLightning = 3.5F;
+    public static boolean lightningDragonParalysis = true;
+    public static int lightningDragonParalysisTicks = 10;
     public static int maxDragonFlight = 256;
     public static int dragonFlightHeight = 48;
     public static int dragonGoldSearchLength = 30;
@@ -137,13 +139,6 @@ public class IafConfig {
     public static boolean dragonWeaponLightningAbility = true;
     public static int villagerHouseWeight = 5;
     public static boolean allowAttributeOverriding = true;
-    public static java.util.List<String> frostShatterThresholds = new java.util.ArrayList<>();
-    public static java.util.List<String> voltageDischargeThresholds = new java.util.ArrayList<>();
-    public static int defaultFrostShatterThreshold = 10;
-    public static int defaultVoltageDischargeThreshold = 10;
-    public static boolean enableMeltEffect = true;
-    public static boolean enableFrostbiteEffect = true;
-    public static boolean enableVoltageEffect = true;
     public static boolean scaleArmorBreathProtect = false;
     public static boolean hydraHeartPassRegen = true;
     public static boolean cyclopsEyeWeaknessApply = true;
@@ -180,6 +175,8 @@ public class IafConfig {
             dragonAttackDamageFire = ConfigHolder.SERVER.dragonAttackDamageFire.get();
             dragonAttackDamageIce = ConfigHolder.SERVER.dragonAttackDamageIce.get();
             dragonAttackDamageLightning = ConfigHolder.SERVER.dragonAttackDamageLightning.get();
+            lightningDragonParalysis = ConfigHolder.SERVER.lightningDragonParalysis.get();
+            lightningDragonParalysisTicks = ConfigHolder.SERVER.lightningDragonParalysisTicks.get();
             maxDragonFlight = ConfigHolder.SERVER.maxDragonFlight.get();
             dragonFlightHeight = ConfigHolder.SERVER.dragonFlightHeight.get();
             dragonGoldSearchLength = ConfigHolder.SERVER.dragonGoldSearchLength.get();
@@ -288,15 +285,6 @@ public class IafConfig {
             villagerHouseWeight = ConfigHolder.SERVER.villagerHouseWeight.get();
             allowAttributeOverriding = ConfigHolder.SERVER.allowAttributeOverriding.get();
             pathfindingDebug = ConfigHolder.SERVER.pathfindingDebug.get();
-            defaultFrostShatterThreshold = ConfigHolder.SERVER.defaultFrostShatterThreshold.get();
-            defaultVoltageDischargeThreshold = ConfigHolder.SERVER.defaultVoltageDischargeThreshold.get();
-            frostShatterThresholds = (java.util.List<String>) ConfigHolder.SERVER.frostShatterThresholds.get();
-            voltageDischargeThresholds = (java.util.List<String>) ConfigHolder.SERVER.voltageDischargeThresholds.get();
-            com.github.alexthe666.iceandfire.config.FrostShatterConfig.parse(frostShatterThresholds, defaultFrostShatterThreshold);
-            com.github.alexthe666.iceandfire.config.VoltageDischargeConfig.parse(voltageDischargeThresholds, defaultVoltageDischargeThreshold);
-            enableMeltEffect = ConfigHolder.SERVER.enableMeltEffect.get();
-            enableFrostbiteEffect = ConfigHolder.SERVER.enableFrostbiteEffect.get();
-            enableVoltageEffect = ConfigHolder.SERVER.enableVoltageEffect.get();
             scaleArmorBreathProtect = ConfigHolder.SERVER.scaleArmorBreathProtect.get();
             hydraHeartPassRegen = ConfigHolder.SERVER.hydraHeartPassRegen.get();
             cyclopsEyeWeaknessApply = ConfigHolder.SERVER.cyclopsEyeWeaknessApply.get();

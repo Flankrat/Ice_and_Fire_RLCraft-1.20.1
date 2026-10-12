@@ -7,13 +7,13 @@ un distributeur.
 
 
 
-Le souffle de feu inflige Fusion,
-brûle et affaiblit l'armure. Celui
-de glace gèle sa victime. Celui de
-foudre inflige Voltage et peut bondir
-entre les ennemis proches sous forme
-d'éclair en chaîne.
-
+Le souffle de feu brûle sa victime;
+ses dégâts directs ignorent la
+Protection contre le feu et la
+Résistance au feu. Celui de glace
+gèle sa victime. Avec Lycanites Mobs,
+le souffle de foudre inflige aussi
+Paralysie.
 
 
 

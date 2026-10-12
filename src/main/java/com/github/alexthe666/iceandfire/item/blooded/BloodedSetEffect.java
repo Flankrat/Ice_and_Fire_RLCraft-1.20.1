@@ -2,10 +2,11 @@ package com.github.alexthe666.iceandfire.item.blooded;
 
 import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.api.ChainLightningUtils;
-import com.github.alexthe666.iceandfire.effect.MobEffectFrostbite;
-import com.github.alexthe666.iceandfire.effect.MobEffectMelt;
+import com.github.alexthe666.iceandfire.entity.props.EntityDataProvider;
 import com.github.alexthe666.iceandfire.item.IafItemRegistry;
 import com.github.alexthe666.iceandfire.item.ItemAlchemySword;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -29,7 +30,7 @@ public final class BloodedSetEffect {
 
         switch (element) {
             case FIRE -> applyFireEffect(player, target);
-            case ICE -> applyIceEffect(player, target, damage);
+            case ICE -> applyIceEffect(player, target);
             case LIGHTNING -> applyLightningEffect(player, target, damage);
         }
     }
@@ -71,20 +72,23 @@ public final class BloodedSetEffect {
     private static void applyFireEffect(Player player, LivingEntity target) {
         if (!IafConfig.dragonWeaponFireAbility)
             return;
-        MobEffectMelt.applyMelt(target, player, 0, 160);
+        target.setSecondsOnFire(5);
+        target.knockback(1.0F, player.getX() - target.getX(), player.getZ() - target.getZ());
     }
 
-    private static void applyIceEffect(Player player, LivingEntity target, float damage) {
+    private static void applyIceEffect(Player player, LivingEntity target) {
         if (!IafConfig.dragonWeaponIceAbility)
             return;
-        MobEffectFrostbite.applyFrostbite(target, player, 200, damage);
+        EntityDataProvider.getCapability(target).ifPresent(data -> data.frozenData.setFrozen(target, 200));
+        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2));
+        target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 100, 2));
+        target.knockback(1.0F, player.getX() - target.getX(), player.getZ() - target.getZ());
     }
 
     private static void applyLightningEffect(Player player, LivingEntity target, float damage) {
         if (!IafConfig.dragonWeaponLightningAbility)
             return;
-        if (!player.level().isClientSide) {
-            ChainLightningUtils.createChainLightning(player.level(), target, player, damage);
-        }
+        ChainLightningUtils.createChainLightning(player.level(), target, player, damage);
+        target.knockback(1.0F, player.getX() - target.getX(), player.getZ() - target.getZ());
     }
 }

@@ -3,9 +3,11 @@ package com.github.alexthe666.iceandfire.entity;
 import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.entity.util.IDragonProjectile;
 import com.github.alexthe666.iceandfire.misc.IafDamageRegistry;
+import com.github.alexthe666.iceandfire.integration.LycanitesCompat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.level.Level;
@@ -49,5 +51,12 @@ public class EntityDragonLightningCharge extends EntityDragonCharge implements I
         return (float) IafConfig.dragonAttackDamageLightning;
     }
 
+    @Override
+    protected void onDirectHit(LivingEntity target, EntityDragonBase dragon) {
+        target.knockback(0.9D, dragon.getX() - target.getX(), dragon.getZ() - target.getZ());
+        if (IafConfig.lightningDragonParalysis) {
+            LycanitesCompat.applyParalysis(target, IafConfig.lightningDragonParalysisTicks);
+        }
+    }
 
 }

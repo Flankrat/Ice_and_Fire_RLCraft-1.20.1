@@ -7,12 +7,13 @@ fired from a dispenser.
 
 
 
-Fire dragon breath inflicts Melt,
-weakening armor while burning its
-victim. Ice dragon breath freezes
-its victim. Lightning dragon breath
-inflicts Voltage and can leap among
-nearby enemies as chain lightning.
+Fire dragon breath burns its victim;
+its direct dragonfire damage ignores
+Fire Protection and Fire Resistance.
+Ice dragon breath freezes its victim.
+With Lycanites Mobs installed,
+lightning dragon breath also inflicts
+Paralysis.
 
 
 

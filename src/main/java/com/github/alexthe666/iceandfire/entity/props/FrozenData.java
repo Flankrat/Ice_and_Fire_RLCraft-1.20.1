@@ -10,6 +10,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
 
+/**
+ * Data-backed ice dragon freeze state.  This deliberately does not use a
+ * MobEffect; it mirrors the old entity-effect/capability implementation.
+ */
 public class FrozenData {
     public int frozenTicks;
     public boolean isFrozen;
@@ -17,115 +21,77 @@ public class FrozenData {
     private boolean triggerClientUpdate;
 
     public void tickFrozen(final LivingEntity entity) {
-        if (!entity.level().isClientSide()) { // SERVER SIDE SYNC
-            if (entity.hasEffect(com.github.alexthe666.iceandfire.effect.IafMobEffects.FROSTBURN.get())) {
-                if (isFrozen) {
-                    clearFrozen(entity);
-                }
-                return;
-            }
-
-            // 配置关闭时用内部计时器驱动，不依赖 FROSTBITE 药水效果
-            if (!com.github.alexthe666.iceandfire.IafConfig.enableFrostbiteEffect) {
-                if (isFrozen && frozenTicks > 0) {
-                    frozenTicks--;
-                    if (frozenTicks <= 0) {
-                        clearFrozen(entity);
-                    }
-                }
-            } else {
-                net.minecraft.world.effect.MobEffectInstance frostbite = entity
-                        .getEffect(com.github.alexthe666.iceandfire.effect.IafMobEffects.FROSTBITE.get());
-                if (frostbite != null) {
-                    if (!isFrozen) {
-                        entity.playSound(SoundEvents.GLASS_PLACE, 1, 1);
-                        isFrozen = true;
-                        triggerClientUpdate = true;
-                    }
-                    frozenTicks = frostbite.getDuration();
-                } else if (isFrozen) {
-                    clearFrozen(entity);
-                }
-            }
-        }
-
         if (!isFrozen) {
             return;
         }
 
-        if (entity instanceof EntityIceDragon) {
-            clearFrozen(entity);
-            if (!entity.level().isClientSide()) {
-                entity.removeEffect(com.github.alexthe666.iceandfire.effect.IafMobEffects.FROSTBITE.get());
+        if (!entity.level().isClientSide()) {
+            if (entity instanceof EntityIceDragon || entity.isDeadOrDying() || entity.isInLava()) {
+                clearFrozen(entity);
+                return;
             }
-            return;
-        }
 
-        if (entity.isOnFire() && !entity.hasEffect(com.github.alexthe666.iceandfire.effect.IafMobEffects.MELT.get())) {
-            clearFrozen(entity);
-            entity.clearFire();
-            if (!entity.level().isClientSide()) {
-                entity.removeEffect(com.github.alexthe666.iceandfire.effect.IafMobEffects.FROSTBITE.get());
+            // Old behaviour: fire breaks a normal freeze and is consumed doing so.
+            if (entity.isOnFire()) {
+                entity.clearFire();
+                clearFrozen(entity);
+                return;
             }
-            return;
-        }
 
-        if (entity.isDeadOrDying()) {
-            clearFrozen(entity);
-            if (!entity.level().isClientSide()) {
-                entity.removeEffect(com.github.alexthe666.iceandfire.effect.IafMobEffects.FROSTBITE.get());
+            if (frozenTicks > 0) {
+                frozenTicks--;
             }
-            return;
-        }
-
-        if (entity.level().isClientSide()) {
+            if (frozenTicks <= 0) {
+                clearFrozen(entity);
+                return;
+            }
+        } else {
+            // Keep the client-side render timer moving between sync packets.
             if (frozenTicks > 0) {
                 frozenTicks--;
             } else {
-                clearFrozen(entity);
+                isFrozen = false;
+                return;
             }
         }
 
-        if (isFrozen && !(entity instanceof Player player && player.isCreative())) {
-            entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.25F, 1, 0.25F));
-
+        if (!(entity instanceof Player player && player.isCreative())) {
+            entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.25F, 1.0F, 0.25F));
             if (!(entity instanceof EnderDragon) && !entity.onGround()) {
-                entity.setDeltaMovement(entity.getDeltaMovement().add(0, -0.2, 0));
+                entity.setDeltaMovement(entity.getDeltaMovement().add(0.0D, -0.1D, 0.0D));
             }
         }
     }
 
     public void setFrozen(final LivingEntity target, int duration) {
+        if (target instanceof EntityIceDragon || duration <= 0) {
+            return;
+        }
+
         if (!isFrozen) {
-            target.playSound(SoundEvents.GLASS_PLACE, 1, 1);
+            target.playSound(SoundEvents.GLASS_PLACE, 1.0F, 1.0F);
         }
 
         frozenTicks = duration;
         isFrozen = true;
         triggerClientUpdate = true;
-
-        // 配置关闭时不添加 FROSTBITE 药水效果，避免显示"霜寒X"图标
-        if (!target.level().isClientSide()
-                && com.github.alexthe666.iceandfire.IafConfig.enableFrostbiteEffect) {
-            target.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                    com.github.alexthe666.iceandfire.effect.IafMobEffects.FROSTBITE.get(), duration, 9, false, true,
-                    true));
-        }
     }
 
     private void clearFrozen(final LivingEntity entity) {
-        for (int i = 0; i < 15; i++) {
-            entity.level().addParticle(
-                    new BlockParticleOption(ParticleTypes.BLOCK,
-                            IafBlockRegistry.DRAGON_ICE.get().defaultBlockState()),
-                    entity.getX() + ((entity.getRandom().nextDouble() - 0.5D) * entity.getBbWidth()),
-                    entity.getY() + ((entity.getRandom().nextDouble()) * entity.getBbHeight()),
-                    entity.getZ() + ((entity.getRandom().nextDouble() - 0.5D) * entity.getBbWidth()),
-                    0, 0, 0);
+        if (!isFrozen) {
+            return;
         }
 
-        entity.playSound(SoundEvents.GLASS_BREAK, 3, 1);
+        for (int i = 0; i < 15; i++) {
+            entity.level().addParticle(
+                    new BlockParticleOption(ParticleTypes.BLOCK, IafBlockRegistry.DRAGON_ICE.get().defaultBlockState()),
+                    entity.getX() + ((entity.getRandom().nextDouble() - 0.5D) * entity.getBbWidth()),
+                    entity.getY() + (entity.getRandom().nextDouble() * entity.getBbHeight()),
+                    entity.getZ() + ((entity.getRandom().nextDouble() - 0.5D) * entity.getBbWidth()),
+                    0.0D, 0.0D, 0.0D);
+        }
 
+        entity.playSound(SoundEvents.GLASS_BREAK, 3.0F, 1.0F);
         isFrozen = false;
         frozenTicks = 0;
         triggerClientUpdate = true;
@@ -135,7 +101,6 @@ public class FrozenData {
         CompoundTag frozenData = new CompoundTag();
         frozenData.putInt("frozenTicks", frozenTicks);
         frozenData.putBoolean("isFrozen", isFrozen);
-
         tag.put("frozenData", frozenData);
     }
 
@@ -150,7 +115,6 @@ public class FrozenData {
             triggerClientUpdate = false;
             return true;
         }
-
         return false;
     }
 }

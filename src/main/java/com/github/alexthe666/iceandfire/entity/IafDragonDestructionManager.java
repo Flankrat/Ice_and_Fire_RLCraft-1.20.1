@@ -1,17 +1,14 @@
 package com.github.alexthe666.iceandfire.entity;
 
 import com.github.alexthe666.iceandfire.IafConfig;
-import com.github.alexthe666.iceandfire.api.ChainLightningUtils;
-import com.github.alexthe666.iceandfire.api.VoltageConfig;
 import com.github.alexthe666.iceandfire.api.event.DragonFireDamageWorldEvent;
 import com.github.alexthe666.iceandfire.block.*;
-import com.github.alexthe666.iceandfire.effect.MobEffectMelt;
-import com.github.alexthe666.iceandfire.compat.LycanitesMobsCompat;
 import com.github.alexthe666.iceandfire.entity.props.EntityDataProvider;
 import com.github.alexthe666.iceandfire.entity.tile.TileEntityDragonforgeInput;
 import com.github.alexthe666.iceandfire.entity.util.BlockLaunchExplosion;
 import com.github.alexthe666.iceandfire.entity.util.DragonUtils;
 import com.github.alexthe666.iceandfire.misc.IafDamageRegistry;
+import com.github.alexthe666.iceandfire.integration.LycanitesCompat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.damagesource.DamageSource;
@@ -32,8 +29,6 @@ import net.minecraftforge.event.ForgeEventFactory;
 import javax.annotation.Nullable;
 
 public class IafDragonDestructionManager {
-    private static final String BREATH_CHAIN_COOLDOWN = "IceAndFireDragonBreathChainCooldown";
-
     public static void destroyAreaBreath(final Level level, final BlockPos center, final EntityDragonBase dragon) {
         if (MinecraftForge.EVENT_BUS
                 .post(new DragonFireDamageWorldEvent(dragon, center.getX(), center.getY(), center.getZ()))) {
@@ -117,10 +112,8 @@ public class IafDragonDestructionManager {
                         if (dragon instanceof EntityShivaxiDragon shivaxi) {
                             damageShivaxiBreathTarget(target, shivaxi);
                         } else {
-                            if (target.hurt(damageSource, stageDamage)
-                                    && applyDragonEffect(target, dragon.dragonType, statusDuration, dragon, stageDamage)
-                                    && dragon.dragonType == DragonType.LIGHTNING) {
-                                tryCreateBreathChain(level, target, dragon, stageDamage);
+                            if (target.hurt(damageSource, stageDamage)) {
+                                applyDragonEffect(target, dragon.dragonType, statusDuration, dragon, stageDamage);
                             }
                         }
                         if (target instanceof Player player) {
@@ -188,10 +181,7 @@ public class IafDragonDestructionManager {
                             * 7.0D * damageRadius + 1.0D)) / 3.0F;
                     if (damage > 0.0F && target.hurt(damageSource, damage)) {
                         int duration = type == DragonType.FIRE ? 5 : type == DragonType.ICE ? 200 : 3;
-                        if (applyDragonEffect(target, type, duration, source, damage)
-                                && type == DragonType.LIGHTNING) {
-                            tryCreateBreathChain(level, target, source, damage);
-                        }
+                        applyDragonEffect(target, type, duration, source, damage);
                     }
 
                     x /= length;
@@ -283,10 +273,8 @@ public class IafDragonDestructionManager {
                                 (double) center.getZ() + z))
                 .forEach(target -> {
                     if (!dragon.isAlliedTo(target) && !dragon.is(target) && dragon.hasLineOfSight(target)) {
-                        if (target.hurt(damageSource, stageDamage)
-                                && applyDragonEffect(target, dragon.dragonType, statusDuration, dragon, stageDamage)
-                                && dragon.dragonType == DragonType.LIGHTNING) {
-                            tryCreateBreathChain(level, target, dragon, stageDamage);
+                        if (target.hurt(damageSource, stageDamage)) {
+                            applyDragonEffect(target, dragon.dragonType, statusDuration, dragon, stageDamage);
                         }
                     }
                 });
@@ -396,47 +384,38 @@ public class IafDragonDestructionManager {
 
     private static boolean applyDragonEffect(final LivingEntity target, final DragonType type, int statusDuration,
                                              final Entity source, float baseDamage) {
-        LivingEntity livingSource = source instanceof LivingEntity living ? living : null;
         if (type == DragonType.FIRE) {
             if (com.github.alexthe666.iceandfire.item.blooded.ItemBloodedArmor.hasFullArmorSet(target,
-                    com.github.alexthe666.iceandfire.item.blooded.BloodedDragonType.DragonElement.FIRE))
+                    com.github.alexthe666.iceandfire.item.blooded.BloodedDragonType.DragonElement.FIRE)) {
                 return false;
-            MobEffectMelt.applyMelt(target, livingSource, baseDamage, statusDuration * 20);
+            }
+            // Legacy behaviour: dragon-fire damage itself is not tagged as vanilla fire damage,
+            // so Fire Protection / Fire Resistance do not absorb the breath hit.  Burning is
+            // applied separately, matching the old 1.12.2 dragon-fire projectile.
+            target.setSecondsOnFire(5);
         } else if (type == DragonType.ICE) {
             if (com.github.alexthe666.iceandfire.item.blooded.ItemBloodedArmor.hasFullArmorSet(target,
-                    com.github.alexthe666.iceandfire.item.blooded.BloodedDragonType.DragonElement.ICE))
+                    com.github.alexthe666.iceandfire.item.blooded.BloodedDragonType.DragonElement.ICE)) {
                 return false;
+            }
+            // Keep ice as synchronized entity data/capability state, not a potion effect.
             EntityDataProvider.getCapability(target)
-                    .ifPresent(data -> data.frozenData.setFrozen(target, statusDuration));
+                    .ifPresent(data -> data.frozenData.setFrozen(target, 200));
         } else if (type == DragonType.LIGHTNING) {
             if (com.github.alexthe666.iceandfire.item.blooded.ItemBloodedArmor.hasFullArmorSet(target,
-                    com.github.alexthe666.iceandfire.item.blooded.BloodedDragonType.DragonElement.LIGHTNING))
+                    com.github.alexthe666.iceandfire.item.blooded.BloodedDragonType.DragonElement.LIGHTNING)) {
                 return false;
-            LycanitesMobsCompat.applyParalysis(target);
+            }
             double x = source.getX() - target.getX();
-            double y = source.getZ() - target.getZ();
-            target.knockback((double) statusDuration / 10, x, y);
+            double z = source.getZ() - target.getZ();
+            target.knockback((double) statusDuration / 10.0D, x, z);
+            if (IafConfig.lightningDragonParalysis) {
+                LycanitesCompat.applyParalysis(target, IafConfig.lightningDragonParalysisTicks);
+            }
         } else {
             return false;
         }
         return true;
-    }
-
-    private static void tryCreateBreathChain(final Level level, final LivingEntity target,
-                                             final Entity source, float baseDamage) {
-        if (level.isClientSide) {
-            return;
-        }
-
-        long gameTime = level.getGameTime();
-        long nextAllowedTime = source.getPersistentData().getLong(BREATH_CHAIN_COOLDOWN);
-        if (nextAllowedTime > gameTime) {
-            return;
-        }
-
-        source.getPersistentData().putLong(BREATH_CHAIN_COOLDOWN,
-                gameTime + VoltageConfig.CHAIN_COOLDOWN_TICKS);
-        ChainLightningUtils.createChainLightning(level, target, source, baseDamage, false, false, true);
     }
 
     private static void causeExplosion(Level world, BlockPos center, EntityDragonBase destroyer, DamageSource source,

@@ -2,11 +2,13 @@ package com.github.alexthe666.iceandfire.item;
 
 import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.api.ChainLightningUtils;
-import com.github.alexthe666.iceandfire.effect.MobEffectMelt;
 import com.github.alexthe666.iceandfire.entity.EntityFireDragon;
 import com.github.alexthe666.iceandfire.entity.EntityIceDragon;
+import com.github.alexthe666.iceandfire.entity.props.EntityDataProvider;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
@@ -27,15 +29,19 @@ public class ItemAlchemySword extends SwordItem {
             if (target instanceof EntityIceDragon) {
                 target.hurt(attacker.level().damageSources().inFire(), 13.5F);
             }
-            MobEffectMelt.applyMelt(target, attacker, ((SwordItem) this).getDamage(), 120);
+            target.setSecondsOnFire(5);
+            target.knockback(1.0F, attacker.getX() - target.getX(), attacker.getZ() - target.getZ());
         }
         if (this == IafItemRegistry.DRAGONBONE_SWORD_ICE.get() && IafConfig.dragonWeaponIceAbility) {
             if (target instanceof EntityFireDragon) {
                 target.hurt(attacker.level().damageSources().drown(), 13.5F);
             }
-            float baseDamage = ((SwordItem) this).getDamage();
-            com.github.alexthe666.iceandfire.effect.MobEffectFrostbite.applyFrostbite(target, attacker, 200,
-                    baseDamage);
+            if (!attacker.level().isClientSide) {
+                EntityDataProvider.getCapability(target).ifPresent(data -> data.frozenData.setFrozen(target, 200));
+            }
+            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2));
+            target.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 100, 2));
+            target.knockback(1.0F, attacker.getX() - target.getX(), attacker.getZ() - target.getZ());
         }
         if (this == IafItemRegistry.DRAGONBONE_SWORD_LIGHTNING.get() && IafConfig.dragonWeaponLightningAbility) {
             if (!attacker.level().isClientSide) {
@@ -45,7 +51,7 @@ public class ItemAlchemySword extends SwordItem {
             if (target instanceof EntityFireDragon || target instanceof EntityIceDragon) {
                 target.hurt(attacker.level().damageSources().lightningBolt(), 9.5F);
             }
-            target.knockback(1F, attacker.getX() - target.getX(), attacker.getZ() - target.getZ());
+            target.knockback(1.0F, attacker.getX() - target.getX(), attacker.getZ() - target.getZ());
         }
         return super.hurtEnemy(stack, target, attacker);
     }
@@ -67,8 +73,7 @@ public class ItemAlchemySword extends SwordItem {
         if (this == IafItemRegistry.DRAGONBONE_SWORD_LIGHTNING.get()) {
             tooltip.add(Component.translatable("dragon_sword_lightning.hurt1").withStyle(ChatFormatting.GREEN));
             if (IafConfig.dragonWeaponLightningAbility)
-                tooltip.add(
-                        Component.translatable("dragon_sword_lightning.hurt2").withStyle(ChatFormatting.DARK_PURPLE));
+                tooltip.add(Component.translatable("dragon_sword_lightning.hurt2").withStyle(ChatFormatting.DARK_PURPLE));
         }
     }
 

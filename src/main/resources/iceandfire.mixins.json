@@ -7,7 +7,6 @@
   "mixins": [
     "BookWyrmMixin",
     "DreadBlockDestroySpeedMixin",
-    "EntityMeltFireMixin",
     "gen.NoLakesInStructuresMixin",
     "gen.WorldGenRegionMixin"
   ],

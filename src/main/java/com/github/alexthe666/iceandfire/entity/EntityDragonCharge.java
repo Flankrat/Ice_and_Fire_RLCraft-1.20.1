@@ -1,6 +1,5 @@
 package com.github.alexthe666.iceandfire.entity;
 
-import com.github.alexthe666.iceandfire.compat.LycanitesMobsCompat;
 import com.github.alexthe666.iceandfire.entity.util.DragonUtils;
 import com.github.alexthe666.iceandfire.entity.util.IDragonProjectile;
 import net.minecraft.core.BlockPos;
@@ -119,9 +118,9 @@ public abstract class EntityDragonCharge extends Fireball implements IDragonProj
                         Entity cause = shootingDragon.getRidingPlayer() != null ? shootingDragon.getRidingPlayer() : shootingDragon;
                         DamageSource source = causeDamage(cause);
 
-                        boolean damaged = entity.hurt(source, damageAmount);
-                        if (damaged && this instanceof EntityDragonLightningCharge && entity instanceof LivingEntity livingTarget) {
-                            LycanitesMobsCompat.applyParalysis(livingTarget);
+                        entity.hurt(source, damageAmount);
+                        if (entity instanceof LivingEntity livingTarget) {
+                            this.onDirectHit(livingTarget, shootingDragon);
                         }
                         if (entity instanceof Player player) {
                             DragonUtils.fillBottleWithDragonBreath(player, shootingDragon.dragonType);
@@ -151,6 +150,13 @@ public abstract class EntityDragonCharge extends Fireball implements IDragonProj
     public abstract void destroyArea(Level world, BlockPos center, EntityDragonBase destroyer);
 
     public abstract float getDamage();
+
+    /**
+     * Element-specific direct-hit behaviour kept separate from block-griefing/explosion logic,
+     * matching the old projectile implementation.
+     */
+    protected void onDirectHit(LivingEntity target, EntityDragonBase dragon) {
+    }
 
     @Override
     public boolean isPickable() {

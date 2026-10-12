@@ -22,6 +22,8 @@ public class ServerConfig {
     public final ForgeConfigSpec.DoubleValue dragonAttackDamageFire;
     public final ForgeConfigSpec.DoubleValue dragonAttackDamageIce;
     public final ForgeConfigSpec.DoubleValue dragonAttackDamageLightning;
+    public final ForgeConfigSpec.BooleanValue lightningDragonParalysis;
+    public final ForgeConfigSpec.IntValue lightningDragonParalysisTicks;
     public final ForgeConfigSpec.IntValue maxDragonFlight;
     public final ForgeConfigSpec.IntValue dragonFlightHeight;
     public final ForgeConfigSpec.IntValue dragonGoldSearchLength;
@@ -131,13 +133,6 @@ public class ServerConfig {
     public final ForgeConfigSpec.BooleanValue dragonWeaponLightningAbility;
     public ForgeConfigSpec.IntValue villagerHouseWeight;
     public ForgeConfigSpec.BooleanValue allowAttributeOverriding;
-    public final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> frostShatterThresholds;
-    public final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> voltageDischargeThresholds;
-    public final ForgeConfigSpec.IntValue defaultFrostShatterThreshold;
-    public final ForgeConfigSpec.IntValue defaultVoltageDischargeThreshold;
-    public final ForgeConfigSpec.BooleanValue enableMeltEffect;
-    public final ForgeConfigSpec.BooleanValue enableFrostbiteEffect;
-    public final ForgeConfigSpec.BooleanValue enableVoltageEffect;
     public final ForgeConfigSpec.BooleanValue scaleArmorBreathProtect;
     public final ForgeConfigSpec.BooleanValue hydraHeartPassRegen;
     public final ForgeConfigSpec.BooleanValue cyclopsEyeWeaknessApply;
@@ -183,6 +178,8 @@ public class ServerConfig {
         this.dragonAttackDamageFire = buildDouble(builder, "Dragon Attack Damage(Fire breath)", "all", 2.0F, 0, 10000, "Damage dealt from a successful fire breath attack. Attack Damage is scaled to by age, so a stage 5 dragon will deal 5x as much as this number");
         this.dragonAttackDamageIce = buildDouble(builder, "Dragon Attack Damage(Ice breath)", "all", 2.5F, 0, 10000, "Damage dealt from a successful ice breath attack. Attack Damage is scaled to by age, so a stage 5 dragon will deal 5x as much as this number");
         this.dragonAttackDamageLightning = buildDouble(builder, "Dragon Attack Damage(Lightning breath)", "all", 3.5F, 0, 10000, "Damage dealt from a successful lightning breath attack. Attack Damage is scaled to by age, so a stage 5 dragon will deal 5x as much as this number");
+        this.lightningDragonParalysis = buildBoolean(builder, "Lightning Dragon Paralysis", "all", true, "Apply Lycanites Mobs paralysis to targets hit by lightning dragon breath when Lycanites Mobs is loaded.");
+        this.lightningDragonParalysisTicks = buildInt(builder, "Lightning Dragon Paralysis Ticks", "all", 10, 1, 1000, "Duration in ticks of the Lycanites Mobs paralysis applied by lightning dragon breath.");
         this.dragonFlightSpeedMod = buildDouble(builder, "Dragon Flight Speed Modifier", "all", 1F, 0.0F, 2.0F, "Change this to slow down or speed up dragon or amphithere flight.");
         this.dragonMovedWronglyFix = buildBoolean(builder, "Dragon Moved Wrongly Error Fix", "all", false, "Enable this if your server is being bombarded with moved wrongly or moved too fast console messages. REQUIRES RESTART!");
         builder.pop();
@@ -330,52 +327,6 @@ public class ServerConfig {
         builder.pop();
 
         builder.push("Effects");
-        this.enableMeltEffect = buildBoolean(builder, "Enable Melt Effect", "all", true, "Enable the Melt effect for fire dragon weapons. When disabled, fire weapons will use vanilla fire damage instead.");
-        this.enableFrostbiteEffect = buildBoolean(builder, "Enable Frostbite Effect", "all", true, "Enable the Frostbite/Frostburn effect for ice dragon weapons. When disabled, ice weapons will use the original Ice and Fire freeze effect instead.");
-        this.enableVoltageEffect = buildBoolean(builder, "Enable Voltage Effect", "all", true, "Enable the Voltage effect for lightning dragon weapons. When disabled, chain lightning will deal direct damage without voltage stacking.");
-        this.defaultFrostShatterThreshold = buildInt(builder, "Default Frost Shatter Threshold", "all", 10, 1, 10, "Default freeze stacks required to trigger frost shatter for entities without a custom threshold.");
-        this.defaultVoltageDischargeThreshold = buildInt(builder, "Default Voltage Discharge Threshold", "all", 10, 1, 10, "Default voltage stacks required to trigger discharge for entities without a custom threshold.");
-        this.frostShatterThresholds = builder
-                .comment("Custom frost shatter threshold for each entity type. Format: entity_type,threshold (e.g. minecraft:zombie,3)")
-                .defineList("Frost Shatter Thresholds",
-                        java.util.List.of(
-                                "minecraft:zombie,3",
-                                "minecraft:husk,3",
-                                "minecraft:drowned,3",
-                                "minecraft:skeleton,5",
-                                "minecraft:stray,7",
-                                "minecraft:wither_skeleton,8",
-                                "minecraft:blaze,2",
-                                "minecraft:magma_cube,2",
-                                "minecraft:wither,10",
-                                "minecraft:ender_dragon,10",
-                                "minecraft:warden,10",
-                                "minecraft:iron_golem,8",
-                                "minecraft:ravager,6"
-                        ),
-                        obj -> obj instanceof String
-                );
-        this.voltageDischargeThresholds = builder
-                .comment("Custom voltage discharge threshold for each entity type. Format: entity_type,threshold (e.g. minecraft:zombie,3)")
-                .defineList("Voltage Discharge Thresholds",
-                        java.util.List.of(
-                                "minecraft:zombie,3",
-                                "minecraft:husk,3",
-                                "minecraft:drowned,3",
-                                "minecraft:skeleton,5",
-                                "minecraft:stray,7",
-                                "minecraft:wither_skeleton,8",
-                                "minecraft:blaze,2",
-                                "minecraft:magma_cube,2",
-                                "minecraft:wither,10",
-                                "minecraft:ender_dragon,10",
-                                "minecraft:warden,10",
-                                "minecraft:iron_golem,8",
-                                "minecraft:ravager,6"
-                        ),
-                        obj -> obj instanceof String
-                );
-
         this.scaleArmorBreathProtect = buildBoolean(builder, "Scale armor protect dragonbreath", "all", false, "Enable dragon scale armor extra protect for dragon breath attacks.");
 
         this.hydraHeartPassRegen = buildBoolean(builder, "Hydra Heart Passive Regenerate Health", "all", true, "Enable hydra heart passive regenerate health.");

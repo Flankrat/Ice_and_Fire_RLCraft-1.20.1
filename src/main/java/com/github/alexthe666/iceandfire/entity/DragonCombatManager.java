@@ -1,6 +1,5 @@
 package com.github.alexthe666.iceandfire.entity;
 
-import com.github.alexthe666.iceandfire.compat.LycanitesMobsCompat;
 import com.github.alexthe666.iceandfire.entity.EntityDragonBase;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -51,15 +50,9 @@ public class DragonCombatManager {
 
 
     public boolean attackTarget(Entity target, Player ridingPlayer, float damage) {
-        boolean damaged;
         if (ridingPlayer == null)
-            damaged = target.hurt(target.level().damageSources().mobAttack(dragon), damage);
+            return target.hurt(target.level().damageSources().mobAttack(dragon), damage);
         else
-            damaged = target.hurt(target.level().damageSources().indirectMagic(dragon, ridingPlayer), damage);
-
-        if (damaged && dragon.dragonType == DragonType.LIGHTNING && target instanceof LivingEntity livingTarget) {
-            LycanitesMobsCompat.applyParalysis(livingTarget);
-        }
-        return damaged;
+            return target.hurt(target.level().damageSources().indirectMagic(dragon, ridingPlayer), damage);
     }
 }
