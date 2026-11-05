@@ -36,7 +36,7 @@ public class RenderDeathWormGauntlet extends BlockEntityWithoutLevelRenderer {
         stackIn.translate(0.5F, 0.5F, 0.5F);
         stackIn.pushPose();
         stackIn.pushPose();
-        MODEL.animate(stack, Minecraft.getInstance().getFrameTime());
+        MODEL.animate(stack, Minecraft.getInstance().getPartialTick());
         MODEL.renderToBuffer(stackIn, bufferIn.getBuffer(texture), combinedLightIn, combinedOverlayIn, 1.0F, 1.0F, 1.0F, 1.0F);
         stackIn.popPose();
         stackIn.popPose();
