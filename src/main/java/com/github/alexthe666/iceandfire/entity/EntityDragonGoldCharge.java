@@ -6,8 +6,9 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.Fireball;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.network.PlayMessages;
 
 import javax.annotation.Nullable;
 
@@ -17,21 +18,21 @@ import javax.annotation.Nullable;
  */
 public class EntityDragonGoldCharge extends EntityDragonCharge {
 
-    public EntityDragonGoldCharge(EntityType<? extends Fireball> type, Level worldIn) {
+    public EntityDragonGoldCharge(EntityType<? extends Projectile> type, Level worldIn) {
         super(type, worldIn);
     }
 
-    public EntityDragonGoldCharge(net.minecraftforge.network.PlayMessages.SpawnEntity spawnEntity, Level worldIn) {
+    public EntityDragonGoldCharge(PlayMessages.SpawnEntity spawnEntity, Level worldIn) {
         this(IafEntityRegistry.GOLD_DRAGON_CHARGE.get(), worldIn);
     }
 
-    public EntityDragonGoldCharge(EntityType<? extends Fireball> type, Level worldIn,
+    public EntityDragonGoldCharge(EntityType<? extends Projectile> type, Level worldIn,
             double posX, double posY, double posZ,
             double accelX, double accelY, double accelZ) {
         super(type, worldIn, posX, posY, posZ, accelX, accelY, accelZ);
     }
 
-    public EntityDragonGoldCharge(EntityType<? extends Fireball> type, Level worldIn,
+    public EntityDragonGoldCharge(EntityType<? extends Projectile> type, Level worldIn,
             EntityDragonBase shooter,
             double accelX, double accelY, double accelZ) {
         super(type, worldIn, shooter, accelX, accelY, accelZ);
@@ -40,7 +41,7 @@ public class EntityDragonGoldCharge extends EntityDragonCharge {
     @Override
     public void tick() {
         super.tick();
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             for (int i = 0; i < 4; i++) {
                 double vx = (random.nextDouble() - 0.5) * 0.3;
                 double vy = (random.nextDouble() - 0.5) * 0.3;
