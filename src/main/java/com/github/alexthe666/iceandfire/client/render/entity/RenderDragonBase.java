@@ -26,6 +26,7 @@ import java.util.Map;
 
 public class RenderDragonBase extends MobRenderer<EntityDragonBase, AdvancedEntityModel<EntityDragonBase>> {
 
+    private static final boolean SHOW_MALE_OVERLAY = false;
     private final Map<String, ResourceLocation> LAYERED_TEXTURE_CACHE = Maps.newHashMap();
     private final int dragonType;
 
@@ -71,7 +72,9 @@ public class RenderDragonBase extends MobRenderer<EntityDragonBase, AdvancedEnti
             } else {
                 tex.add(EnumDragonTextures.getTextureFromDragon(entity).toString());
             }
-            if (entity.isMale() && !entity.isSkeletal() && !(entity instanceof EntityShivaxiDragon)) {
+            // RLCraft: dragons use the plain 1.12 patterns. The modern male overlay adds dark spots to the
+            // wings and body that RLCraft dragons never had, so it stays off.
+            if (SHOW_MALE_OVERLAY && entity.isMale() && !entity.isSkeletal() && !(entity instanceof EntityShivaxiDragon)) {
                 if (dragonType == 0) {
                     tex.add(EnumDragonTextures.getDragonEnum(entity).FIRE_MALE_OVERLAY.toString());
                 } else if (dragonType == 1) {
