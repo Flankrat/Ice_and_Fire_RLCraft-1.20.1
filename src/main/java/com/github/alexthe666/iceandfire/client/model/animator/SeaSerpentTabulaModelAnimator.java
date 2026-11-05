@@ -28,7 +28,7 @@ public class SeaSerpentTabulaModelAnimator extends IceAndFireTabulaModelAnimator
         }
         TabulaModel prevPosition = swimPose[prevIndex];
         TabulaModel currentPosition = swimPose[currentIndex];
-        float partialTicks = Minecraft.getInstance().getFrameTime();
+        float partialTicks = Minecraft.getInstance().getPartialTick();
         float delta = ((entity.swimCycle) / 10.0F) % 1.0F + (partialTicks / 10.0F);
         // AdvancedModelBox[] tailParts = {model.getCube("Tail1"), model.getCube("Tail2"), model.getCube("Tail3"), model.getCube("Tail4"), model.getCube("Tail5"), model.getCube("Tail6")};
         // AdvancedModelBox[] neckParts = {model.getCube("Neck1"), model.getCube("Neck2"), model.getCube("Neck3"), model.getCube("Head")};

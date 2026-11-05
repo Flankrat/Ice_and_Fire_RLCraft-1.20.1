@@ -144,6 +144,6 @@ public class ReversedBuffer {
 
 
     private float getPartialTicks() {
-        return Minecraft.getInstance().getFrameTime();
+        return Minecraft.getInstance().getPartialTick();
     }
 }

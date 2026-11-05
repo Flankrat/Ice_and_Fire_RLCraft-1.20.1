@@ -299,7 +299,7 @@ public class IFChainBuffer {
 
 
     private float getPartialTicks() {
-        return Minecraft.getInstance().getFrameTime();
+        return Minecraft.getInstance().getPartialTick();
     }
 
 }
