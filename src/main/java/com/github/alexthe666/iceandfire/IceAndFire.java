@@ -2,6 +2,7 @@ package com.github.alexthe666.iceandfire;
 
 import com.github.alexthe666.iceandfire.block.IafBlockRegistry;
 import com.github.alexthe666.iceandfire.client.ClientProxy;
+import com.github.alexthe666.iceandfire.compat.ModCompatList;
 import com.github.alexthe666.iceandfire.config.ConfigHolder;
 import com.github.alexthe666.iceandfire.entity.IafEntityRegistry;
 import com.github.alexthe666.iceandfire.entity.IafVillagerRegistry;
