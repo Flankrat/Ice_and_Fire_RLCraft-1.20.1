@@ -3,6 +3,7 @@ package com.github.alexthe666.iceandfire.entity;
 import com.github.alexthe666.iceandfire.entity.util.DragonUtils;
 import com.github.alexthe666.iceandfire.entity.util.IDragonProjectile;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -12,51 +13,58 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Fireball;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
-public abstract class EntityDragonCharge extends Fireball implements IDragonProjectile {
+public abstract class EntityDragonCharge extends Projectile implements IDragonProjectile {
+	public double xPower;
+	public double yPower;
+	public double zPower;
 
-
-    public EntityDragonCharge(EntityType<? extends Fireball> type, Level worldIn) {
+    public EntityDragonCharge(EntityType<? extends Projectile> type, Level worldIn) {
         super(type, worldIn);
     }
 
-    public EntityDragonCharge(EntityType<? extends Fireball> type, Level worldIn, double posX,
+    public EntityDragonCharge(EntityType<? extends Projectile> type, Level worldIn, double posX,
                               double posY, double posZ, double accelX, double accelY, double accelZ) {
-        super(type, posX, posY, posZ, accelX, accelY, accelZ, worldIn);
+        this(type, worldIn);
+        this.moveTo(posX, posY, posZ, this.getYRot(), this.getXRot());
+        this.reapplyPosition();
         double d0 = Math.sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ);
-        this.xPower = accelX / d0 * 0.07D;
-        this.yPower = accelY / d0 * 0.07D;
-        this.zPower = accelZ / d0 * 0.07D;
+        if (d0 > 0D) {
+        	this.xPower = (accelX / d0) * 0.21D;
+            this.yPower = (accelY / d0) * 0.21D;
+            this.zPower = (accelZ / d0) * 0.21D;
+        }
     }
 
-    public EntityDragonCharge(EntityType<? extends Fireball> type, Level worldIn,
+    public EntityDragonCharge(EntityType<? extends Projectile> type, Level worldIn,
                               EntityDragonBase shooter, double accelX, double accelY, double accelZ) {
-        super(type, shooter, accelX, accelY, accelZ, worldIn);
-        double d0 = Math.sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ);
-        this.xPower = accelX / d0 * 0.07D;
-        this.yPower = accelY / d0 * 0.07D;
-        this.zPower = accelZ / d0 * 0.07D;
+        this(type, worldIn, shooter.getX(), shooter.getY(), shooter.getZ(), accelX, accelY, accelZ);
+        this.setOwner(shooter);
+        this.setRot(shooter.getYRot(), shooter.getXRot());
     }
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public void tick() {
         Entity shootingEntity = this.getOwner();
-        if (this.level().isClientSide || (shootingEntity == null || shootingEntity.isAlive()) && this.level().hasChunkAt(this.blockPosition())) {
+        if ((shootingEntity == null || shootingEntity.isAlive()) && this.level().hasChunkAt(this.blockPosition())) {
             super.baseTick();
 
             HitResult raytraceresult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitMob);
 
-            if (raytraceresult.getType() != HitResult.Type.MISS && !net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, raytraceresult)) {
+            if (raytraceresult.getType() != HitResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, raytraceresult)) {
                 this.onHit(raytraceresult);
             }
 
@@ -65,15 +73,7 @@ public abstract class EntityDragonCharge extends Fireball implements IDragonProj
             double d0 = this.getX() + vector3d.x;
             double d1 = this.getY() + vector3d.y;
             double d2 = this.getZ() + vector3d.z;
-            ProjectileUtil.rotateTowardsMovement(this, 0.2F);
-            float f = this.getInertia();
-            if (this.isInWater()) {
-                for (int i = 0; i < 4; ++i) {
-                    this.level().addParticle(ParticleTypes.BUBBLE, this.getX() - this.getDeltaMovement().x * 0.25D, this.getY() - this.getDeltaMovement().y * 0.25D, this.getZ() - this.getDeltaMovement().z * 0.25D, this.getDeltaMovement().x, this.getDeltaMovement().y, this.getDeltaMovement().z);
-                }
-                f = 0.8F;
-            }
-            this.setDeltaMovement(vector3d.add(this.xPower, this.yPower, this.zPower).scale(f));
+            this.setDeltaMovement(vector3d.add(this.xPower, this.yPower, this.zPower));
             this.level().addParticle(this.getTrailParticle(), this.getX(), this.getY() + 0.5D, this.getZ(), 0.0D, 0.0D, 0.0D);
             this.setPos(d0, d1, d2);
         } else {
@@ -84,9 +84,15 @@ public abstract class EntityDragonCharge extends Fireball implements IDragonProj
     @Override
     protected void onHit(@NotNull HitResult movingObject) {
         Entity shootingEntity = this.getOwner();
-        if (!this.level().isClientSide) {
-            if (movingObject.getType() == HitResult.Type.ENTITY) {
+        HitResult.Type hitresult = movingObject.getType();
+        if (!this.level().isClientSide()) {
+        	BlockPos center = BlockPos.containing(this.getX(), this.getY(), this.getZ());
+        	if (movingObject instanceof BlockHitResult blockhit) {
+        		center = blockhit.getBlockPos();
+        	}
+            if (hitresult == HitResult.Type.ENTITY) {
                 Entity entity = ((EntityHitResult) movingObject).getEntity();
+                center = entity.blockPosition();
 
                 if (entity instanceof IDragonProjectile) {
                     return;
@@ -135,9 +141,9 @@ public abstract class EntityDragonCharge extends Fireball implements IDragonProj
                     this.remove(RemovalReason.DISCARDED);
                 }
             }
-            if (movingObject.getType() != HitResult.Type.MISS) {
+            if (hitresult != HitResult.Type.MISS) {
                 if (shootingEntity instanceof EntityDragonBase && DragonUtils.canGrief((EntityDragonBase) shootingEntity)) {
-                    destroyArea(level(), BlockPos.containing(this.getX(), this.getY(), this.getZ()), ((EntityDragonBase) shootingEntity));
+                    destroyArea(level(), center, ((EntityDragonBase) shootingEntity));
                 }
                 this.remove(RemovalReason.DISCARDED);
             }
@@ -162,6 +168,11 @@ public abstract class EntityDragonCharge extends Fireball implements IDragonProj
     public boolean isPickable() {
         return false;
     }
+    
+    @Override
+    public boolean isAttackable() {
+        return false;
+     }
 
     protected boolean canHitMob(Entity hitMob) {
         Entity shooter = getOwner();
@@ -182,4 +193,12 @@ public abstract class EntityDragonCharge extends Fireball implements IDragonProj
     public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
+    
+    protected ParticleOptions getTrailParticle() {
+        return ParticleTypes.SMOKE;
+    }
+    
+    @Override
+	protected void defineSynchedData() {
+	}
 }
