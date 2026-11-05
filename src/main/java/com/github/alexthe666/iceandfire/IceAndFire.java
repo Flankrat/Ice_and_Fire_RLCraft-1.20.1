@@ -216,6 +216,7 @@ public class IceAndFire {
                         PROXY.setup();
                         IafLootRegistry.init();
                 });
+                ModCompatList.isEVon = ModList.get().isLoaded("enhancedvisuals");
         }
 
         private static void setupClient(final FMLClientSetupEvent event) {

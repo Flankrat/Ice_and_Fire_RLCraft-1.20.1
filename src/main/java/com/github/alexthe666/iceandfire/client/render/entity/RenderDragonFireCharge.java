@@ -11,11 +11,14 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.projectile.Fireball;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
+
 import org.jetbrains.annotations.NotNull;
 
-public class RenderDragonFireCharge extends EntityRenderer<Fireball> {
+public class RenderDragonFireCharge extends EntityRenderer<Projectile> {
 
     public boolean isFire;
 
@@ -25,19 +28,27 @@ public class RenderDragonFireCharge extends EntityRenderer<Fireball> {
     }
 
     @Override
-    public @NotNull ResourceLocation getTextureLocation(@NotNull Fireball entity) {
+    public @NotNull ResourceLocation getTextureLocation(@NotNull Projectile entity) {
         return TextureAtlas.LOCATION_BLOCKS;
     }
 
     @Override
-    public void render(@NotNull Fireball entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, @NotNull MultiBufferSource bufferIn, int packedLightIn) {
-        BlockRenderDispatcher blockrendererdispatcher = Minecraft.getInstance().getBlockRenderer();
+    public void render(@NotNull Projectile entityIn, float entityYaw, float partialTicks, PoseStack matrixStackIn, @NotNull MultiBufferSource bufferIn, int packedLightIn) {
+    	Minecraft instance = Minecraft.getInstance();
         matrixStackIn.pushPose();
-        matrixStackIn.translate(0.0D, 0.5D, 0.0D);
-        matrixStackIn.mulPose(Axis.YP.rotationDegrees(-90.0F));
-        matrixStackIn.translate(-0.5D, -0.5D, 0.5D);
-        matrixStackIn.mulPose(Axis.YP.rotationDegrees(90.0F));
-        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(isFire ? Blocks.MAGMA_BLOCK.defaultBlockState() : IafBlockRegistry.DRAGON_ICE.get().defaultBlockState(), matrixStackIn, bufferIn, packedLightIn, OverlayTexture.NO_OVERLAY);
+    	BlockRenderDispatcher blockrendererdispatcher = instance.getBlockRenderer();
+    	Vec3 motion = entityIn.getDeltaMovement();
+        float x = (float) motion.x;
+        float z = (float) motion.z;
+
+
+        float newyaw   = (float)(Math.PI - Math.atan2(z, x));
+        float roll  = (entityIn.tickCount % 20) * 18f * Mth.DEG_TO_RAD;
+        matrixStackIn.translate(0.0, 0.5, 0.0);
+        matrixStackIn.mulPose(Axis.YP.rotation(newyaw));
+        matrixStackIn.mulPose(Axis.ZP.rotation(roll));
+        matrixStackIn.translate(-0.5, -0.5, -0.5);
+        blockrendererdispatcher.renderSingleBlock(isFire ? Blocks.MAGMA_BLOCK.defaultBlockState() : IafBlockRegistry.DRAGON_ICE.get().defaultBlockState(), matrixStackIn, bufferIn, packedLightIn, OverlayTexture.NO_OVERLAY);
         matrixStackIn.popPose();
     }
 

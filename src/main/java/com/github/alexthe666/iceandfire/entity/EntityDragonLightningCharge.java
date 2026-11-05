@@ -9,7 +9,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.Fireball;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.network.PlayMessages;
 
@@ -18,7 +18,7 @@ import javax.annotation.Nullable;
 public class EntityDragonLightningCharge extends EntityDragonCharge implements IDragonProjectile {
 
 
-    public EntityDragonLightningCharge(EntityType<? extends Fireball> type, Level worldIn) {
+    public EntityDragonLightningCharge(EntityType<? extends Projectile> type, Level worldIn) {
         super(type, worldIn);
     }
 
@@ -26,12 +26,12 @@ public class EntityDragonLightningCharge extends EntityDragonCharge implements I
         this(IafEntityRegistry.LIGHTNING_DRAGON_CHARGE.get(), worldIn);
     }
 
-    public EntityDragonLightningCharge(EntityType<? extends Fireball> type, Level worldIn, double posX,
+    public EntityDragonLightningCharge(EntityType<? extends Projectile> type, Level worldIn, double posX,
                                        double posY, double posZ, double accelX, double accelY, double accelZ) {
         super(type, worldIn, posX, posY, posZ, accelX, accelY, accelZ);
     }
 
-    public EntityDragonLightningCharge(EntityType<? extends Fireball> type, Level worldIn,
+    public EntityDragonLightningCharge(EntityType<? extends Projectile> type, Level worldIn,
                                        EntityDragonBase shooter, double accelX, double accelY, double accelZ) {
         super(type, worldIn, shooter, accelX, accelY, accelZ);
     }
