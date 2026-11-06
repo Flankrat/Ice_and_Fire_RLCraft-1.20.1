@@ -184,7 +184,7 @@ public class DragonServerTickManager {
             dragon.airTarget = null;
             dragon.setFlying(false);
             dragon.setHovering(false);
-            dragon.setNoGravity(false);
+            //dragon.setNoGravity(false);
             dragon.flyTicks = 0;
             dragon.hoverTicks = 0;
 
@@ -218,7 +218,7 @@ public class DragonServerTickManager {
             } else {
                 if (dragon.getControllingPassenger() == null || dragon.getControllingPassenger() instanceof EntityDreadQueen) {
                     if (!dragon.isBeyondHeight()) {
-                        double up = dragon.isInWater() ? 0.12D : 0.08D;
+                        double up = dragon.isInWater() ? 0.12D : 0.00D;
                         if (dragon.isTame()) {
                             // The old +0.08 lift was balanced by 1.12.2 gravity. Modern dragons
                             // disable gravity while hovering, so repeatedly adding it makes a
