@@ -211,6 +211,21 @@ public class DragonUtils {
         return null;
     }
 
+    /**
+     * Air target for a dragon with an attack target: the target's own position (as the 1.12.2
+     * air-target AI did), kept under the local flight ceiling. Falls back to
+     * {@link #getBlockInView} when there is no live target.
+     */
+    public static BlockPos getBlockWithTarget(EntityDragonBase dragon) {
+        LivingEntity target = dragon.getTarget();
+        if (target == null || !target.isAlive()) {
+            return getBlockInView(dragon);
+        }
+        BlockPos pos = target.blockPosition();
+        int maxHeight = getMaximumFlightHeightForPos(dragon.level(), pos);
+        return pos.getY() > maxHeight ? new BlockPos(pos.getX(), maxHeight, pos.getZ()) : pos;
+    }
+
     public static BlockPos getWaterBlockInView(EntityDragonBase dragon) {
         float radius = 0.75F * (0.7F * dragon.getRenderSize() / 3) * -7 - dragon.getRandom().nextInt(dragon.getDragonStage() * 6);
         float neg = dragon.getRandom().nextBoolean() ? 1 : -1;

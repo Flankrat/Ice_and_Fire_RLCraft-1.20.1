@@ -29,10 +29,18 @@ public class DragonFlyingPathNavigation extends FlyingPathNavigation {
 	@Override
 	public void tick() {
 		MoveControl control = this.dragon.getMoveControl();
-		if (this.dragon.airTarget == null) {
+		if (this.dragon.getTarget() != null && this.dragon.getTarget().isAlive()) {
+			// Follow a moving attack target every tick, like the 1.12.2 air-target AI did,
+			// instead of flying to where it was when the point was picked.
+			this.dragon.airTarget = DragonUtils.getBlockWithTarget(dragon);
+		} else if (this.dragon.airTarget == null) {
 			this.dragon.airTarget = DragonUtils.getBlockInView(dragon);
 		}
 		BlockPos target = this.dragon.airTarget;
+		if (target == null) {
+			// getBlockInView found no free spot this tick (e.g. right after hitting a wall); try again next tick.
+			return;
+		}
 		BlockPos dragonpos = this.dragon.blockPosition();
 		int distance = target.distManhattan(dragonpos);
 		//if home then restrict the dragon to go away regardless of targeting, technically this is not needed if DragonsUtils.getBlockInView already chooses a position inside its home
@@ -40,19 +48,19 @@ public class DragonFlyingPathNavigation extends FlyingPathNavigation {
 			if (this.dragon.homePos.getPosition().distManhattan(dragonpos) >= IafConfig.dragonWanderFromHomeDistance) {  // manhattan is very useful for those approximations
 				this.dragon.airTarget = DragonUtils.getBlockInView(dragon);
 				target = this.dragon.airTarget;
-				control.setWantedPosition(target.getX(), target.getY(), target.getZ(), control.getSpeedModifier()); // i wonder if this is necessary
+				if (target != null) control.setWantedPosition(target.getX(), target.getY(), target.getZ(), control.getSpeedModifier()); // i wonder if this is necessary
 			} else { 
 				if (distance <= dragon.getRenderSize() + 2) { // dragon is close to the target so we choose a new one, no idea what threshold is good enough
 					this.dragon.airTarget = this.dragon.getTarget() != null ? DragonUtils.getBlockWithTarget(dragon): DragonUtils.getBlockInView(dragon);
 					target = this.dragon.airTarget;
-					control.setWantedPosition(target.getX(), target.getY(), target.getZ(), control.getSpeedModifier());
+					if (target != null) control.setWantedPosition(target.getX(), target.getY(), target.getZ(), control.getSpeedModifier());
 				}
 			}
 		} else { //if dragon doesnt have a patrol area
-			if (distance <= dragon.getRenderSize() + 2 || this.dragon.horizontalCollision || target == BlockPos.ZERO) {
+			if (distance <= dragon.getRenderSize() + 2 || this.dragon.horizontalCollision || BlockPos.ZERO.equals(target)) {
 				this.dragon.airTarget = this.dragon.getTarget() != null ? DragonUtils.getBlockWithTarget(dragon): DragonUtils.getBlockInView(dragon);
 				target = this.dragon.airTarget;
-				control.setWantedPosition(target.getX(), target.getY(), target.getZ(), control.getSpeedModifier());
+				if (target != null) control.setWantedPosition(target.getX(), target.getY(), target.getZ(), control.getSpeedModifier());
 			} 
 		}
 	}
