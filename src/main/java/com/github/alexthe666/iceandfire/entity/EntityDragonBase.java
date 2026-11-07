@@ -25,6 +25,7 @@ import com.github.alexthe666.iceandfire.item.ItemSummoningCrystal;
 import com.github.alexthe666.iceandfire.message.MessageDragonSetBurnBlock;
 import com.github.alexthe666.iceandfire.message.MessageStartRidingMob;
 import com.github.alexthe666.iceandfire.misc.IafSoundRegistry;
+import com.github.alexthe666.iceandfire.pathfinding.DragonFlyingPathNavigation;
 import com.github.alexthe666.iceandfire.pathfinding.raycoms.AdvancedPathNavigate;
 import com.github.alexthe666.iceandfire.pathfinding.raycoms.IPassabilityNavigator;
 import com.github.alexthe666.iceandfire.pathfinding.raycoms.PathingStuckHandler;
@@ -61,10 +62,8 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -319,15 +318,13 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
         this.goalSelector.addGoal(3, new DragonAIAttackMelee(this, 1.5D, false));
         this.goalSelector.addGoal(4, new DragonAIEscort(this, 1.0D));
         this.goalSelector.addGoal(6, new TemptGoal(this, 1.0D, Ingredient.of(IafItemTags.TEMPT_DRAGON), false));
-        // TODO: drop DragonAIAirTarget again once the new flight navigator is added (see switchNavigator).
-        this.goalSelector.addGoal(7, new DragonAIAirTarget(this));
-        this.goalSelector.addGoal(8, new DragonAIWander(this, 1.0D));
-        this.goalSelector.addGoal(9, new DragonAIWatchClosest(this, LivingEntity.class, 6.0F));
+        //this.goalSelector.addGoal(7, new DragonAIAirTarget(this));
+        this.goalSelector.addGoal(7, new DragonAIWander(this, 1.0D));
+        this.goalSelector.addGoal(8, new DragonAIWatchClosest(this, LivingEntity.class, 6.0F));
         this.goalSelector.addGoal(9, new DragonAILookIdle(this));
         this.targetSelector.addGoal(1, new OwnerHurtTargetGoal(this));
         this.targetSelector.addGoal(2, new OwnerHurtByTargetGoal(this));
-        // TODO: switch to DragonAIHurtByTarget once it's added to the repo.
-        this.targetSelector.addGoal(3, new HurtByTargetGoal(this));
+        this.targetSelector.addGoal(3, new DragonAIHurtByTarget(this));
         this.targetSelector.addGoal(4, new DragonAITargetItems<>(this, 60, false, false, true));
         this.targetSelector.addGoal(5, new DragonAITargetNonTamed<>(this, LivingEntity.class, false, (Predicate<LivingEntity>) entity -> {
             if (entity instanceof Player player) {
@@ -494,13 +491,10 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
             this.setFlying(false);
             this.setHovering(false);
         } else if (navigatorType == 1) {
-            // Temporary fallback: AI flight is driven by flyAround()/flyTowardsTarget() again, because
-            // DragonFlyingPathNavigation (Kettle5000's flight rework) isn't in the repo yet. Once it is:
-            //   this.moveControl = new IafDragonFlightManager.DragonFlyingMoveControl(this);
-            //   this.navigation = new DragonFlyingPathNavigation(this, this.level());
-            // and remove the flyAround() call in tick(), DragonAIAirTarget and the setTarget() reset.
-            this.moveControl = new MoveControl(this);
-            this.navigation = createNavigator(level(), AdvancedPathNavigate.MovementType.FLYING);
+            // I have reworked this entirely, movecontrol here is the same as in the original mod since it didnt need any changes but small optimizations
+            // almost all logic regarding flying around is handled inside the pathnavigator class here
+            this.moveControl = new IafDragonFlightManager.DragonFlyingMoveControl(this);  // this was changed
+            this.navigation = new DragonFlyingPathNavigation(this, this.level());
             this.navigatorType = 1;
         } else {
             this.moveControl = new IafDragonFlightManager.PlayerFlightMoveHelper(this);
@@ -1810,12 +1804,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
             }
         }
         level().getProfiler().pop();
-        // Temporary fallback flight (see switchNavigator).
-        level().getProfiler().push("dragonFlight");
-        if (!level().isClientSide() && (this.isFlying() || this.isHovering()) && !this.isModelDead()) {
-            this.flyAround();
-        }
-        level().getProfiler().pop();
+        //I removed all of this since its now handled on the path navigator instead : Kettle
         
         // RLC-style stuck handling is performed by DragonServerTickManager so it can
         // play the tail-whack and break terrain on the impact frame instead of instantly digging.
@@ -3004,10 +2993,6 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     @Override
     public void setTarget(@Nullable LivingEntity target) {
         super.setTarget(target);
-        // Temporary fallback flight: clear the old air target so flyAround() picks a new point.
-        if (target != null) {
-            this.airTarget = null;
-        }
     }
 
     @Override

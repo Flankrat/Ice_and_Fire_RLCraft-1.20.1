@@ -13,17 +13,26 @@ public class DragonAIWatchClosest extends LookAtPlayerGoal {
 
     @Override
     public boolean canUse() {
-        if (this.mob instanceof EntityDragonBase && ((EntityDragonBase) this.mob).getAnimation() == EntityDragonBase.ANIMATION_SHAKEPREY) {
-            return false;
-        }
-        return super.canUse();
+        return isAvailableToWatch() && super.canUse();
     }
 
     @Override
     public boolean canContinueToUse() {
-        if (this.mob instanceof EntityDragonBase && !((EntityDragonBase) this.mob).canMove()) {
-            return false;
+        return isAvailableToWatch() && super.canContinueToUse();
+    }
+
+    /**
+     * Same conditions as 1.12.2 RLCraft Dregora: no head turning while ridden, while it can't move,
+     * during the shake-prey animation, or while breathing into a dragonforge (so the head and the
+     * breath stay pointed at the forge).
+     */
+    private boolean isAvailableToWatch() {
+        if (!(this.mob instanceof EntityDragonBase dragon)) {
+            return true;
         }
-        return super.canContinueToUse();
+        return dragon.getPassengers().isEmpty()
+                && dragon.canMove()
+                && dragon.getAnimation() != EntityDragonBase.ANIMATION_SHAKEPREY
+                && !dragon.isFuelingForge();
     }
 }

@@ -113,8 +113,7 @@ public class IafDragonFlightManager {
 
     }
     
-    // Flight MoveControl for Kettle5000's flight rework. Not used yet: it goes with
-    // DragonFlyingPathNavigation, which isn't in the repo. See EntityDragonBase#switchNavigator.
+    //Adding this back from the original mod. its needed to control movement when flying.
     
     protected static class DragonFlyingMoveControl extends MoveControl {
 
