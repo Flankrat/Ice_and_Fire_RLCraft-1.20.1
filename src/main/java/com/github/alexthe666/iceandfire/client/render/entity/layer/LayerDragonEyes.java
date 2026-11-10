@@ -3,6 +3,7 @@ package com.github.alexthe666.iceandfire.client.render.entity.layer;
 import com.github.alexthe666.citadel.client.model.AdvancedEntityModel;
 import com.github.alexthe666.citadel.client.model.AdvancedModelBox;
 import com.github.alexthe666.citadel.client.model.TabulaModel;
+import com.github.alexthe666.iceandfire.IceAndFire;
 import com.github.alexthe666.iceandfire.client.model.util.TabulaModelHandlerHelper;
 import com.github.alexthe666.iceandfire.client.render.TabulaModelAccessor;
 import com.github.alexthe666.iceandfire.entity.EntityDragonBase;
@@ -32,21 +33,22 @@ public class LayerDragonEyes extends RenderLayer<EntityDragonBase, AdvancedEntit
     public LayerDragonEyes(MobRenderer renderIn) {
         super(renderIn);
         this.render = renderIn;
+        // Paths must match the file names exactly: inside a jar they are case-sensitive.
+        // Each head loads on its own, so one failure doesn't leave the others unloaded.
+        fireHead = loadHead("firedragon");
+        iceHead = loadHead("icedragon");
+        lightningHead = loadHead("lightningdragon");
+    }
+
+    /** The dragon's ground model with everything except the front of the head removed, or null if it can't load. */
+    private TabulaModel loadHead(String dragon) {
+        String path = "/assets/iceandfire/models/tabula/" + dragon + "/" + dragon + "_ground";
         try {
-            fireHead = onlyKeepCubes(
-                    new TabulaModelAccessor(TabulaModelHandlerHelper
-                            .loadTabulaModel("/assets/iceandfire/models/tabula/firedragon/firedragon_Ground"), null),
-                    Collections.singletonList("HeadFront"));
-            iceHead = onlyKeepCubes(
-                    new TabulaModelAccessor(TabulaModelHandlerHelper
-                            .loadTabulaModel("/assets/iceandfire/models/tabula/icedragon/icedragon_Ground"), null),
-                    Collections.singletonList("HeadFront"));
-            lightningHead = onlyKeepCubes(
-                    new TabulaModelAccessor(TabulaModelHandlerHelper.loadTabulaModel(
-                            "/assets/iceandfire/models/tabula/lightningdragon/lightningdragon_Ground"), null),
+            return onlyKeepCubes(new TabulaModelAccessor(TabulaModelHandlerHelper.loadTabulaModel(path), null),
                     Collections.singletonList("HeadFront"));
         } catch (Exception ex) {
-            ex.printStackTrace();
+            IceAndFire.LOGGER.warn("Could not load the " + dragon + " eye model from " + path + ": " + ex.getMessage());
+            return null;
         }
     }
 

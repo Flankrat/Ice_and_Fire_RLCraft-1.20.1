@@ -46,6 +46,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD, modid = IceAndFire.MODID)
 public class IafClientSetup {
@@ -173,12 +175,34 @@ public class IafClientSetup {
         return rendertypeDreadPortalShader;
     }
 
+    /** Swim poses only exist as ice dragon models; fire and lightning dragons share them, as in 1.12.2. */
+    private static final List<EnumDragonPoses> SHARED_SWIM_POSES = Arrays.asList(
+            EnumDragonPoses.SWIM_POSE, EnumDragonPoses.SWIM1, EnumDragonPoses.SWIM2,
+            EnumDragonPoses.SWIM3, EnumDragonPoses.SWIM4, EnumDragonPoses.SWIM5);
+
+    /**
+     * Loads every dragon pose. Swim poses are loaded once from the ice dragon and shared with the
+     * other dragon types instead of being looked up per type, since fire dragons have no swim files.
+     */
+    private static void registerDragonAnimations() {
+        EnumDragonPoses[] perTypePoses = Arrays.stream(EnumDragonPoses.values())
+                .filter(pose -> !SHARED_SWIM_POSES.contains(pose))
+                .toArray(EnumDragonPoses[]::new);
+        DragonAnimationsLibrary.register(perTypePoses, EnumDragonModelTypes.values());
+        DragonAnimationsLibrary.register(SHARED_SWIM_POSES.toArray(new EnumDragonPoses[0]),
+                new EnumDragonModelTypes[]{EnumDragonModelTypes.ICE_DRAGON_MODEL});
+        for (EnumDragonPoses pose : SHARED_SWIM_POSES) {
+            DragonAnimationsLibrary.registerReference(pose, EnumDragonModelTypes.ICE_DRAGON_MODEL, EnumDragonModelTypes.FIRE_DRAGON_MODEL);
+            DragonAnimationsLibrary.registerReference(pose, EnumDragonModelTypes.ICE_DRAGON_MODEL, EnumDragonModelTypes.LIGHTNING_DRAGON_MODEL);
+        }
+    }
+
     @SubscribeEvent
     public static void setupClient(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             IafGuiRegistry.register();
             EnumSeaSerpentAnimations.initializeSerpentModels();
-            DragonAnimationsLibrary.register(EnumDragonPoses.values(), EnumDragonModelTypes.values());
+            registerDragonAnimations();
 
             try {
                 SEA_SERPENT_BASE_MODEL = new TabulaModel(
