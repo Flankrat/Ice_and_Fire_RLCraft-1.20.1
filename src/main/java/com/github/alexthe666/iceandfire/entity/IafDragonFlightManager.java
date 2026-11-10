@@ -125,52 +125,72 @@ public class IafDragonFlightManager {
         }
 
         
+        /** How fast an AI dragon turns while flying (degrees per tick), as in the original mod. */
+        private static final float TURN_SPEED = 4.0F;
+
+        @Override
         public void tick() {
             if (dragon.horizontalCollision) {
-                this.speedModifier = 0.02D;
+                this.speedModifier = 0.1D;
                 dragon.airTarget = null;
                 return;
             }
-
             if (dragon.airTarget == null) {
                 return;
             }
-            final double dx = dragon.airTarget.getX() - dragon.getX();
-            final double dy = dragon.airTarget.getY() - dragon.getY();
-            final double dz = dragon.airTarget.getZ() - dragon.getZ();
+            final Vec3 target = Vec3.atCenterOf(dragon.airTarget);
+            double distX = target.x - dragon.getX();
+            final double distY = target.y - dragon.getY();
+            double distZ = target.z - dragon.getZ();
 
-            final double distanceSqr = dx * dx + dy * dy + dz * dz;
-
-            if (distanceSqr < 1.0D) {
+            // Original mod: a steep climb or dive shortens the horizontal part of the move.
+            // Clamped so a target almost straight above/below can't flip the heading around.
+            double planeDist = Math.sqrt(distX * distX + distZ * distZ);
+            if (planeDist > 1.0E-3D) {
+                double yDistMod = Mth.clamp(1.0D - Math.abs(distY * 0.7D) / planeDist, 0.1D, 1.0D);
+                distX *= yDistMod;
+                distZ *= yDistMod;
+                planeDist *= yDistMod;
+            }
+            final double dist = Math.sqrt(distX * distX + distZ * distZ + distY * distY);
+            if (dist <= 1.0D) {
                 return;
             }
 
-            // ----------------------------------------
-            // ROTATION: Slowly face the target (yaw only)
-            // ----------------------------------------
-
-            final float targetYaw = (float) (Mth.atan2(-dx, dz) * Mth.RAD_TO_DEG);
-
-            dragon.setYRot(
-                Mth.approachDegrees(dragon.getYRot(), targetYaw, 10.0F)
-            );
-
+            // Turn toward the target at a fixed rate. Speed builds up while the dragon is lined up
+            // and drops while it is still turning, so it flies in arcs instead of sliding sideways.
+            final float oldYaw = dragon.getYRot();
+            if (planeDist > 1.0E-3D) {
+                float targetYaw = (float) (Mth.atan2(distZ, distX) * Mth.RAD_TO_DEG) - 90.0F;
+                dragon.setYRot(IafDragonFlightManager.approachDegrees(oldYaw, targetYaw, TURN_SPEED));
+            }
             dragon.yBodyRot = dragon.getYRot();
+            if (IafDragonFlightManager.degreesDifferenceAbs(oldYaw, dragon.getYRot()) < 3.0F) {
+                speedModifier = IafDragonFlightManager.approach((float) speedModifier, 1.8F, 0.005F * (1.8F / (float) Math.max(speedModifier, 0.1D)));
+            } else {
+                speedModifier = IafDragonFlightManager.approach((float) speedModifier, 0.2F, 0.025F);
+            }
 
-            // ----------------------------------------
-            // MOVEMENT: Always move toward target
-            // ----------------------------------------
+            final float pitch = (float) (-(Mth.atan2(-distY, planeDist) * Mth.RAD_TO_DEG));
+            double speed = speedModifier * dragon.getFlightSpeedModifier();
+            speed *= Math.min(1.0D, dist / 50.0D + 0.3D); // slow down close to the target
 
-            final double movementSpeed = (0.01D / Math.sqrt(distanceSqr)) + 0.001D;
+            // Thrust goes along the way the dragon is FACING, not straight at the target.
+            final float headingRad = (dragon.getYRot() + 90.0F) * Mth.DEG_TO_RAD;
+            final double x = speed * Mth.cos(headingRad) * Math.abs(distX / dist);
+            final double y = speed * Mth.sin(pitch * Mth.DEG_TO_RAD) * Math.abs(distY / dist);
+            final double z = speed * Mth.sin(headingRad) * Math.abs(distZ / dist);
+            final double motionCap = 0.2D;
             Vec3 delta = dragon.getDeltaMovement().add(
-                    dx * movementSpeed,
-                    dy * movementSpeed,
-                    dz * movementSpeed
-                );
-            double intensity = delta.length();
-            double maxspeed = 0.15 + (dragon.getDragonStage() * 0.05);
-            if (intensity > maxspeed) {
-            	delta = delta.scale(maxspeed/intensity);
+                    Mth.clamp(x * 0.2D, -motionCap, motionCap),
+                    Mth.clamp(y * 0.2D, -motionCap, motionCap),
+                    Mth.clamp(z * 0.2D, -motionCap, motionCap));
+
+            // Keep the port's tuned top speed per growth stage.
+            final double maxSpeed = 0.15D + (dragon.getDragonStage() * 0.05D);
+            final double length = delta.length();
+            if (length > maxSpeed) {
+                delta = delta.scale(maxSpeed / length);
             }
             dragon.setDeltaMovement(delta);
         }

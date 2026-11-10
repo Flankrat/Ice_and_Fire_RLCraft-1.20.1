@@ -182,7 +182,7 @@ public class DragonUtils {
                 targetY = Math.min(targetY, maximumFlightHeight);
 
                 BlockPos pos = new BlockPos(
-                        home.getX() + dragon.getRandom().nextInt(wander) - wander,
+                        home.getX() + dragon.getRandom().nextInt(wander * 2) - wander,
                         targetY,
                         home.getZ() + dragon.getRandom().nextInt(wander * 2) - wander
                 );
