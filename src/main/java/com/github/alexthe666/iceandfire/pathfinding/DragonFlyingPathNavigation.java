@@ -37,7 +37,6 @@ public class DragonFlyingPathNavigation extends FlyingPathNavigation {
     
 	@Override
 	public void tick() {
-		MoveControl control = this.dragon.getMoveControl();
 		boolean chasing = this.dragon.getTarget() != null && this.dragon.getTarget().isAlive();
 		if (chasing) {
 			// Follow a moving attack target every tick, like the 1.12.2 air-target AI did,
@@ -54,26 +53,44 @@ public class DragonFlyingPathNavigation extends FlyingPathNavigation {
 		}
 		BlockPos dragonpos = this.dragon.blockPosition();
 		int distance = target.distManhattan(dragonpos);
-		//if home then restrict the dragon to go away regardless of targeting, technically this is not needed if DragonsUtils.getBlockInView already chooses a position inside its home
-		if (this.dragon.hasHomePosition && this.dragon.homePos != null) {
-			if (this.dragon.homePos.getPosition().distManhattan(dragonpos) >= IafConfig.dragonWanderFromHomeDistance) {  // manhattan is very useful for those approximations
-				this.dragon.airTarget = pickWanderPoint();
-				target = this.dragon.airTarget;
-				if (target != null) control.setWantedPosition(target.getX(), target.getY(), target.getZ(), control.getSpeedModifier()); // i wonder if this is necessary
-			} else { 
-				if (distance <= dragon.getRenderSize() + 2) { // dragon is close to the target so we choose a new one, no idea what threshold is good enough
-					this.dragon.airTarget = chasing ? DragonUtils.getBlockWithTarget(dragon) : pickWanderPoint();
-					target = this.dragon.airTarget;
-					if (target != null) control.setWantedPosition(target.getX(), target.getY(), target.getZ(), control.getSpeedModifier());
-				}
-			}
-		} else { //if dragon doesnt have a patrol area
-			if (distance <= dragon.getRenderSize() + 2 || this.dragon.horizontalCollision || BlockPos.ZERO.equals(target)) {
-				this.dragon.airTarget = chasing ? DragonUtils.getBlockWithTarget(dragon) : pickWanderPoint();
-				target = this.dragon.airTarget;
-				if (target != null) control.setWantedPosition(target.getX(), target.getY(), target.getZ(), control.getSpeedModifier());
-			} 
+		boolean arrived = distance <= dragon.getRenderSize() + 2;
+		boolean hasHome = this.dragon.hasHomePosition && this.dragon.homePos != null;
+
+		if (!chasing && hasHome && !isNearHome(dragonpos) && !isNearHome(target)) {
+			// Wandered past its home range and isn't already heading back: fly back toward home.
+			// This is one fixed point, so the dragon keeps a steady course until it's back in range,
+			// instead of getting a new random target every tick while it's outside.
+			setTarget(homeReturnPoint());
+		} else if (arrived || this.dragon.horizontalCollision || BlockPos.ZERO.equals(target)) {
+			setTarget(chasing ? DragonUtils.getBlockWithTarget(dragon) : pickWanderPoint());
 		}
+	}
+
+	private void setTarget(@Nullable BlockPos target) {
+		this.dragon.airTarget = target;
+		if (target != null) {
+			MoveControl control = this.dragon.getMoveControl();
+			control.setWantedPosition(target.getX(), target.getY(), target.getZ(), control.getSpeedModifier());
+		}
+	}
+
+	/**
+	 * Whether a position is inside the dragon's home range. Uses the same square, horizontal-only
+	 * area that {@link DragonUtils#getBlockInView} picks wander points from, so flight height doesn't
+	 * count and every wander point it gives counts as near home.
+	 */
+	private boolean isNearHome(BlockPos pos) {
+		BlockPos home = this.dragon.homePos.getPosition();
+		int range = Math.max(1, IafConfig.dragonWanderFromHomeDistance);
+		return Math.abs(pos.getX() - home.getX()) <= range && Math.abs(pos.getZ() - home.getZ()) <= range;
+	}
+
+	/** Above the home position, at the dragon's current height (kept under the flight ceiling). */
+	private BlockPos homeReturnPoint() {
+		BlockPos home = this.dragon.homePos.getPosition();
+		int ceiling = DragonUtils.getMaximumFlightHeightForPos(dragon.level(), home);
+		int y = Math.min(Math.max(this.dragon.getBlockY(), home.getY() + 8), ceiling);
+		return new BlockPos(home.getX(), y, home.getZ());
 	}
 
 	/**
