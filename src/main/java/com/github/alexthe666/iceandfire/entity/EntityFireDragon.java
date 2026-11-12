@@ -157,9 +157,22 @@ public class EntityFireDragon extends EntityDragonBase {
         return false;
     }
 
+    /** How long a fire dragon can stay in water before it starts taking damage (3 seconds). */
+    private static final int WATER_GRACE_TICKS = 60;
+    /** How often water damages a fire dragon once the grace time is over (once a second). */
+    private static final int WATER_DAMAGE_INTERVAL_TICKS = 20;
+    /** Share of max health lost per hit; doubled in water in a frozen biome. */
+    private static final float WATER_DAMAGE_FRACTION = 0.01F;
+
+    /** Ticks this dragon has been in water without leaving it. Not saved: leaving the world resets it. */
+    private int ticksInWater;
+
     @Override
     public void aiStep() {
         super.aiStep();
+        if (!level().isClientSide) {
+            tickWaterDamage();
+        }
         LivingEntity attackTarget = this.getTarget();
         if (!level().isClientSide && attackTarget != null) {
             if (this.getBoundingBox().inflate(2.5F + this.getRenderSize() * 0.33F, 2.5F + this.getRenderSize() * 0.33F, 2.5F + this.getRenderSize() * 0.33F).intersects(attackTarget.getBoundingBox())) {
@@ -172,6 +185,27 @@ public class EntityFireDragon extends EntityDragonBase {
         }
     }
 
+
+    /**
+     * Fire dragons are hurt by water: after {@link #WATER_GRACE_TICKS} in water they lose 1% of their
+     * max health every second, or 2% if the water is in a frozen (snowy) biome.
+     */
+    private void tickWaterDamage() {
+        if (!this.isInWater() || !this.isAlive() || this.isModelDead()) {
+            this.ticksInWater = 0;
+            return;
+        }
+        this.ticksInWater++;
+        if (this.ticksInWater <= WATER_GRACE_TICKS
+                || (this.ticksInWater - WATER_GRACE_TICKS - 1) % WATER_DAMAGE_INTERVAL_TICKS != 0) {
+            return;
+        }
+        BlockPos pos = this.blockPosition();
+        boolean frozenBiome = this.level().getBiome(pos).value().coldEnoughToSnow(pos);
+        float damage = this.getMaxHealth() * WATER_DAMAGE_FRACTION * (frozenBiome ? 2.0F : 1.0F);
+        // Drowning and freezing both ignore armor, so the damage is always the full share of health.
+        this.hurt(frozenBiome ? this.damageSources().freeze() : this.damageSources().drown(), damage);
+    }
 
     @Override
     protected void breathFireAtPos(BlockPos burningTarget) {
