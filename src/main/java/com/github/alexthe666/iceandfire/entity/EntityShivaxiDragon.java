@@ -5,7 +5,6 @@ import com.github.alexthe666.iceandfire.entity.ai.*;
 import com.github.alexthe666.iceandfire.misc.IafSoundRegistry;
 import com.github.alexthe666.iceandfire.enums.EnumParticles;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -22,7 +21,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -198,10 +196,9 @@ public class EntityShivaxiDragon extends EntityLightningDragon {
         return Items.AIR;
     }
 
-    @Override
-    public ResourceLocation getDeadLootTable() {
-        return BuiltInLootTables.EMPTY;
-    }
+    // No getDeadLootTable() override: Shivaxi uses EntityLightningDragon's corpse tables, like Dregora.
+    // customize_to_dragon turns the scales and flesh into air via the overrides above,
+    // so only the skeleton table's dragon bones actually drop from the corpse.
 
     @Override
     public boolean isFood(ItemStack stack) {
