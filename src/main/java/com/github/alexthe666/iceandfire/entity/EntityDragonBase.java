@@ -1413,7 +1413,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
             PathNavigation navigation = getNavigation();
             Path path = navigation.getPath();
 
-            if (!navigation.isDone() && (path == null || path.getEndNode() != null || blockPosition().distSqr(path.getEndNode().asBlockPos()) > 15)) {
+            if (!navigation.isDone() && (path == null || (path.getEndNode() != null && blockPosition().distSqr(path.getEndNode().asBlockPos()) > 15))) {
                 return true;
             }
         }
