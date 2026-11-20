@@ -22,6 +22,8 @@ import com.github.alexthe666.iceandfire.inventory.ContainerDragon;
 import com.github.alexthe666.iceandfire.item.IafItemRegistry;
 import com.github.alexthe666.iceandfire.item.ItemDragonArmor;
 import com.github.alexthe666.iceandfire.item.ItemSummoningCrystal;
+import com.github.alexthe666.iceandfire.item.blooded.BloodedDragonType;
+import com.github.alexthe666.iceandfire.item.blooded.ItemBloodedArmor;
 import com.github.alexthe666.iceandfire.message.MessageDragonSetBurnBlock;
 import com.github.alexthe666.iceandfire.message.MessageStartRidingMob;
 import com.github.alexthe666.iceandfire.misc.IafSoundRegistry;
@@ -56,6 +58,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -91,6 +94,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.items.wrapper.InvWrapper;
 import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -2955,14 +2959,56 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
 
     public abstract void stimulateFire(double burnX, double burnY, double burnZ, int syncType);
 
-    // 随机化攻击决策：飞行时强制远程，地面时随机
+    // 随机化攻击决策：地面和飞行时都随机（1.12）；目标抗本元素时总是近战
     public void randomizeAttacks() {
-        if (this.isFlying() || this.isHovering()) {
-            // 飞行中始终使用远程攻击（喷火/火球）
-            this.attackDecision = false;
-        } else {
-            this.attackDecision = getRandom().nextBoolean();
+        // 1.12 picks melee or ranged at random in the air too. Melee in the air is the diving tackle
+        // (DragonServerTickManager); ranged flies above the target and breathes (IafDragonFlightManager).
+        // Always picking ranged in the air left an attacking dragon breathing from above without coming down.
+        this.attackDecision = getRandom().nextBoolean() || this.isTargetResistantToBreath(this.getTarget());
+    }
+
+    /**
+     * True when this dragon's breath can't hurt the target: a fire dragon against a target with Fire
+     * Resistance or that is fire immune (1.12's dragon fire counted as fire damage, so Fire Resistance
+     * blocked it), an ice or lightning dragon against Trinkets and Baubles' Ice or Lightning Resistance
+     * (that mod cancels this mod's ice and lightning breath damage for those effects, like its 1.12
+     * version did), or any dragon against a full set of blooded armor of its own element (see
+     * IafDragonDestructionManager.applyDragonEffect). Such a dragon closes in and bites instead.
+     */
+    public boolean isTargetResistantToBreath(@Nullable LivingEntity target) {
+        if (target == null) {
+            return false;
         }
+        BloodedDragonType.DragonElement element;
+        if (this.dragonType == DragonType.FIRE) {
+            if (target.fireImmune() || target.hasEffect(MobEffects.FIRE_RESISTANCE)) {
+                return true;
+            }
+            element = BloodedDragonType.DragonElement.FIRE;
+        } else if (this.dragonType == DragonType.ICE) {
+            if (hasEffect(target, ICE_RESISTANCE_EFFECT)) {
+                return true;
+            }
+            element = BloodedDragonType.DragonElement.ICE;
+        } else if (this.dragonType == DragonType.LIGHTNING) {
+            if (hasEffect(target, LIGHTNING_RESISTANCE_EFFECT)) {
+                return true;
+            }
+            element = BloodedDragonType.DragonElement.LIGHTNING;
+        } else {
+            return false;
+        }
+        return ItemBloodedArmor.hasFullArmorSet(target, element);
+    }
+
+    // Trinkets and Baubles' resistance effects, looked up by id so this mod doesn't need it installed
+    private static final ResourceLocation ICE_RESISTANCE_EFFECT = new ResourceLocation("xat", "ice_resistance");
+    private static final ResourceLocation LIGHTNING_RESISTANCE_EFFECT = new ResourceLocation("xat", "lightning_resistance");
+
+    /** True if the target has the effect with this id (false if no mod registers it). */
+    private static boolean hasEffect(LivingEntity target, ResourceLocation effectId) {
+        MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(effectId);
+        return effect != null && target.hasEffect(effect);
     }
 
     @Override

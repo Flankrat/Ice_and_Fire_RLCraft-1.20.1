@@ -1,9 +1,11 @@
 package com.github.alexthe666.iceandfire.entity;
 
 import com.github.alexthe666.iceandfire.IafConfig;
+import com.github.alexthe666.iceandfire.entity.util.DragonUtils;
 import com.github.alexthe666.iceandfire.entity.util.IFlyingMount;
 import com.github.alexthe666.iceandfire.util.IAFMath;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -129,6 +131,8 @@ public class IafDragonFlightManager {
         private static final float TURN_SPEED = 4.0F;
         /** How far below a dragon resting on something its target has to be before it flies off the edge first. */
         private static final double LEDGE_DROP = 4.0D;
+        /** Blocks above its target that a dragon attacking from range flies at (see tick()). */
+        private static final double RANGED_PURSUIT_HEIGHT = 6.0D;
 
         // direction findWayOff() picked last, kept for a second so the dragon doesn't re-pick every tick
         private Vec3 wayOff;
@@ -171,8 +175,21 @@ public class IafDragonFlightManager {
             }
             final Vec3 target = Vec3.atCenterOf(dragon.airTarget);
             double distX = target.x - dragon.getX();
-            final double distY = target.y - dragon.getY();
+            double distY = target.y - dragon.getY();
             double distZ = target.z - dragon.getZ();
+
+            // 1.12: while it attacks from range (breath/fire charges, attackDecision false) a flying dragon
+            // chases its target from the air instead of diving onto it; only its melee pick dives (the
+            // tackle). Diving made it touch down beside the target and fall back to a slow ground chase.
+            // It flies a few blocks above the target: high enough not to skim into the ground next to it,
+            // close enough that its next pick can be the tackle (that needs it within melee range).
+            LivingEntity combatTarget = dragon.getTarget();
+            if (combatTarget != null && combatTarget.isAlive() && !dragon.attackDecision
+                    && dragon.getControllingPassenger() == null) {
+                double cruiseY = Math.min(combatTarget.getY() + RANGED_PURSUIT_HEIGHT,
+                        DragonUtils.getMaximumFlightHeightForPos(dragon.level(), dragon.airTarget));
+                distY = cruiseY - dragon.getY();
+            }
 
             // Something solid under the dragon while its target is below it (a dragon on a roof, cliff or
             // pillar, or a wide dragon whose body still rests on an edge): it can't drop through the block, so
