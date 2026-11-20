@@ -58,6 +58,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.*;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -93,6 +94,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.items.wrapper.InvWrapper;
 import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -2968,7 +2970,9 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     /**
      * True when this dragon's breath can't hurt the target: a fire dragon against a target with Fire
      * Resistance or that is fire immune (1.12's dragon fire counted as fire damage, so Fire Resistance
-     * blocked it), or any dragon against a full set of blooded armor of its own element (see
+     * blocked it), an ice or lightning dragon against Trinkets and Baubles' Ice or Lightning Resistance
+     * (that mod cancels this mod's ice and lightning breath damage for those effects, like its 1.12
+     * version did), or any dragon against a full set of blooded armor of its own element (see
      * IafDragonDestructionManager.applyDragonEffect). Such a dragon closes in and bites instead.
      */
     public boolean isTargetResistantToBreath(@Nullable LivingEntity target) {
@@ -2982,13 +2986,29 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
             }
             element = BloodedDragonType.DragonElement.FIRE;
         } else if (this.dragonType == DragonType.ICE) {
+            if (hasEffect(target, ICE_RESISTANCE_EFFECT)) {
+                return true;
+            }
             element = BloodedDragonType.DragonElement.ICE;
         } else if (this.dragonType == DragonType.LIGHTNING) {
+            if (hasEffect(target, LIGHTNING_RESISTANCE_EFFECT)) {
+                return true;
+            }
             element = BloodedDragonType.DragonElement.LIGHTNING;
         } else {
             return false;
         }
         return ItemBloodedArmor.hasFullArmorSet(target, element);
+    }
+
+    // Trinkets and Baubles' resistance effects, looked up by id so this mod doesn't need it installed
+    private static final ResourceLocation ICE_RESISTANCE_EFFECT = new ResourceLocation("xat", "ice_resistance");
+    private static final ResourceLocation LIGHTNING_RESISTANCE_EFFECT = new ResourceLocation("xat", "lightning_resistance");
+
+    /** True if the target has the effect with this id (false if no mod registers it). */
+    private static boolean hasEffect(LivingEntity target, ResourceLocation effectId) {
+        MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(effectId);
+        return effect != null && target.hasEffect(effect);
     }
 
     @Override
