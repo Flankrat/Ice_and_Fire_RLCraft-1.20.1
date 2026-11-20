@@ -127,6 +127,37 @@ public class IafDragonFlightManager {
         
         /** How fast an AI dragon turns while flying (degrees per tick), as in the original mod. */
         private static final float TURN_SPEED = 4.0F;
+        /** How far below a dragon resting on something its target has to be before it flies off the edge first. */
+        private static final double LEDGE_DROP = 4.0D;
+
+        // direction findWayOff() picked last, kept for a second so the dragon doesn't re-pick every tick
+        private Vec3 wayOff;
+        private int wayOffUntil;
+
+        /**
+         * The horizontal direction (of 8) in which the dragon has to move the shortest distance before
+         * nothing is under its whole body, or null if there is none within twice its width.
+         */
+        private Vec3 findWayOff() {
+            if (wayOff != null && dragon.tickCount < wayOffUntil) {
+                return wayOff;
+            }
+            wayOff = null;
+            int maxSteps = Mth.ceil(dragon.getBbWidth() * 2.0F) + 2;
+            for (int step = 1; step <= maxSteps && wayOff == null; step++) {
+                for (int i = 0; i < 8; i++) {
+                    double angle = i * Math.PI / 4.0D;
+                    double dx = Math.cos(angle), dz = Math.sin(angle);
+                    // free one block lower at that spot means it would drop instead of resting on something
+                    if (dragon.level().noCollision(dragon, dragon.getBoundingBox().move(dx * step, -1.0D, dz * step))) {
+                        wayOff = new Vec3(dx, 0, dz);
+                        break;
+                    }
+                }
+            }
+            wayOffUntil = dragon.tickCount + 20;
+            return wayOff;
+        }
 
         @Override
         public void tick() {
@@ -142,6 +173,25 @@ public class IafDragonFlightManager {
             double distX = target.x - dragon.getX();
             final double distY = target.y - dragon.getY();
             double distZ = target.z - dragon.getZ();
+
+            // Something solid under the dragon while its target is below it (a dragon on a roof, cliff or
+            // pillar, or a wide dragon whose body still rests on an edge): it can't drop through the block, so
+            // the downward part of the move did nothing and only slowed the sideways part to a crawl, and with
+            // the target under its body it stopped right above it. It scraped along the top for 15-30 seconds.
+            // Fly the shortest way off the block at full speed first (1.12 flight also moved sideways at full
+            // speed whatever the height difference); the normal chase takes over once it's over open air.
+            // Its heading is set here directly: breath attacks keep snapping its facing to the target.
+            // Only for a target well below (a few blocks is a normal landing next to it, not a ledge).
+            if (distY < -LEDGE_DROP && (dragon.onGround() || !dragon.isOverAir())) {
+                Vec3 wayOff = findWayOff();
+                if (wayOff != null) {
+                    final double escapeSpeed = 0.15D + (dragon.getDragonStage() * 0.05D); // same top speed as below
+                    dragon.setYRot((float) (Mth.atan2(wayOff.z, wayOff.x) * Mth.RAD_TO_DEG) - 90.0F);
+                    dragon.yBodyRot = dragon.getYRot();
+                    dragon.setDeltaMovement(wayOff.x * escapeSpeed, 0, wayOff.z * escapeSpeed);
+                    return;
+                }
+            }
 
             // Original mod: a steep climb or dive shortens the horizontal part of the move.
             // Clamped so a target almost straight above/below can't flip the heading around.
