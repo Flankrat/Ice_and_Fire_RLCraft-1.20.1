@@ -18,7 +18,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BannerPatternItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.ForgeSpawnEggItem;
@@ -101,7 +100,7 @@ public class IafItemRegistry {
     public static CustomToolMaterial GHOST_SWORD_TOOL_MATERIAL = new CustomToolMaterial("GhostSword", 2, 3000, 5,
             10.0F,
             25);
-    public static final Tier DREAD_QUEEN_SWORD_MATERIAL = new CustomToolMaterial("DreadQueenSword", 4, 6666, 19,
+    public static final CustomToolMaterial DREAD_QUEEN_SWORD_MATERIAL = new CustomToolMaterial("DreadQueenSword", 4, 6666, 19,
             10F, 25);
 
     public static DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, IceAndFire.MODID);
@@ -699,6 +698,8 @@ public class IafItemRegistry {
         IafItemRegistry.BLINDFOLD_ARMOR_MATERIAL.setRepairMaterial(Ingredient.of(Tags.Items.STRING));
         IafItemRegistry.SILVER_ARMOR_MATERIAL.setRepairMaterial(Ingredient.of(IafItemTags.INGOTS_SILVER));
         IafItemRegistry.SILVER_TOOL_MATERIAL.setRepairMaterial(Ingredient.of(IafItemTags.INGOTS_SILVER));
+        IafItemRegistry.COPPER_ARMOR_MATERIAL.setRepairMaterial(Ingredient.of(Tags.Items.INGOTS_COPPER));
+        IafItemRegistry.COPPER_TOOL_MATERIAL.setRepairMaterial(Ingredient.of(Tags.Items.INGOTS_COPPER));
         IafItemRegistry.DRAGONBONE_TOOL_MATERIAL.setRepairMaterial(Ingredient.of(IafItemRegistry.DRAGON_BONE.get()));
         IafItemRegistry.FIRE_DRAGONBONE_TOOL_MATERIAL.setRepairMaterial(Ingredient.of(IafItemRegistry.DRAGON_BONE.get()));
         IafItemRegistry.ICE_DRAGONBONE_TOOL_MATERIAL.setRepairMaterial(Ingredient.of(IafItemRegistry.DRAGON_BONE.get()));
@@ -724,6 +725,8 @@ public class IafItemRegistry {
         IafItemRegistry.MYRMEX_JUNGLE_ARMOR_MATERIAL.setRepairMaterial(Ingredient.of(IafItemRegistry.MYRMEX_JUNGLE_CHITIN.get()));
         IafItemRegistry.DREAD_SWORD_TOOL_MATERIAL.setRepairMaterial(Ingredient.of(IafItemRegistry.DREAD_SHARD.get()));
         IafItemRegistry.DREAD_KNIGHT_TOOL_MATERIAL.setRepairMaterial(Ingredient.of(IafItemRegistry.DREAD_SHARD.get()));
+        IafItemRegistry.DREAD_QUEEN_SWORD_MATERIAL.setRepairMaterial(Ingredient.of(IafItemRegistry.DREAD_SHARD.get()));
+        IafItemRegistry.GHOST_SWORD_TOOL_MATERIAL.setRepairMaterial(Ingredient.of(IafItemRegistry.GHOST_INGOT.get()));
         for (EnumSeaSerpent serpent : EnumSeaSerpent.values()) {
             serpent.armorMaterial.setRepairMaterial(Ingredient.of(serpent.scale.get()));
         }
