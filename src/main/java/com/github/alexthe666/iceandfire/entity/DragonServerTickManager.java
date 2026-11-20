@@ -18,6 +18,22 @@ public class DragonServerTickManager {
         this.dragon = dragon;
     }
 
+    /**
+     * A grounded wild dragon whose target is out of melee range (the distance at which it switches to
+     * ranged attacks) takes off to chase it, on average after 15 ticks like the "target above it" take-off.
+     * On foot a dragon can't keep up with a sprinting player or get past rough ground; in the air it
+     * follows from above and attacks from range or dives in (see IafDragonFlightManager).
+     */
+    private boolean targetGettingAway() {
+        LivingEntity target = dragon.getTarget();
+        if (target == null || !target.isAlive() || dragon.isTame() || dragon.getDragonStage() < 2) {
+            return false;
+        }
+        double averageEdge = (dragon.getBbWidth() + dragon.getBbHeight() + dragon.getBbWidth()) / 3.0D;
+        double meleeRange = Math.min(averageEdge * 5.0D, 25.0D);
+        return dragon.distanceTo(target) > meleeRange && dragon.getRandom().nextInt(15) == 0;
+    }
+
     public void updateDragonServer() {
         // Update dragon rider
         dragon.updateRider();
@@ -124,7 +140,12 @@ public class DragonServerTickManager {
             // Old behavior switches a distant adult dragon from melee dive to ranged attack.
             double averageEdge = (dragon.getBbWidth() + dragon.getBbHeight() + dragon.getBbWidth()) / 3.0D;
             double rangedThreshold = Math.min(averageEdge * 5.0D, 25.0D);
-            if (dragon.attackDecision && dragon.getDragonStage() > 1 && dragon.distanceTo(aerialTarget) > rangedThreshold) {
+            boolean breathUseless = dragon.isTargetResistantToBreath(aerialTarget);
+            if (breathUseless) {
+                // Its breath can't hurt this target (Fire Resistance, or a full blooded armor set of its
+                // element): always melee, so it closes in and bites, from the air by diving at it.
+                dragon.attackDecision = true;
+            } else if (dragon.attackDecision && dragon.getDragonStage() > 1 && dragon.distanceTo(aerialTarget) > rangedThreshold) {
                 dragon.attackDecision = false;
                 dragon.setTackling(false);
             }
@@ -275,6 +296,7 @@ public class DragonServerTickManager {
                 if (dragon.getRandom().nextInt(dragon.getFlightChancePerTick()) == 0
                         || dragon.getY() < dragon.level().getMinBuildHeight()
                         || (dragon.getTarget() != null && Math.abs(dragon.getTarget().getY() - dragon.getY()) > 5)
+                        || targetGettingAway()
                         || dragon.isInWater()) {
                     dragon.setHovering(true);
                     dragon.setInSittingPose(false);
