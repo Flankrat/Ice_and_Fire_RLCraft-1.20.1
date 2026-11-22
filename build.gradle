@@ -134,6 +134,11 @@ repositories {
         name = "ModMaven"
         url = "https://modmaven.dev"
     }
+    maven { // GeckoLib, for the optional Community Edition dragon and sea serpent models
+        name = "GeckoLib"
+        url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/"
+        content { includeGroup("software.bernie.geckolib") }
+    }
 }
 
 dependencies {
@@ -148,6 +153,8 @@ dependencies {
     implementation fg.deobf("curse.maven:citadel-331936:5075402")
     compileOnly fg.deobf("curse.maven:defiled-lands-reforged-1490680:8131329")
     implementation fg.deobf("curse.maven:curios-309927:6418456")
+    // The dragons and sea serpents can be drawn with Community Edition's GeckoLib models (client option)
+    implementation fg.deobf("software.bernie.geckolib:geckolib-forge-1.20.1:4.8.4")
     // Optional: only touched through compat/EnhancedVisualsCompat when the mod is loaded.
     compileOnly fg.deobf("curse.maven:enhancedvisuals-255389:9080707")
     // Optional: the glacier biome is placed through compat/TerraBlenderCompat only when TerraBlender is loaded.
