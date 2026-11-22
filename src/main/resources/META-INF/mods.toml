@@ -40,3 +40,9 @@ side = "BOTH"
     versionRange = "[5.0,)"
     ordering = "AFTER"
     side = "BOTH"
+[[dependencies.iceandfire]]
+    modId = "terrablender"
+    mandatory = false
+    versionRange = "[3.0,)"
+    ordering = "NONE"
+    side = "BOTH"

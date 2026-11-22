@@ -12,6 +12,11 @@ public class ServerConfig {
     public final ForgeConfigSpec.IntValue dragonDenGoldAmount;
     public final ForgeConfigSpec.BooleanValue spawnGlaciers;
     public final ForgeConfigSpec.IntValue glacierSpawnChance;
+    public final ForgeConfigSpec.BooleanValue generateSnowVillages;
+    public final ForgeConfigSpec.IntValue generateSnowVillageChance;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> snowVillageDimensions;
+    public final ForgeConfigSpec.BooleanValue snowVillageDimensionWhitelist;
+    public final ForgeConfigSpec.BooleanValue allowSnowForSapphireTrade;
     public final ForgeConfigSpec.IntValue oreToStoneRatioForDragonCaves;
     public final ForgeConfigSpec.IntValue dragonEggTime;
     public final ForgeConfigSpec.IntValue dragonGriefing;
@@ -233,6 +238,11 @@ public class ServerConfig {
 
         this.spawnGlaciers = buildBoolean(builder, "Generate Glaciers", "all", true, "Whether to generate glacier biomes or not");
         this.glacierSpawnChance = buildInt(builder, "Glacier Spawn Weight", "all", 4, 1, 10000, "Glacier Spawn Weight. Higher number = more common");
+        this.generateSnowVillages = buildBoolean(builder, "Generate Snow Villages", "all", true, "Whether to generate snow villages (in cold snowy biomes) or not");
+        this.generateSnowVillageChance = buildInt(builder, "Generate Snow Village Chance", "all", 100, 1, 10000, "About one snow village per this many cold snowy chunks. Lower = more common");
+        this.snowVillageDimensions = buildStringList(builder, "Snow Village Dimensions", List.of("minecraft:overworld"), "Dimensions snow villages can (whitelist) or can't (blacklist) generate in");
+        this.snowVillageDimensionWhitelist = buildBoolean(builder, "Snow Village Dimension Use Whitelist", "all", true, "If true, Snow Village Dimensions is a whitelist; if false, a blacklist");
+        this.allowSnowForSapphireTrade = buildBoolean(builder, "Snow Villager Allow Craftsman Snow Trade", "all", true, "Whether craftsman snow villagers buy snow blocks for sapphires");
 
         this.generateMausoleums = buildBoolean(builder, "Generate Mausoleums", "all", true, "True if mausoleums are allowed to generate");
 

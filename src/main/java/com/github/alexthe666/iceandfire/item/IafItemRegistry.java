@@ -676,6 +676,7 @@ public class IafItemRegistry {
         registerItem("spawn_egg_dread_beast", () -> new ForgeSpawnEggItem(IafEntityRegistry.DREAD_BEAST, 0XE0E6E6, 0X38373C, new Item.Properties()/*.tab(IceAndFire.TAB_ITEMS)*/));
         registerItem("spawn_egg_dread_scuttler", () -> new ForgeSpawnEggItem(IafEntityRegistry.DREAD_SCUTTLER, 0XE0E6E6, 0X4D5667, new Item.Properties()/*.tab(IceAndFire.TAB_ITEMS)*/));
         registerItem("spawn_egg_lich", () -> new ForgeSpawnEggItem(IafEntityRegistry.DREAD_LICH, 0XE0E6E6, 0X274860, new Item.Properties()/*.tab(IceAndFire.TAB_ITEMS)*/));
+        registerItem("spawn_egg_snow_villager", () -> new ForgeSpawnEggItem(IafEntityRegistry.SNOW_VILLAGER, 0X3B3B3B, 0XB5DDFB, new Item.Properties()));
         registerItem("spawn_egg_dread_queen", () -> new ForgeSpawnEggItem(IafEntityRegistry.DREAD_QUEEN, 0XB5DDFB, 0XE0E6E6, new Item.Properties()));
         registerItem("spawn_egg_black_frost_dragon", () -> new ForgeSpawnEggItem(IafEntityRegistry.BLACK_FROST_DRAGON, 0XE0E6E6, 0XB5DDFB, new Item.Properties()));
         registerItem("spawn_egg_dread_knight", () -> new ForgeSpawnEggItem(IafEntityRegistry.DREAD_KNIGHT, 0XE0E6E6, 0X4A6C6E, new Item.Properties()/*.tab(IceAndFire.TAB_ITEMS)*/));
