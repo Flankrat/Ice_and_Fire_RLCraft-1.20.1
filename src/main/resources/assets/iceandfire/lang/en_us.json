@@ -1378,5 +1378,10 @@
   "block.iceandfire.dragonscales_pile": "Pile of Dragon Scales",
   "block.iceandfire.sea_serpent_scales_pile": "Pile of Sea Serpent Scales",
   "block.iceandfire.diamondpile": "Pile of Diamonds",
-  "item.iceandfire.diamond_shard": "Diamond Shard"
+  "item.iceandfire.diamond_shard": "Diamond Shard",
+  "effect.iceandfire.acid": "Acid",
+  "death.attack.acid": "%1$s was dissolved in acid",
+  "death.attack.acid.player": "%1$s was dissolved in acid while fighting %2$s",
+  "item.iceandfire.bronze_alloy": "Bronze Alloy",
+  "item.iceandfire.dragon_collar": "Dragon Collar"
 }

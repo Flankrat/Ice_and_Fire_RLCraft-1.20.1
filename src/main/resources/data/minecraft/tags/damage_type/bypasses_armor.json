@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "iceandfire:gorgon"
+    "iceandfire:gorgon",
+    "iceandfire:acid"
   ]
 }

@@ -210,6 +210,16 @@ public class IafConfig {
     public static boolean chainLightningParalysis = false;
     public static int[] chainLightningParalysisTicksPerHop = {10, 8, 6, 4, 2};
     public static int chainLightningRange = 8;
+    public static int dragonCoffeeTicks = 6000;
+    public static Set<ResourceLocation> dragonCoffeePotions = Set.of(new ResourceLocation("charm:coffee"));
+    public static boolean spookySeason = true;
+    public static boolean hydraBreathAcid = false;
+    public static boolean manuscriptsInVanillaChests = false;
+    public static boolean copperInVanillaChests = false;
+    public static double tideTridentBaseDamage = 12;
+    public static double tideTridentUnderwaterDamageMultiplier = 1;
+    public static String bloodedArmorSetEffectMode = "attack";
+    public static int bloodedDragonArmorSetEffectCooldown = 0;
 
 
     public static void bakeClient(final ModConfig config) {
@@ -416,6 +426,16 @@ public class IafConfig {
             chainLightningParalysis = ConfigHolder.SERVER.chainLightningParalysis.get();
             chainLightningParalysisTicksPerHop = ConfigHolder.SERVER.chainLightningParalysisTicksPerHop.get().stream().mapToInt(Integer::intValue).toArray();
             chainLightningRange = ConfigHolder.SERVER.chainLightningRange.get();
+            dragonCoffeeTicks = ConfigHolder.SERVER.dragonCoffeeTicks.get();
+            dragonCoffeePotions = parseIds(ConfigHolder.SERVER.dragonCoffeePotions.get(), "Dragon Coffee Potions");
+            spookySeason = ConfigHolder.SERVER.spookySeason.get();
+            hydraBreathAcid = ConfigHolder.SERVER.hydraBreathAcid.get();
+            manuscriptsInVanillaChests = ConfigHolder.SERVER.manuscriptsInVanillaChests.get();
+            copperInVanillaChests = ConfigHolder.SERVER.copperInVanillaChests.get();
+            tideTridentBaseDamage = ConfigHolder.SERVER.tideTridentBaseDamage.get();
+            tideTridentUnderwaterDamageMultiplier = ConfigHolder.SERVER.tideTridentUnderwaterDamageMultiplier.get();
+            bloodedArmorSetEffectMode = ConfigHolder.SERVER.bloodedArmorSetEffectMode.get();
+            bloodedDragonArmorSetEffectCooldown = ConfigHolder.SERVER.bloodedDragonArmorSetEffectCooldown.get();
         } catch (Exception e) {
             IceAndFire.LOGGER.warn("An exception was caused trying to load the common config for Ice and Fire.");
             e.printStackTrace();

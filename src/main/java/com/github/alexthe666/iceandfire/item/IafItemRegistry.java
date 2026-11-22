@@ -107,6 +107,10 @@ public class IafItemRegistry {
 
     public static final RegistryObject<Item> BESTIARY = registerItem("bestiary", ItemBestiary::new);
     public static final RegistryObject<Item> MANUSCRIPT = registerItem("manuscript", ItemGeneric::new);
+    // From the 1.12 version: smelts into a bronze ingot (forge:ingots/bronze) from another mod
+    public static final RegistryObject<Item> BRONZE_ALLOY = registerItem("bronze_alloy", ItemGeneric::new);
+    // From the 1.12 version: a creative item that tames the dragon it is used on
+    public static final RegistryObject<Item> DRAGON_COLLAR = registerItem("dragon_collar", ItemGeneric::new);
     public static final RegistryObject<Item> RUBY_GEM = registerItem("ruby_gem", ItemGeneric::new);
     public static final RegistryObject<Item> SAPPHIRE_GEM = registerItem("sapphire_gem", ItemGeneric::new);
     public static final RegistryObject<Item> SILVER_INGOT = registerItem("silver_ingot", ItemGeneric::new);

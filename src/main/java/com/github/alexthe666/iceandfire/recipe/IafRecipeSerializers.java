@@ -9,5 +9,6 @@ import net.minecraftforge.registries.RegistryObject;
 public class IafRecipeSerializers {
     public static final DeferredRegister<RecipeSerializer<?>> SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, IceAndFire.MODID);
     public static final RegistryObject<RecipeSerializer<?>> DRAGONFORGE_SERIALIZER = SERIALIZERS.register("dragonforge", DragonForgeRecipe.Serializer::new);
+    public static final RegistryObject<RecipeSerializer<TagResultSmeltingRecipe>> SMELTING_TO_TAG = SERIALIZERS.register("smelting_to_tag", TagResultSmeltingRecipe.Serializer::new);
 
 }

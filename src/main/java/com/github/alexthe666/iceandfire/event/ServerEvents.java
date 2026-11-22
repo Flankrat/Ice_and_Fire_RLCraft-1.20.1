@@ -1,5 +1,12 @@
 package com.github.alexthe666.iceandfire.event;
 
+import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
+import com.github.alexthe666.iceandfire.entity.util.IDreadMob;
+import com.github.alexthe666.iceandfire.block.IDreadBlock;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraftforge.event.entity.EntityTeleportEvent;
+import net.minecraftforge.event.entity.EntityMountEvent;
 import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.IceAndFire;
 import com.github.alexthe666.iceandfire.block.IafBlockRegistry;
@@ -19,6 +26,7 @@ import com.github.alexthe666.iceandfire.message.MessagePlayerHitMultipart;
 import com.github.alexthe666.iceandfire.message.MessageSwingArm;
 import com.github.alexthe666.iceandfire.message.MessageSyncPath;
 import com.github.alexthe666.iceandfire.misc.IafDamageRegistry;
+import com.github.alexthe666.iceandfire.misc.IafMobEffects;
 import com.github.alexthe666.iceandfire.misc.IafTagRegistry;
 import com.github.alexthe666.iceandfire.pathfinding.raycoms.Pathfinding;
 import com.github.alexthe666.iceandfire.pathfinding.raycoms.pathjobs.AbstractPathJob;
@@ -481,6 +489,10 @@ public class ServerEvents {
 
     @SubscribeEvent
     public void onEntityUpdate(LivingEvent.LivingTickEvent event) {
+        // Water washes acid off, as in the 1.12 version
+        if (!event.getEntity().level().isClientSide && event.getEntity().isInWater() && event.getEntity().hasEffect(IafMobEffects.ACID.get())) {
+            event.getEntity().removeEffect(IafMobEffects.ACID.get());
+        }
         if (AiDebug.isEnabled() && event.getEntity() instanceof Mob && AiDebug.contains((Mob) event.getEntity())) {
             AiDebug.logData();
         }
@@ -573,26 +585,47 @@ public class ServerEvents {
         }
     }
 
-    // @SubscribeEvent // FIXME :: Unused
+    // From the 1.12 version: manuscripts and copper ingots in vanilla structure chests (each has a config switch)
+    @SubscribeEvent
     public static void onChestGenerated(LootTableLoadEvent event) {
-        final ResourceLocation eventName = event.getName();
-        final boolean condition1 = eventName.equals(BuiltInLootTables.SIMPLE_DUNGEON) || eventName.equals(BuiltInLootTables.ABANDONED_MINESHAFT) || eventName.equals(BuiltInLootTables.DESERT_PYRAMID) || eventName.equals(BuiltInLootTables.JUNGLE_TEMPLE) || eventName.equals(BuiltInLootTables.STRONGHOLD_CORRIDOR) || eventName.equals(BuiltInLootTables.STRONGHOLD_CROSSING);
+        final ResourceLocation name = event.getName();
+        final boolean manuscriptTable = name.equals(BuiltInLootTables.SIMPLE_DUNGEON) || name.equals(BuiltInLootTables.ABANDONED_MINESHAFT)
+            || name.equals(BuiltInLootTables.DESERT_PYRAMID) || name.equals(BuiltInLootTables.JUNGLE_TEMPLE)
+            || name.equals(BuiltInLootTables.STRONGHOLD_CORRIDOR) || name.equals(BuiltInLootTables.STRONGHOLD_CROSSING);
+        final boolean copperTable = manuscriptTable || name.equals(BuiltInLootTables.IGLOO_CHEST)
+            || name.equals(BuiltInLootTables.WOODLAND_MANSION) || name.equals(BuiltInLootTables.VILLAGE_WEAPONSMITH);
 
-        if (condition1 || eventName.equals(BuiltInLootTables.VILLAGE_CARTOGRAPHER)) {
-            LootPoolEntryContainer.Builder item = LootItem.lootTableItem(IafItemRegistry.MANUSCRIPT.get()).setQuality(20).setWeight(5);
-            LootPool.Builder builder = new LootPool.Builder().name("iaf_manuscript").add(item).when(LootItemRandomChanceCondition.randomChance(0.35f)).setRolls(UniformGenerator.between(1, 4)).setBonusRolls(UniformGenerator.between(0, 3));
-            event.getTable().addPool(builder.build());
+        if (manuscriptTable && IafConfig.manuscriptsInVanillaChests) {
+            LootPoolEntryContainer.Builder<?> item = LootItem.lootTableItem(IafItemRegistry.MANUSCRIPT.get()).setQuality(5).setWeight(20);
+            event.getTable().addPool(new LootPool.Builder().name("iaf_manuscript").add(item).when(LootItemRandomChanceCondition.randomChance(0.35F))
+                .setRolls(UniformGenerator.between(1, 4)).setBonusRolls(UniformGenerator.between(0, 3)).build());
         }
-        if (condition1 || eventName.equals(BuiltInLootTables.IGLOO_CHEST) || eventName.equals(BuiltInLootTables.WOODLAND_MANSION) || eventName.equals(BuiltInLootTables.VILLAGE_TOOLSMITH) || eventName.equals(BuiltInLootTables.VILLAGE_ARMORER)) {
+        if (copperTable && IafConfig.copperInVanillaChests) {
+            LootPoolEntryContainer.Builder<?> item = LootItem.lootTableItem(Items.COPPER_INGOT).setQuality(14).setWeight(10);
+            event.getTable().addPool(new LootPool.Builder().name("iaf_copper").add(item).when(LootItemRandomChanceCondition.randomChance(0.6F))
+                .setRolls(UniformGenerator.between(1, 3)).setBonusRolls(UniformGenerator.between(0, 3)).build());
+        }
+    }
 
-            LootPoolEntryContainer.Builder item = LootItem.lootTableItem(IafItemRegistry.SILVER_INGOT.get()).setQuality(15).setWeight(12);
-            LootPool.Builder builder = new LootPool.Builder().name("iaf_silver_ingot").add(item).when(LootItemRandomChanceCondition.randomChance(0.5f)).setRolls(UniformGenerator.between(1, 3)).setBonusRolls(UniformGenerator.between(0, 3));
-            event.getTable().addPool(builder.build());
+    // From the 1.12 version: dread mobs only ride other dread mobs (or horses), so they can't be put in boats or minecarts
+    @SubscribeEvent
+    public void onEntityMount(EntityMountEvent event) {
+        if (event.isMounting() && isDreadTeam(event.getEntityMounting())
+                && !(event.getEntityBeingMounted() instanceof AbstractHorse) && !isDreadTeam(event.getEntityBeingMounted())) {
+            event.setCanceled(true);
+        }
+    }
 
-        } else if ((event.getName().equals(WorldGenFireDragonCave.FIRE_DRAGON_CHEST) || event.getName().equals(WorldGenFireDragonCave.FIRE_DRAGON_CHEST_MALE) || event.getName().equals(WorldGenIceDragonCave.ICE_DRAGON_CHEST) || event.getName().equals(WorldGenIceDragonCave.ICE_DRAGON_CHEST_MALE) || event.getName().equals(WorldGenLightningDragonCave.LIGHTNING_DRAGON_CHEST) || event.getName().equals(WorldGenLightningDragonCave.LIGHTNING_DRAGON_CHEST_MALE))) {
-            LootPoolEntryContainer.Builder item = LootItem.lootTableItem(IafItemRegistry.WEEZER_BLUE_ALBUM.get()).setQuality(100).setWeight(1);
-            LootPool.Builder builder = new LootPool.Builder().name("iaf_weezer").add(item).when(LootItemRandomChanceCondition.randomChance(0.01f)).setRolls(UniformGenerator.between(1, 1));
-            event.getTable().addPool(builder.build());
+    private static boolean isDreadTeam(Entity entity) {
+        return entity instanceof IDreadMob || IafConfig.dreadTargetingEntityBlacklist.contains(ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()));
+    }
+
+    // From the 1.12 version: no ender pearl, enderman or chorus fruit teleporting into a mausoleum
+    @SubscribeEvent
+    public void onEnderTeleport(EntityTeleportEvent event) {
+        if ((event instanceof EntityTeleportEvent.EnderPearl || event instanceof EntityTeleportEvent.EnderEntity || event instanceof EntityTeleportEvent.ChorusFruit)
+                && IDreadBlock.isBlockInsideMausoleum(event.getEntity().level(), BlockPos.containing(event.getTargetX(), event.getTargetY(), event.getTargetZ()))) {
+            event.setCanceled(true);
         }
     }
 

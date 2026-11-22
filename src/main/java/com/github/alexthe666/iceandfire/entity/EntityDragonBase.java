@@ -74,6 +74,8 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.*;
@@ -730,6 +732,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putInt("Hunger", this.getHunger());
+        compound.putInt("CaffeineTicks", this.caffeineTicks);
         compound.putInt("AgeTicks", this.getAgeInTicks());
         compound.putBoolean("Gender", this.isMale());
         compound.putInt("Variant", this.getVariant());
@@ -773,6 +776,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         this.setHunger(compound.getInt("Hunger"));
+        this.caffeineTicks = compound.getInt("CaffeineTicks");
         this.setAgeInTicks(compound.getInt("AgeTicks"));
         this.setGender(compound.getBoolean("Gender"));
         this.setVariant(compound.getInt("Variant"));
@@ -1162,6 +1166,18 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
             stack = player.getItemInHand(hand);
         }
 
+        // Dragon Collar (creative item from the 1.12 version): tames a dragon the player doesn't own
+        if (stack.getItem() == IafItemRegistry.DRAGON_COLLAR.get() && !this.isModelDead() && !this.isOwnedBy(player)) {
+            if (!this.level().isClientSide) {
+                this.tame(player);
+                this.level().broadcastEntityEvent(this, (byte) 7);
+            }
+            if (!player.isCreative()) {
+                stack.shrink(1);
+            }
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
+        }
+
         if (stack.getItem() == IafItemRegistry.DRAGON_DEBUG_STICK.get()) {
             debug();
             return InteractionResult.SUCCESS;
@@ -1252,6 +1268,18 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
                         if (!player.isCreative()) {
                             stack.shrink(1);
                         }
+                        return InteractionResult.SUCCESS;
+                    } else if (stackItem instanceof PotionItem && !this.isCaffeinated() && isCoffee(stack)) {
+                        // Coffee keeps the dragon awake for Dragon Coffee Sleep Prevention Ticks, as in 1.12
+                        if (!player.isCreative()) {
+                            stack.shrink(1);
+                            ItemStack bottle = new ItemStack(Items.GLASS_BOTTLE);
+                            if (!player.getInventory().add(bottle)) {
+                                player.drop(bottle, false);
+                            }
+                        }
+                        this.caffeineTicks = IafConfig.dragonCoffeeTicks;
+                        this.setInSittingPose(false);
                         return InteractionResult.SUCCESS;
                     } else if (stackItem == IafItemRegistry.SICKLY_DRAGON_MEAL.get() && !this.isAgingDisabled()) {
                         this.setHunger(this.getHunger() + 20);
@@ -1396,6 +1424,18 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
                 this.level().addParticle(new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(item)), headVec.x, headVec.y, headVec.z, motionX, motionY, motionZ);
             }
         }
+    }
+
+    // Ticks left before coffee wears off (server side; sleeping is decided on the server)
+    public int caffeineTicks = 0;
+
+    public boolean isCaffeinated() {
+        return this.caffeineTicks > 0;
+    }
+
+    private static boolean isCoffee(ItemStack stack) {
+        ResourceLocation potion = ForgeRegistries.POTIONS.getKey(PotionUtils.getPotion(stack));
+        return potion != null && IafConfig.dragonCoffeePotions.contains(potion);
     }
 
     public boolean isTimeToWake() {

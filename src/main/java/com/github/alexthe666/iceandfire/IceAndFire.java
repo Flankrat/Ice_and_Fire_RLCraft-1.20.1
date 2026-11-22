@@ -2,6 +2,7 @@ package com.github.alexthe666.iceandfire;
 
 import com.github.alexthe666.iceandfire.block.IafBlockRegistry;
 import com.github.alexthe666.iceandfire.client.ClientProxy;
+import com.github.alexthe666.iceandfire.compat.FirstAidCompat;
 import com.github.alexthe666.iceandfire.compat.ModCompatList;
 import com.github.alexthe666.iceandfire.config.ConfigHolder;
 import com.github.alexthe666.iceandfire.entity.IafEntityRegistry;
@@ -13,6 +14,7 @@ import com.github.alexthe666.iceandfire.item.IafItemRegistry;
 import com.github.alexthe666.iceandfire.item.IafTabRegistry;
 import com.github.alexthe666.iceandfire.loot.IafLootRegistry;
 import com.github.alexthe666.iceandfire.message.*;
+import com.github.alexthe666.iceandfire.misc.IafMobEffects;
 import com.github.alexthe666.iceandfire.recipe.IafBannerPatterns;
 import com.github.alexthe666.iceandfire.recipe.IafRecipeRegistry;
 import com.github.alexthe666.iceandfire.recipe.IafRecipeSerializers;
@@ -92,6 +94,7 @@ public class IceAndFire {
                 biomeModifiers.register("iaf_features", IafFeatureBiomeModifier::makeCodec);
 
                 IafItemRegistry.ITEMS.register(modBus);
+                IafMobEffects.EFFECTS.register(modBus);
                 IafBlockRegistry.BLOCKS.register(modBus);
                 IafTabRegistry.TAB_REGISTER.register(modBus);
                 IafEntityRegistry.ENTITIES.register(modBus);
@@ -218,6 +221,9 @@ public class IceAndFire {
                         IafLootRegistry.init();
                 });
                 ModCompatList.isEVon = ModList.get().isLoaded("enhancedvisuals");
+                if (ModList.get().isLoaded("firstaid")) {
+                        FirstAidCompat.init();
+                }
         }
 
         private static void setupClient(final FMLClientSetupEvent event) {

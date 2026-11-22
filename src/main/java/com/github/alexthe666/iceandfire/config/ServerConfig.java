@@ -82,6 +82,16 @@ public class ServerConfig {
     public final ForgeConfigSpec.BooleanValue chainLightningParalysis;
     public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> chainLightningParalysisTicksPerHop;
     public final ForgeConfigSpec.IntValue chainLightningRange;
+    public final ForgeConfigSpec.IntValue dragonCoffeeTicks;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> dragonCoffeePotions;
+    public final ForgeConfigSpec.BooleanValue spookySeason;
+    public final ForgeConfigSpec.BooleanValue hydraBreathAcid;
+    public final ForgeConfigSpec.BooleanValue manuscriptsInVanillaChests;
+    public final ForgeConfigSpec.BooleanValue copperInVanillaChests;
+    public final ForgeConfigSpec.DoubleValue tideTridentBaseDamage;
+    public final ForgeConfigSpec.DoubleValue tideTridentUnderwaterDamageMultiplier;
+    public final ForgeConfigSpec.ConfigValue<String> bloodedArmorSetEffectMode;
+    public final ForgeConfigSpec.IntValue bloodedDragonArmorSetEffectCooldown;
     public final ForgeConfigSpec.DoubleValue dragonAttackDamageFire;
     public final ForgeConfigSpec.DoubleValue dragonAttackDamageIce;
     public final ForgeConfigSpec.DoubleValue dragonAttackDamageLightning;
@@ -291,6 +301,9 @@ public class ServerConfig {
         this.villagersFearDragons = buildBoolean(builder, "Villagers Fear Dragons", "all", true, "True if villagers should run away and hide from dragons and other hostile Ice and Fire mobs.");
         this.animalsFearDragons = buildBoolean(builder, "Animals Fear Dragons", "all", true, "True if animals should run away and hide from dragons and other hostile Ice and Fire mobs.");
         this.completeDragonPathfinding = buildBoolean(builder, "Intelligent Dragon Pathfinding", "all", false, "A more intelligent dragon pathfinding system, but is also laggier. Turn this on if you think dragons are too stupid.");
+        this.dragonCoffeeTicks = buildInt(builder, "Dragon Coffee Sleep Prevention Ticks", "all", 6000, 0, Integer.MAX_VALUE, "How many ticks a tamed dragon stays awake after its owner gives it coffee");
+        this.dragonCoffeePotions = buildStringList(builder, "Dragon Coffee Potions", List.of("charm:coffee"), "Potion ids that count as coffee for dragons (a potion bottle of one of these keeps a tamed dragon awake)");
+        this.spookySeason = buildBoolean(builder, "Spooky Season Dragons", "all", true, "If true, dragons look like skeletons from October 28 to November 2 (client side)");
         builder.pop();
         builder.pop();
         builder.push("Mobs");
@@ -419,6 +432,7 @@ public class ServerConfig {
         this.hydraBaseHealth = buildDouble(builder, "Base Hydra Health", "all", 0, 0, 100000, "Health a hydra spawns with. 0 uses Hydra Max Health. Hydra Max Health still sets how much damage cuts off a head");
         this.hydraBiteAttackStrength = buildDouble(builder, "Hydra Attack Strength", "all", 3, 0, 10000, "Hydra bite attack strength");
         this.hydraBreathAttackDamage = buildDouble(builder, "Hydra Breath Attack Damage", "all", 2, 0, 10000, "Damage of a hydra breath hit");
+        this.hydraBreathAcid = buildBoolean(builder, "Hydra Breath Acid", "all", false, "If true, hydra breath applies Acid (as in the 1.12 version) instead of Poison");
 
         this.ghostMaxHealth = buildDouble(builder, "Ghost Max Health", "all", 30F, 1.0F, 10000.0F, "Maximum ghost health.");
         this.ghostAttackStrength = buildDouble(builder, "Ghost Attack Strength", "all", 3F, 0.0F, 10000.0F, "Maximum ghost attack strength.");
@@ -432,6 +446,12 @@ public class ServerConfig {
         this.weezerTinkers = buildBoolean(builder, "Weezer", "all", true, "Disable this to remove easter egg with tinkers installed.");
         this.weezerTinkersDisarmChance = buildDouble(builder, "Easter Egg Tinkers Tool Disarm chance", "all", 0.2F, 0F, 1F, "Percentage of critical strike that will disarm with easter egg tinkers material.");
         this.chunkLoadSummonCrystal = buildBoolean(builder, "Chunk Load Summon Crystal", "all", true, "True if the summon crystal can load chunks to find dragons.");
+        this.manuscriptsInVanillaChests = buildBoolean(builder, "Manuscripts In Vanilla Chests", "all", false, "If true, dungeon, mineshaft, desert and jungle temple and stronghold chests can have manuscripts");
+        this.copperInVanillaChests = buildBoolean(builder, "Copper In Vanilla Chests", "all", false, "If true, the manuscript chests plus igloo, woodland mansion and village weaponsmith chests can have copper ingots");
+        this.tideTridentBaseDamage = buildDouble(builder, "Tide Trident Base Damage", "all", 12, 1, 1000, "Damage of a thrown tide trident, before enchantments");
+        this.tideTridentUnderwaterDamageMultiplier = buildDouble(builder, "Tide Trident Underwater Damage Multiplier", "all", 1, 1, 100, "Damage multiplier for a thrown tide trident while it is in water");
+        this.bloodedArmorSetEffectMode = builder.comment("How blooded dragon armor's element effect triggers. attack: a full set of one element adds its effect to the wearer's hits. defend (the 1.12 version): when a mob hits the wearer in melee, the blooded piece on the hit body part (with First Aid) or a random piece (needs all four pieces) strikes back, with bonus damage against the opposite dragon type").translation("Blooded Dragon Armor Set Effect Mode").define("Blooded Dragon Armor Set Effect Mode", "attack", o -> o instanceof String str && (str.equalsIgnoreCase("attack") || str.equalsIgnoreCase("defend")));
+        this.bloodedDragonArmorSetEffectCooldown = buildInt(builder, "Blooded Dragon Armor Set Effect Cooldown", "all", 0, 0, 100000, "Ticks between blooded armor element effects (0 = no cooldown). The cooldown shows on the worn chestplate");
         this.dragonWeaponFireAbility = buildBoolean(builder, "Dragon Bone Fire Abilities", "all", true, "True if the dragon bone fire sword ignites attackers.");
         this.dragonWeaponIceAbility = buildBoolean(builder, "Dragon Bone Ice Abilities", "all", true, "True if the dragon bone ice sword freezes attackers.");
         this.dragonWeaponLightningAbility = buildBoolean(builder, "Dragon Bone Lightning Abilities", "all", true, "True if the dragon bone lightning sword strikes attackers.");

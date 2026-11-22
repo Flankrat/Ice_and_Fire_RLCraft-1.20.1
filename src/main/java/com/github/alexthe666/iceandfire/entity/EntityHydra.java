@@ -4,6 +4,7 @@ import com.github.alexthe666.citadel.animation.Animation;
 import com.github.alexthe666.citadel.animation.IAnimatedEntity;
 import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.entity.util.*;
+import com.github.alexthe666.iceandfire.misc.IafMobEffects;
 import com.github.alexthe666.iceandfire.misc.IafSoundRegistry;
 import com.google.common.base.Predicate;
 import net.minecraft.nbt.CompoundTag;
@@ -464,7 +465,7 @@ public class EntityHydra extends Monster implements IAnimatedEntity, IMultipartE
 
     @Override
     public boolean canBeAffected(MobEffectInstance potioneffectIn) {
-        return potioneffectIn.getEffect() != MobEffects.POISON && super.canBeAffected(potioneffectIn);
+        return potioneffectIn.getEffect() != MobEffects.POISON && potioneffectIn.getEffect() != IafMobEffects.ACID.get() && super.canBeAffected(potioneffectIn);
     }
 
     public void onHitHead(float damage, int headIndex) {
