@@ -67,6 +67,10 @@ public class WorldGenMyrmexHive extends Feature<NoneFeatureConfiguration> implem
 
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+        // Dimension lists from the world gen config
+        if (!IafWorldRegistry.isDimensionAllowed(context.level(), false)) {
+            return false;
+        }
         WorldGenMyrmexHive worker = new WorldGenMyrmexHive(this.small, this.jungle, NoneFeatureConfiguration.CODEC);
         return worker.placeInternal(context);
     }

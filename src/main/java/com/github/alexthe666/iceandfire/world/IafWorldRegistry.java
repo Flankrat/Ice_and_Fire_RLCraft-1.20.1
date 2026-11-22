@@ -11,6 +11,7 @@ import com.github.alexthe666.iceandfire.world.gen.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -69,6 +70,32 @@ public class IafWorldRegistry {
         return !spawnRelative.closerThan(position, IafConfig.dangerousWorldGenDistanceLimit);
     }
 
+    /**
+     * Whether Ice and Fire world gen may run in this dimension, from World Gen Dimension List (all features)
+     * and, for dragon caves, roosts and skeletons, Dragon Dimension List. Each list is a whitelist or a
+     * blacklist depending on its "Use Whitelist" option.
+     */
+    public static boolean isDimensionAllowed(final LevelAccessor level, final boolean dragonFeature) {
+        if (!(level instanceof ServerLevelAccessor serverLevel)) {
+            return true;
+        }
+        ResourceLocation dimension = serverLevel.getLevel().dimension().location();
+        if (IafConfig.chunkGenDimensionList.contains(dimension) != IafConfig.chunkGenDimensionWhitelist) {
+            return false;
+        }
+        return !dragonFeature || IafConfig.dragonDimensionList.contains(dimension) == IafConfig.dragonDimensionWhitelist;
+    }
+
+    /** The per-chunk chance from a biome_id=chance config map for the biome at this position, or the fallback. */
+    public static int getChanceForBiome(final LevelAccessor level, final BlockPos position, final Map<ResourceLocation, Integer> chances, final int fallback) {
+        if (chances.isEmpty()) {
+            return fallback;
+        }
+        ResourceLocation biome = level.getBiome(position).unwrapKey().map(ResourceKey::location).orElse(null);
+        Integer chance = biome == null ? null : chances.get(biome);
+        return chance == null ? fallback : Math.max(1, chance);
+    }
+
     public static boolean isFarEnoughFromDangerousGen(final ServerLevelAccessor level, final BlockPos position, final String id) {
         return isFarEnoughFromDangerousGen(level, position, id, IafWorldData.FeatureType.SURFACE);
     }
@@ -85,6 +112,7 @@ public class IafWorldRegistry {
         LOADED_FEATURES.put("iceandfire:lightning_lily", false);
         LOADED_FEATURES.put("iceandfire:silver_ore", false);
         LOADED_FEATURES.put("iceandfire:sapphire_ore", false);
+        LOADED_FEATURES.put("iceandfire:ruby_ore", false);
         LOADED_FEATURES.put("iceandfire:fire_dragon_roost", false);
         LOADED_FEATURES.put("iceandfire:ice_dragon_roost", false);
         LOADED_FEATURES.put("iceandfire:lightning_dragon_roost", false);
@@ -122,78 +150,81 @@ public class IafWorldRegistry {
         if (safelyTestBiome(BiomeConfig.frostLilyBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_FROST_LILY, features, builder, GenerationStep.Decoration.VEGETAL_DECORATION);
         }
-        if (safelyTestBiome(BiomeConfig.oreGenBiomes, biome)) {
+        if (IafConfig.generateSilverOre && safelyTestBiome(BiomeConfig.oreGenBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_SILVER_ORE, features, builder, GenerationStep.Decoration.UNDERGROUND_ORES);
         }
-        if (safelyTestBiome(BiomeConfig.sapphireBiomes, biome)) {
+        if (IafConfig.generateSapphireOre && safelyTestBiome(BiomeConfig.sapphireBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_SAPPHIRE_ORE, features, builder, GenerationStep.Decoration.UNDERGROUND_ORES);
         }
+        if (IafConfig.generateRubyOre && safelyTestBiome(BiomeConfig.rubyBiomes, biome)) {
+            addFeatureToBiome(IafPlacedFeatures.PLACED_RUBY_ORE, features, builder, GenerationStep.Decoration.UNDERGROUND_ORES);
+        }
 
 
-        if (safelyTestBiome(BiomeConfig.fireDragonBiomes, biome)) {
+        if (IafConfig.generateDragonRoosts && safelyTestBiome(BiomeConfig.fireDragonBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_FIRE_DRAGON_ROOST, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.lightningDragonBiomes, biome)) {
+        if (IafConfig.generateDragonRoosts && safelyTestBiome(BiomeConfig.lightningDragonBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_LIGHTNING_DRAGON_ROOST, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.iceDragonBiomes, biome)) {
+        if (IafConfig.generateDragonRoosts && safelyTestBiome(BiomeConfig.iceDragonBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_ICE_DRAGON_ROOST, features, builder);
         }
 
 
-        if (safelyTestBiome(BiomeConfig.fireDragonCaveBiomes, biome)) {
+        if (IafConfig.generateDragonDens && safelyTestBiome(BiomeConfig.fireDragonCaveBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_FIRE_DRAGON_CAVE, features, builder, GenerationStep.Decoration.UNDERGROUND_STRUCTURES);
         }
-        if (safelyTestBiome(BiomeConfig.lightningDragonCaveBiomes, biome)) {
+        if (IafConfig.generateDragonDens && safelyTestBiome(BiomeConfig.lightningDragonCaveBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_LIGHTNING_DRAGON_CAVE, features, builder, GenerationStep.Decoration.UNDERGROUND_STRUCTURES);
         }
-        if (safelyTestBiome(BiomeConfig.iceDragonCaveBiomes, biome)) {
+        if (IafConfig.generateDragonDens && safelyTestBiome(BiomeConfig.iceDragonCaveBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_ICE_DRAGON_CAVE, features, builder, GenerationStep.Decoration.UNDERGROUND_STRUCTURES);
         }
 
 
-        if (safelyTestBiome(BiomeConfig.cyclopsCaveBiomes, biome)) {
+        if (IafConfig.generateCyclopsCaves && safelyTestBiome(BiomeConfig.cyclopsCaveBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_CYCLOPS_CAVE, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.pixieBiomes, biome)) {
+        if (IafConfig.generatePixieVillages && safelyTestBiome(BiomeConfig.pixieBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_PIXIE_VILLAGE, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.hydraBiomes, biome)) {
+        if (IafConfig.generateHydraCaves && safelyTestBiome(BiomeConfig.hydraBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_HYDRA_CAVE, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.desertMyrmexBiomes, biome)) {
+        if (IafConfig.generateMyrmexColonies && safelyTestBiome(BiomeConfig.desertMyrmexBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_MYRMEX_HIVE_DESERT, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.jungleMyrmexBiomes, biome)) {
+        if (IafConfig.generateMyrmexColonies && safelyTestBiome(BiomeConfig.jungleMyrmexBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_MYRMEX_HIVE_JUNGLE, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.sirenBiomes, biome)) {
+        if (IafConfig.generateSirenIslands && safelyTestBiome(BiomeConfig.sirenBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_SIREN_ISLAND, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.deathwormBiomes, biome)) {
+        if (IafConfig.spawnDeathWorm && safelyTestBiome(BiomeConfig.deathwormBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_SPAWN_DEATH_WORM, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.wanderingCyclopsBiomes, biome)) {
+        if (IafConfig.generateWanderingCyclops && safelyTestBiome(BiomeConfig.wanderingCyclopsBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_SPAWN_WANDERING_CYCLOPS, features, builder);
         }
 
-        if (safelyTestBiome(BiomeConfig.lightningDragonSkeletonBiomes, biome)) {
+        if (IafConfig.generateDragonSkeletons && safelyTestBiome(BiomeConfig.lightningDragonSkeletonBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_SPAWN_DRAGON_SKELETON_L, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.fireDragonSkeletonBiomes, biome)) {
+        if (IafConfig.generateDragonSkeletons && safelyTestBiome(BiomeConfig.fireDragonSkeletonBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_SPAWN_DRAGON_SKELETON_F, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.iceDragonSkeletonBiomes, biome)) {
+        if (IafConfig.generateDragonSkeletons && safelyTestBiome(BiomeConfig.iceDragonSkeletonBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_SPAWN_DRAGON_SKELETON_I, features, builder);
         }
 
-        if (safelyTestBiome(BiomeConfig.hippocampusBiomes, biome)) {
+        if (IafConfig.spawnHippocampus && safelyTestBiome(BiomeConfig.hippocampusBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_SPAWN_HIPPOCAMPUS, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.seaSerpentBiomes, biome)) {
+        if (IafConfig.spawnSeaSerpents && safelyTestBiome(BiomeConfig.seaSerpentBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_SPAWN_SEA_SERPENT, features, builder);
         }
-        if (safelyTestBiome(BiomeConfig.stymphalianBiomes, biome)) {
+        if (IafConfig.spawnStymphalianBirds && safelyTestBiome(BiomeConfig.stymphalianBiomes, biome)) {
             addFeatureToBiome(IafPlacedFeatures.PLACED_SPAWN_STYMPHALIAN_BIRD, features, builder);
         }
 

@@ -44,8 +44,9 @@ public class EntityStymphalianFeather extends AbstractArrow {
     @Override
     public void remove(@NotNull RemovalReason reason) {
         super.remove(reason);
-        if (IafConfig.stymphalianBirdFeatherDropChance > 0) {
-            if (this.level().isClientSide && this.random.nextInt(IafConfig.stymphalianBirdFeatherDropChance) == 0) {
+        // Server side only: an item spawned on the client doesn't exist on the server
+        if (IafConfig.stymphalianBirdFeatherProjectileItem && IafConfig.stymphalianBirdFeatherDropChance > 0 && reason == RemovalReason.DISCARDED) {
+            if (!this.level().isClientSide && this.random.nextInt(IafConfig.stymphalianBirdFeatherDropChance) == 0) {
                 this.spawnAtLocation(getPickupItem(), 0.1F);
             }
         }

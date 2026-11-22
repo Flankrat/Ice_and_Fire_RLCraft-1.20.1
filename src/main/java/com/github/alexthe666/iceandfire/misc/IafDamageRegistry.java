@@ -1,5 +1,6 @@
 package com.github.alexthe666.iceandfire.misc;
 
+import com.github.alexthe666.iceandfire.IafConfig;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
@@ -29,6 +30,8 @@ import static com.github.alexthe666.iceandfire.IceAndFire.MODID;
 public class IafDamageRegistry {
     public static final ResourceKey<DamageType> GORGON_DMG_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("iceandfire:gorgon"));
     public static final ResourceKey<DamageType> DRAGON_FIRE_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("iceandfire:dragon_fire"));
+    // Same as dragon fire but not tagged as fire, for "Dragon Breath Can Damage Immune Targets"
+    public static final ResourceKey<DamageType> DRAGON_FIRE_UNBLOCKABLE_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("iceandfire:dragon_fire_unblockable"));
     public static final ResourceKey<DamageType> DRAGON_ICE_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("iceandfire:dragon_ice"));
     public static final ResourceKey<DamageType> DRAGON_LIGHTNING_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation("iceandfire:dragon_lightning"));
 
@@ -70,13 +73,18 @@ public class IafDamageRegistry {
         return new CustomEntityDamageSource(holder, entity);
     }
 
+    // Fire Resistance and fire immunity only check the fire tag, so the untagged type gets past them
+    private static ResourceKey<DamageType> dragonFireType() {
+        return IafConfig.breathDamageBypassImmunities ? DRAGON_FIRE_UNBLOCKABLE_TYPE : DRAGON_FIRE_TYPE;
+    }
+
     public static CustomEntityDamageSource causeDragonFireDamage(@Nullable Entity entity) {
-        Holder<DamageType> holder = entity.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolder(DRAGON_FIRE_TYPE).get();
+        Holder<DamageType> holder = entity.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolder(dragonFireType()).get();
         return new CustomEntityDamageSource(holder, entity);
     }
 
     public static CustomIndirectEntityDamageSource causeIndirectDragonFireDamage(Entity source, @Nullable Entity indirectEntityIn) {
-        Holder<DamageType> holder = indirectEntityIn.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolder(DRAGON_FIRE_TYPE).get();
+        Holder<DamageType> holder = indirectEntityIn.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolder(dragonFireType()).get();
         return new CustomIndirectEntityDamageSource(holder, source, indirectEntityIn);
     }
 

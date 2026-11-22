@@ -66,6 +66,11 @@ public class EntityDragonFireCharge extends EntityDragonCharge {
     }
 
     @Override
+    public float getChargeDamage() {
+        return IafConfig.dragonFireChargeDamage;
+    }
+
+    @Override
     protected void onDirectHit(LivingEntity target, EntityDragonBase dragon) {
         target.setSecondsOnFire(5);
     }

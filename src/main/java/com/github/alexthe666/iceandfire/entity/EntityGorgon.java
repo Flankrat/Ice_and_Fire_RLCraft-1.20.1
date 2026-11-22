@@ -5,6 +5,7 @@ import com.github.alexthe666.citadel.animation.AnimationHandler;
 import com.github.alexthe666.citadel.animation.IAnimatedEntity;
 import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.IceAndFire;
+import com.github.alexthe666.iceandfire.datagen.tags.IafEntityTags;
 import com.github.alexthe666.iceandfire.entity.ai.GorgonAIStareAttack;
 import com.github.alexthe666.iceandfire.entity.util.*;
 import com.github.alexthe666.iceandfire.enums.EnumParticles;
@@ -33,6 +34,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -140,9 +142,24 @@ public class EntityGorgon extends Monster implements IAnimatedEntity, IVillagerF
         }
     }
 
+    /**
+     * Whether an entity can't be turned to stone: it says so itself (IBlacklistedFromStatues), it's in the
+     * iceandfire:immune_to_gorgon_stone tag, or it's in the Stone Entity Blacklist config.
+     */
+    public static boolean isStoneImmune(@Nullable Entity entity) {
+        if (entity == null) {
+            return false;
+        }
+        if (entity instanceof IBlacklistedFromStatues blacklisted && !blacklisted.canBeTurnedToStone()) {
+            return true;
+        }
+        return entity.getType().is(IafEntityTags.IMMUNE_TO_GORGON_STONE)
+            || IafConfig.stoneEntityBlacklist.contains(ForgeRegistries.ENTITY_TYPES.getKey(entity.getType()));
+    }
+
     @Override
     public boolean doHurtTarget(@NotNull Entity entityIn) {
-        boolean blindness = this.hasEffect(MobEffects.BLINDNESS) || this.getTarget() != null && this.getTarget().hasEffect(MobEffects.BLINDNESS) || this.getTarget() != null && this.getTarget() instanceof IBlacklistedFromStatues && !((IBlacklistedFromStatues) this.getTarget()).canBeTurnedToStone();
+        boolean blindness = this.hasEffect(MobEffects.BLINDNESS) || this.getTarget() != null && this.getTarget().hasEffect(MobEffects.BLINDNESS) || this.getTarget() != null && isStoneImmune(this.getTarget());
         if (blindness && this.deathTime == 0) {
             if (this.getAnimation() != ANIMATION_HIT) {
                 this.setAnimation(ANIMATION_HIT);
@@ -160,7 +177,7 @@ public class EntityGorgon extends Monster implements IAnimatedEntity, IVillagerF
         if (LivingEntityIn != null && !level().isClientSide) {
 
 
-            boolean blindness = this.hasEffect(MobEffects.BLINDNESS) || LivingEntityIn.hasEffect(MobEffects.BLINDNESS) || LivingEntityIn instanceof IBlacklistedFromStatues && !((IBlacklistedFromStatues) LivingEntityIn).canBeTurnedToStone() || isBlindfolded(LivingEntityIn);
+            boolean blindness = this.hasEffect(MobEffects.BLINDNESS) || LivingEntityIn.hasEffect(MobEffects.BLINDNESS) || isStoneImmune(LivingEntityIn) || isBlindfolded(LivingEntityIn);
             if (blindness && this.deathTime == 0) {
                 this.goalSelector.addGoal(3, aiMelee);
                 this.goalSelector.removeGoal(aiStare);
@@ -228,7 +245,7 @@ public class EntityGorgon extends Monster implements IAnimatedEntity, IVillagerF
 
 
         if (attackTarget != null && isEntityLookingAt(this, attackTarget, 0.4) && isEntityLookingAt(attackTarget, this, 0.4) && !isBlindfolded(attackTarget)) {
-            boolean blindness = this.hasEffect(MobEffects.BLINDNESS) || attackTarget.hasEffect(MobEffects.BLINDNESS) || attackTarget instanceof IBlacklistedFromStatues && !((IBlacklistedFromStatues) attackTarget).canBeTurnedToStone();
+            boolean blindness = this.hasEffect(MobEffects.BLINDNESS) || attackTarget.hasEffect(MobEffects.BLINDNESS) || isStoneImmune(attackTarget);
             if (!blindness && this.deathTime == 0) {
                 if (this.getAnimation() != ANIMATION_SCARE) {
                     this.playSound(IafSoundRegistry.GORGON_ATTACK, 1, 1);

@@ -1,7 +1,14 @@
 package com.github.alexthe666.iceandfire;
 
 import com.github.alexthe666.iceandfire.config.ConfigHolder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.config.ModConfig;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class IafConfig {
     public static boolean customMainMenu = true;
@@ -142,6 +149,67 @@ public class IafConfig {
     public static boolean scaleArmorBreathProtect = false;
     public static boolean hydraHeartPassRegen = true;
     public static boolean cyclopsEyeWeaknessApply = true;
+
+    // Options ported from the 1.12 version
+    public static boolean generateDragonDens = true;
+    public static boolean generateDragonRoosts = true;
+    public static int generateDragonSkeletonMaximumStage = 5;
+    public static Map<ResourceLocation, Integer> generateDragonDenChanceForBiome = Map.of();
+    public static Map<ResourceLocation, Integer> generateDragonRoostChanceForBiome = Map.of();
+    public static Set<ResourceLocation> dragonDimensionList = Set.of(new ResourceLocation("minecraft:overworld"));
+    public static boolean dragonDimensionWhitelist = true;
+    public static Set<ResourceLocation> chunkGenDimensionList = Set.of(new ResourceLocation("minecraft:overworld"));
+    public static boolean chunkGenDimensionWhitelist = true;
+    public static boolean generateSilverOre = true;
+    public static boolean generateSapphireOre = true;
+    public static boolean generateRubyOre = true;
+    public static boolean generateCyclopsCaves = true;
+    public static boolean generateWanderingCyclops = true;
+    public static boolean generatePixieVillages = true;
+    public static boolean generateSirenIslands = true;
+    public static boolean generateMyrmexColonies = true;
+    public static boolean generateHydraCaves = true;
+    public static boolean spawnDeathWorm = true;
+    public static int deathWormSpawnCheckChance = 0;
+    public static int cockatriceSpawnCheckChance = 0;
+    public static int trollSpawnCheckChance = 0;
+    public static int trollSpawnCheckHeight = 320;
+    public static Map<ResourceLocation, Integer> trollSpawnCheckHeightForBiome = Map.of();
+    public static Map<ResourceLocation, String> trollSpawnTypeForBiome = Map.of();
+    public static boolean spawnHippocampus = true;
+    public static boolean spawnSeaSerpents = true;
+    public static boolean spawnStymphalianBirds = true;
+    public static int dragonFireChargeDamage = 0;
+    public static int dragonIceChargeDamage = 0;
+    public static int dragonLightningChargeDamage = 0;
+    public static int dragonFireExplosionDamage = 7;
+    public static int dragonIceExplosionDamage = 7;
+    public static int dragonLightningExplosionDamage = 7;
+    public static int dragonChargeExplosionDamage = 6;
+    public static double dragonBiteHeal = 0.5D;
+    public static Map<ResourceLocation, Integer> dragonGriefingBlockChance = Map.of();
+    public static Map<ResourceLocation, Integer> dragonGriefingEffectChance = Map.of();
+    public static boolean lightningDragonKnockback = true;
+    public static boolean breathDamageBypassImmunities = false;
+    public static boolean dragonAffectedBlocksRevert = true;
+    public static double amphithereTameDamage = 1;
+    public static double hydraBaseHealth = 0;
+    public static double hydraBiteAttackStrength = 3;
+    public static double hydraBreathAttackDamage = 2;
+    public static boolean dreadTargetingCheckSight = true;
+    public static Set<ResourceLocation> dreadTargetingEntityBlacklist = Set.of();
+    public static double myrmexSwarmerAttackStrength = 2;
+    public static double myrmexSwarmerMaxHealth = 5;
+    public static int pixieCooldown = 24000;
+    public static Set<ResourceLocation> stoneEntityBlacklist = Set.of();
+    public static boolean stymphalianBirdFeatherProjectileItem = true;
+    public static float[] chainLightningDamagePerHop = {5.0F, 4.0F, 3.0F, 2.0F, 1.0F};
+    public static boolean chainLightningBypassesArmor = true;
+    public static int chainLightningCooldown = 10;
+    public static Set<ResourceLocation> chainLightningEntityBlacklist = Set.of();
+    public static boolean chainLightningParalysis = false;
+    public static int[] chainLightningParalysisTicksPerHop = {10, 8, 6, 4, 2};
+    public static int chainLightningRange = 8;
 
 
     public static void bakeClient(final ModConfig config) {
@@ -288,10 +356,120 @@ public class IafConfig {
             scaleArmorBreathProtect = ConfigHolder.SERVER.scaleArmorBreathProtect.get();
             hydraHeartPassRegen = ConfigHolder.SERVER.hydraHeartPassRegen.get();
             cyclopsEyeWeaknessApply = ConfigHolder.SERVER.cyclopsEyeWeaknessApply.get();
+
+            generateDragonDens = ConfigHolder.SERVER.generateDragonDens.get();
+            generateDragonRoosts = ConfigHolder.SERVER.generateDragonRoosts.get();
+            generateDragonSkeletonMaximumStage = ConfigHolder.SERVER.generateDragonSkeletonMaximumStage.get();
+            generateDragonDenChanceForBiome = parseIntMap(ConfigHolder.SERVER.generateDragonDenChanceForBiome.get(), "Generate Dragon Caves Biome Chance");
+            generateDragonRoostChanceForBiome = parseIntMap(ConfigHolder.SERVER.generateDragonRoostChanceForBiome.get(), "Generate Dragon Roosts Biome Chance");
+            dragonDimensionList = parseIds(ConfigHolder.SERVER.dragonDimensionList.get(), "Dragon Dimension List");
+            dragonDimensionWhitelist = ConfigHolder.SERVER.dragonDimensionWhitelist.get();
+            chunkGenDimensionList = parseIds(ConfigHolder.SERVER.chunkGenDimensionList.get(), "World Gen Dimension List");
+            chunkGenDimensionWhitelist = ConfigHolder.SERVER.chunkGenDimensionWhitelist.get();
+            generateSilverOre = ConfigHolder.SERVER.generateSilverOre.get();
+            generateSapphireOre = ConfigHolder.SERVER.generateSapphireOre.get();
+            generateRubyOre = ConfigHolder.SERVER.generateRubyOre.get();
+            generateCyclopsCaves = ConfigHolder.SERVER.generateCyclopsCaves.get();
+            generateWanderingCyclops = ConfigHolder.SERVER.generateWanderingCyclops.get();
+            generatePixieVillages = ConfigHolder.SERVER.generatePixieVillages.get();
+            generateSirenIslands = ConfigHolder.SERVER.generateSirenIslands.get();
+            generateMyrmexColonies = ConfigHolder.SERVER.generateMyrmexColonies.get();
+            generateHydraCaves = ConfigHolder.SERVER.generateHydraCaves.get();
+            spawnDeathWorm = ConfigHolder.SERVER.spawnDeathWorm.get();
+            deathWormSpawnCheckChance = ConfigHolder.SERVER.deathWormSpawnCheckChance.get();
+            cockatriceSpawnCheckChance = ConfigHolder.SERVER.cockatriceSpawnCheckChance.get();
+            trollSpawnCheckChance = ConfigHolder.SERVER.trollSpawnCheckChance.get();
+            trollSpawnCheckHeight = ConfigHolder.SERVER.trollSpawnCheckHeight.get();
+            trollSpawnCheckHeightForBiome = parseIntMap(ConfigHolder.SERVER.trollSpawnCheckHeightForBiome.get(), "Troll Spawn Check Height For Biome");
+            trollSpawnTypeForBiome = parseStringMap(ConfigHolder.SERVER.trollSpawnTypeForBiome.get(), "Troll Spawn Type For Biome");
+            spawnHippocampus = ConfigHolder.SERVER.spawnHippocampus.get();
+            spawnSeaSerpents = ConfigHolder.SERVER.spawnSeaSerpents.get();
+            spawnStymphalianBirds = ConfigHolder.SERVER.spawnStymphalianBirds.get();
+            dragonFireChargeDamage = ConfigHolder.SERVER.dragonFireChargeDamage.get();
+            dragonIceChargeDamage = ConfigHolder.SERVER.dragonIceChargeDamage.get();
+            dragonLightningChargeDamage = ConfigHolder.SERVER.dragonLightningChargeDamage.get();
+            dragonFireExplosionDamage = ConfigHolder.SERVER.dragonFireExplosionDamage.get();
+            dragonIceExplosionDamage = ConfigHolder.SERVER.dragonIceExplosionDamage.get();
+            dragonLightningExplosionDamage = ConfigHolder.SERVER.dragonLightningExplosionDamage.get();
+            dragonChargeExplosionDamage = ConfigHolder.SERVER.dragonChargeExplosionDamage.get();
+            dragonBiteHeal = ConfigHolder.SERVER.dragonBiteHeal.get();
+            dragonGriefingBlockChance = parseIntMap(ConfigHolder.SERVER.dragonGriefingBlockChance.get(), "Dragon Griefing Block Drop Chance");
+            dragonGriefingEffectChance = parseIntMap(ConfigHolder.SERVER.dragonGriefingEffectChance.get(), "Dragon Griefing Block Effect Chance");
+            lightningDragonKnockback = ConfigHolder.SERVER.lightningDragonKnockback.get();
+            breathDamageBypassImmunities = ConfigHolder.SERVER.breathDamageBypassImmunities.get();
+            dragonAffectedBlocksRevert = ConfigHolder.SERVER.dragonAffectedBlocksRevert.get();
+            amphithereTameDamage = ConfigHolder.SERVER.amphithereTameDamage.get();
+            hydraBaseHealth = ConfigHolder.SERVER.hydraBaseHealth.get();
+            hydraBiteAttackStrength = ConfigHolder.SERVER.hydraBiteAttackStrength.get();
+            hydraBreathAttackDamage = ConfigHolder.SERVER.hydraBreathAttackDamage.get();
+            dreadTargetingCheckSight = ConfigHolder.SERVER.dreadTargetingCheckSight.get();
+            dreadTargetingEntityBlacklist = parseIds(ConfigHolder.SERVER.dreadTargetingEntityBlacklist.get(), "Dread Targeting Entity Blacklist");
+            myrmexSwarmerAttackStrength = ConfigHolder.SERVER.myrmexSwarmerAttackStrength.get();
+            myrmexSwarmerMaxHealth = ConfigHolder.SERVER.myrmexSwarmerMaxHealth.get();
+            pixieCooldown = ConfigHolder.SERVER.pixieCooldown.get();
+            stoneEntityBlacklist = parseIds(ConfigHolder.SERVER.stoneEntityBlacklist.get(), "Stone Entity Blacklist");
+            stymphalianBirdFeatherProjectileItem = ConfigHolder.SERVER.stymphalianBirdFeatherProjectileItem.get();
+            chainLightningDamagePerHop = toFloatArray(ConfigHolder.SERVER.chainLightningDamagePerHop.get());
+            chainLightningBypassesArmor = ConfigHolder.SERVER.chainLightningBypassesArmor.get();
+            chainLightningCooldown = ConfigHolder.SERVER.chainLightningCooldown.get();
+            chainLightningEntityBlacklist = parseIds(ConfigHolder.SERVER.chainLightningEntityBlacklist.get(), "Chain Lightning Entity Blacklist");
+            chainLightningParalysis = ConfigHolder.SERVER.chainLightningParalysis.get();
+            chainLightningParalysisTicksPerHop = ConfigHolder.SERVER.chainLightningParalysisTicksPerHop.get().stream().mapToInt(Integer::intValue).toArray();
+            chainLightningRange = ConfigHolder.SERVER.chainLightningRange.get();
         } catch (Exception e) {
             IceAndFire.LOGGER.warn("An exception was caused trying to load the common config for Ice and Fire.");
             e.printStackTrace();
         }
+    }
+
+    // Reads "namespace:path" entries; bad entries are logged and skipped
+    private static Set<ResourceLocation> parseIds(List<? extends String> entries, String option) {
+        Set<ResourceLocation> ids = new HashSet<>();
+        for (String entry : entries) {
+            ResourceLocation id = ResourceLocation.tryParse(entry.trim());
+            if (id == null || entry.isBlank()) {
+                IceAndFire.LOGGER.warn("Ignoring invalid entry \"{}\" in Ice and Fire config option \"{}\"", entry, option);
+            } else {
+                ids.add(id);
+            }
+        }
+        return ids;
+    }
+
+    // Reads "namespace:path=value" entries into a map of strings
+    private static Map<ResourceLocation, String> parseStringMap(List<? extends String> entries, String option) {
+        Map<ResourceLocation, String> map = new HashMap<>();
+        for (String entry : entries) {
+            int split = entry.lastIndexOf('=');
+            ResourceLocation id = split > 0 ? ResourceLocation.tryParse(entry.substring(0, split).trim()) : null;
+            if (id == null) {
+                IceAndFire.LOGGER.warn("Ignoring invalid entry \"{}\" in Ice and Fire config option \"{}\" (expected id=value)", entry, option);
+            } else {
+                map.put(id, entry.substring(split + 1).trim());
+            }
+        }
+        return map;
+    }
+
+    // Reads "namespace:path=number" entries into a map of numbers
+    private static Map<ResourceLocation, Integer> parseIntMap(List<? extends String> entries, String option) {
+        Map<ResourceLocation, Integer> map = new HashMap<>();
+        parseStringMap(entries, option).forEach((id, value) -> {
+            try {
+                map.put(id, Integer.parseInt(value));
+            } catch (NumberFormatException e) {
+                IceAndFire.LOGGER.warn("Ignoring invalid number \"{}\" for {} in Ice and Fire config option \"{}\"", value, id, option);
+            }
+        });
+        return map;
+    }
+
+    private static float[] toFloatArray(List<? extends Number> values) {
+        float[] array = new float[values.size()];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = values.get(i).floatValue();
+        }
+        return array;
     }
 
 }

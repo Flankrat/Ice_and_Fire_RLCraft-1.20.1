@@ -300,7 +300,7 @@ public class EntityAmphithere extends TamableAnimal implements ISyncMount, IAnim
             this.setAnimation(ANIMATION_BITE_RIDER);
         }
         if (!this.level().isClientSide && this.getAnimation() == ANIMATION_BITE_RIDER && this.getAnimationTick() == 6 && !this.isTame()) {
-            passenger.hurt(this.level().damageSources().mobAttack(this), 1);
+            passenger.hurt(this.level().damageSources().mobAttack(this), (float) IafConfig.amphithereTameDamage);
         }
         float pitch_forward = 0;
         if (this.getXRot() > 0 && this.isFlying()) {

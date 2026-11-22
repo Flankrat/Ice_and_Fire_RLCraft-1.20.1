@@ -1,5 +1,6 @@
 package com.github.alexthe666.iceandfire.entity;
 
+import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.entity.ai.*;
 import com.github.alexthe666.iceandfire.pathfinding.raycoms.AdvancedPathNavigate;
 import net.minecraft.core.BlockPos;
@@ -41,15 +42,22 @@ public class EntityMyrmexSwarmer extends EntityMyrmexRoyal {
     public static AttributeSupplier.Builder bakeAttributes() {
         return Mob.createMobAttributes()
             //HEALTH
-            .add(Attributes.MAX_HEALTH, 5)
+            .add(Attributes.MAX_HEALTH, IafConfig.myrmexSwarmerMaxHealth)
             //SPEED
             .add(Attributes.MOVEMENT_SPEED, 0.35D)
             //ATTACK
-            .add(Attributes.ATTACK_DAMAGE, 2)
+            .add(Attributes.ATTACK_DAMAGE, IafConfig.myrmexSwarmerAttackStrength)
             //FOLLOW RANGE
             .add(Attributes.FOLLOW_RANGE, 64.0D)
             //ARMOR
             .add(Attributes.ARMOR, 0D);
+    }
+
+    // Swarmers extend royals, so without this they'd get the royal's attack strength after loading
+    @Override
+    public void setConfigurableAttributes() {
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(IafConfig.myrmexSwarmerMaxHealth);
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(IafConfig.myrmexSwarmerAttackStrength);
     }
 
     @Override

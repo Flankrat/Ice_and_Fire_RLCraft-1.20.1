@@ -77,6 +77,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.*;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -1458,7 +1459,23 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
         if (isBreakable(position, state, hardness, this)) {
             this.setDeltaMovement(this.getDeltaMovement().multiply(0.6F, 1, 0.6F));
             if (!level().isClientSide()) {
-                level().destroyBlock(position, !state.is(IafBlockTags.DRAGON_BLOCK_BREAK_NO_DROPS) && random.nextFloat() <= IafConfig.dragonBlockBreakingDropChance);
+                // Per-block chances from Dragon Griefing Block Drop/Effect Chance (0-100); unlisted blocks
+                // use Dragon Block Breaking Drop Chance and always play the break effect
+                ResourceLocation blockId = ForgeRegistries.BLOCKS.getKey(state.getBlock());
+                Integer dropChance = IafConfig.dragonGriefingBlockChance.get(blockId);
+                Integer effectChance = IafConfig.dragonGriefingEffectChance.get(blockId);
+                boolean drop = !state.is(IafBlockTags.DRAGON_BLOCK_BREAK_NO_DROPS)
+                    && (dropChance != null ? random.nextInt(100) < dropChance : random.nextFloat() <= IafConfig.dragonBlockBreakingDropChance);
+                boolean effect = effectChance == null || random.nextInt(100) < effectChance;
+                if (effect) {
+                    level().destroyBlock(position, drop);
+                } else {
+                    // Same as destroyBlock, without the sound and particles
+                    if (drop) {
+                        Block.dropResources(state, level(), position, level().getBlockEntity(position), this, ItemStack.EMPTY);
+                    }
+                    level().setBlock(position, state.getFluidState().createLegacyBlock(), 3);
+                }
             }
         }
     }
@@ -1641,7 +1658,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
             boolean didDamage = prey.hurt(this.level().damageSources().mobAttack(this), damage);
 
             if (didDamage && IafConfig.canDragonsHealFromBiting) {
-                heal(damage * 0.5f);
+                heal(damage * (float) IafConfig.dragonBiteHeal);
             }
 
             if (!(prey instanceof Player)) {
@@ -1886,10 +1903,18 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
             return false;
         }
 
+        final float healthBefore = entityIn instanceof LivingEntity living ? living.getHealth() : 0;
         final boolean flag = entityIn.hurt(this.level().damageSources().mobAttack(this), ((int) this.getAttribute(Attributes.ATTACK_DAMAGE).getValue()));
 
         if (flag) {
             this.doEnchantDamageEffects(this, entityIn);
+            // Bites heal the dragon for Dragon Bite Healing Percentage of the health they took, as in 1.12
+            if (IafConfig.canDragonsHealFromBiting && entityIn instanceof LivingEntity living) {
+                float taken = healthBefore - living.getHealth();
+                if (taken > 0) {
+                    this.heal(taken * (float) IafConfig.dragonBiteHeal);
+                }
+            }
         }
 
         return flag;

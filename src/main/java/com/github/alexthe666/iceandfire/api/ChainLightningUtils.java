@@ -1,7 +1,9 @@
 package com.github.alexthe666.iceandfire.api;
 
+import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.IceAndFire;
 import com.github.alexthe666.iceandfire.entity.util.IDeadMob;
+import com.github.alexthe666.iceandfire.integration.LycanitesCompat;
 import com.github.alexthe666.iceandfire.message.MessageChainLightningFX;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -17,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
@@ -48,13 +51,16 @@ public final class ChainLightningUtils {
             }
             player.getCooldowns().addCooldown(
                     player.getMainHandItem().getItem(),
-                    ChainLightningConfig.CHAIN_COOLDOWN_TICKS);
+                    IafConfig.chainLightningCooldown);
         }
 
-        float[] damage = ChainLightningConfig.CHAIN_DAMAGE_PER_HOP;
-        int range = ChainLightningConfig.CHAIN_RANGE;
+        float[] damage = IafConfig.chainLightningDamagePerHop;
+        int range = IafConfig.chainLightningRange;
+        if (damage.length == 0)
+            return;
         int hop = 0;
         attackWithLightning(level, attacker, target, damage[hop]);
+        applyParalysis(target, hop);
         target.playSound(SoundEvents.LIGHTNING_BOLT_IMPACT, 0.5F, 1.0F);
 
         List<Vec3> chainPositions = new ArrayList<>();
@@ -82,6 +88,7 @@ public final class ChainLightningUtils {
             LivingEntity next = candidates.get(0);
 
             attackWithLightning(level, attacker, next, damage[hop]);
+            applyParalysis(next, hop);
             visited.add(next.getId());
             chainPositions.add(next.getBoundingBox().getCenter());
             source = next;
@@ -93,10 +100,18 @@ public final class ChainLightningUtils {
     }
 
 
+    // Chain Lightning Paralysis: Lycanites Mobs paralysis, length from Chain Lightning Paralysis Ticks for this hop
+    private static void applyParalysis(LivingEntity target, int hop) {
+        int[] ticks = IafConfig.chainLightningParalysisTicksPerHop;
+        if (IafConfig.chainLightningParalysis && hop < ticks.length && ticks[hop] > 0) {
+            LycanitesCompat.applyParalysis(target, ticks[hop]);
+        }
+    }
+
     private static void attackWithLightning(Level level, Entity attacker,
             LivingEntity target, float dmg) {
         DamageSource src;
-        if (ChainLightningConfig.CHAIN_BYPASSES_ARMOR) {
+        if (IafConfig.chainLightningBypassesArmor) {
             src = level.damageSources().magic();
         } else {
             src = level.damageSources().lightningBolt();
@@ -126,6 +141,9 @@ public final class ChainLightningUtils {
 
     private static boolean canChainTo(LivingEntity target, Entity attacker) {
         if (target instanceof Player)
+            return false;
+        // Chain Lightning Entity Blacklist
+        if (IafConfig.chainLightningEntityBlacklist.contains(ForgeRegistries.ENTITY_TYPES.getKey(target.getType())))
             return false;
         if (!canHurt(target, attacker))
             return false;
