@@ -1,8 +1,8 @@
 package com.github.alexthe666.iceandfire.config;
 
 
-import java.util.List;
 import net.minecraftforge.common.ForgeConfigSpec;
+import java.util.List;
 
 public class ServerConfig {
 

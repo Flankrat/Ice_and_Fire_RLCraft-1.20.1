@@ -4,8 +4,8 @@ import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.entity.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
-
 import java.time.LocalDate;
+
 
 public enum EnumDragonTextures {
     VARIANT1("red_", "blue_", "electric_"),

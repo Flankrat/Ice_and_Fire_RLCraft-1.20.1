@@ -3,12 +3,12 @@ package com.github.alexthe666.iceandfire;
 import com.github.alexthe666.iceandfire.config.ConfigHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.config.ModConfig;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 
 public class IafConfig {
     public static boolean customMainMenu = true;
