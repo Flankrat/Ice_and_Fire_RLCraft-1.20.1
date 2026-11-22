@@ -34,6 +34,20 @@ public class DragonServerTickManager {
         return dragon.distanceTo(target) > meleeRange && dragon.getRandom().nextInt(15) == 0;
     }
 
+    /**
+     * A grounded wild dragon that can't see its target (trees, a wall or a hill in the way) takes off, on
+     * average after 15 ticks like the other take-offs. In the air it waits above the cover and dives once it has
+     * a clear line (DragonUtils.getBlockWithTarget). On foot it would push into the trees after the target and
+     * get stuck there. Like 1.12, where a dragon that lost sight of its target went back up into the sky.
+     */
+    private boolean targetOutOfSight() {
+        LivingEntity target = dragon.getTarget();
+        if (target == null || !target.isAlive() || dragon.isTame() || dragon.getDragonStage() < 2) {
+            return false;
+        }
+        return dragon.getRandom().nextInt(15) == 0 && !dragon.hasClearLineTo(target);
+    }
+
     public void updateDragonServer() {
         // Update dragon rider
         dragon.updateRider();
@@ -140,11 +154,16 @@ public class DragonServerTickManager {
             // Old behavior switches a distant adult dragon from melee dive to ranged attack.
             double averageEdge = (dragon.getBbWidth() + dragon.getBbHeight() + dragon.getBbWidth()) / 3.0D;
             double rangedThreshold = Math.min(averageEdge * 5.0D, 25.0D);
-            boolean breathUseless = dragon.isTargetResistantToBreath(aerialTarget);
-            if (breathUseless) {
-                // Its breath can't hurt this target (Fire Resistance, or a full blooded armor set of its
-                // element): always melee, so it closes in and bites, from the air by diving at it.
+            dragon.trackBreathProofTarget(aerialTarget);
+            if (dragon.hasGivenUpOnBreath(aerialTarget)) {
+                // Its breath can't hurt this target (Fire Resistance, Ice/Lightning Resistance, or a full blooded
+                // armor set of its element) and it has seen that for 7 s: always melee from now on, so it closes
+                // in and bites, from the air by diving at it once it has a clear line.
                 dragon.attackDecision = true;
+            } else if (dragon.isTryingBreathOn(aerialTarget) && (dragon.isFlying() || dragon.isHovering())) {
+                // still in its first 7 s against a breath-proof target: in the air it keeps breathing, no melee yet
+                dragon.attackDecision = false;
+                dragon.setTackling(false);
             } else if (dragon.attackDecision && dragon.getDragonStage() > 1 && dragon.distanceTo(aerialTarget) > rangedThreshold) {
                 dragon.attackDecision = false;
                 dragon.setTackling(false);
@@ -297,6 +316,7 @@ public class DragonServerTickManager {
                         || dragon.getY() < dragon.level().getMinBuildHeight()
                         || (dragon.getTarget() != null && Math.abs(dragon.getTarget().getY() - dragon.getY()) > 5)
                         || targetGettingAway()
+                        || targetOutOfSight()
                         || dragon.isInWater()) {
                     dragon.setHovering(true);
                     dragon.setInSittingPose(false);

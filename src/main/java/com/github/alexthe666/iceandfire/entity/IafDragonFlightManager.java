@@ -126,6 +126,12 @@ public class IafDragonFlightManager {
 
         /** How far below a dragon resting on something its air target has to be before it flies off the edge first. */
         private static final double LEDGE_DROP = 4.0D;
+        // air target this many blocks above a dragon that's resting on something: it climbs off at CLIMB_OFF_SPEED
+        private static final double CLIMB_OFF_HEIGHT = 1.0D;
+        private static final double CLIMB_OFF_SPEED = 0.2D;
+        // a tackling dragon pushes this many times harder toward its target, up to this many times its top speed
+        private static final double TACKLE_BOOST = 2.0D;
+        private static final double TACKLE_TOP_SPEED = 1.5D;
 
         // direction findWayOff() picked last, kept for a second so the dragon doesn't re-pick every tick
         private Vec3 wayOff;
@@ -215,14 +221,25 @@ public class IafDragonFlightManager {
             // MOVEMENT: Always move toward target
             // ----------------------------------------
 
-            final double movementSpeed = (0.01D / Math.sqrt(distanceSqr)) + 0.001D;
+            // A tackling dragon (diving at its target on a melee pick, see DragonServerTickManager) flies faster, like
+            // 1.12's tackle, which doubled the flight speed. Without it the push toward a target ~15 blocks off
+            // balanced the air drag at ~5 blocks/s, so a diving dragon trailed a running player forever.
+            final double tackleBoost = dragon.isTackling() ? TACKLE_BOOST : 1.0D;
+            final double movementSpeed = ((0.01D / Math.sqrt(distanceSqr)) + 0.001D) * tackleBoost;
             Vec3 delta = dragon.getDeltaMovement().add(
                     dx * movementSpeed,
                     dy * movementSpeed,
                     dz * movementSpeed
                 );
+            // Resting on something (treetops, a roof, the ground) while its air target is above it: the straight
+            // push is mostly sideways when the target is far off, so it slid along the leaves at ~1 block/s
+            // instead of lifting off them. Climb off the surface first, like 1.12's flight, which moved up and
+            // sideways independently.
+            if (dy > CLIMB_OFF_HEIGHT && (dragon.onGround() || !dragon.isOverAir()) && delta.y < CLIMB_OFF_SPEED) {
+                delta = new Vec3(delta.x, CLIMB_OFF_SPEED, delta.z);
+            }
             double intensity = delta.length();
-            double maxspeed = 0.15 + (dragon.getDragonStage() * 0.05);
+            double maxspeed = (0.15 + (dragon.getDragonStage() * 0.05)) * (dragon.isTackling() ? TACKLE_TOP_SPEED : 1.0D);
             if (intensity > maxspeed) {
                 delta = delta.scale(maxspeed / intensity);
             }

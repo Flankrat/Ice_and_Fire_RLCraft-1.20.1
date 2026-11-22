@@ -197,22 +197,39 @@ public class DragonUtils {
 
     /** Blocks above its target that a dragon attacking from range flies at (see getBlockWithTarget). */
     private static final double RANGED_PURSUIT_HEIGHT = 6.0D;
+    /** Blocks a dragon keeps above the treetops (or other cover) at its chase point when it isn't diving. */
+    private static final int COVER_CLEARANCE = 4;
+
+    /**
+     * True when a chasing dragon should dive at its target: it picked melee ({@code attackDecision}) and its body
+     * has a clear way down to it ({@link EntityDragonBase#hasClearDiveTo}). As in 1.12, a dragon whose target is
+     * behind trees or other cover stays up in the air instead of diving into it.
+     */
+    public static boolean shouldDive(EntityDragonBase dragon) {
+        LivingEntity target = dragon.getTarget();
+        return dragon.attackDecision && target != null && target.isAlive() && dragon.hasClearDiveTo(target);
+    }
+
+    /** {@link #getBlockWithTarget(EntityDragonBase, boolean)}, working out whether to dive ({@link #shouldDive}). */
+    public static BlockPos getBlockWithTarget(EntityDragonBase dragon) {
+        return getBlockWithTarget(dragon, shouldDive(dragon));
+    }
 
     /**
      * Air target for a dragon chasing its attack target ({@link #getBlockInView} without a target).
-     * Kettle5000's flight picks a point next to the target; the height depends on the attack the dragon
-     * picked, as in the 1.12 version:
+     * Kettle5000's flight picks a point next to the target; the height depends on what the dragon is doing,
+     * as in the 1.12 version:
      * <ul>
-     *   <li>melee ({@code attackDecision} true): the target's own height, so the dragon dives at it and
-     *       DragonServerTickManager's tackle hits it;</li>
-     *   <li>ranged (breath / charges): {@link #RANGED_PURSUIT_HEIGHT} blocks above the target, so it
-     *       attacks from the air instead of diving to the ground beside the target, but stays close
-     *       enough that its next pick can be the tackle (a melee pick farther away than the ranged
-     *       threshold is switched straight back to ranged).</li>
+     *   <li>diving ({@code dive}: a melee pick with a clear way to the target): a block above the target's feet, so
+     *       the dragon dives at it and DragonServerTickManager's tackle hits it;</li>
+     *   <li>otherwise (a ranged pick, or a melee pick with trees or other cover in the way):
+     *       {@link #RANGED_PURSUIT_HEIGHT} blocks above the target, and at least {@link #COVER_CLEARANCE}
+     *       blocks above the highest block around there ({@link #coverTop}, leaves count), so it attacks from the air or waits above
+     *       the cover until it has a clear line, instead of flying into the trees beside the target.</li>
      * </ul>
      * Both are kept under the local flight ceiling. A dragon that wants to land gets the ground there.
      */
-    public static BlockPos getBlockWithTarget(EntityDragonBase dragon) {
+    public static BlockPos getBlockWithTarget(EntityDragonBase dragon, boolean dive) {
         LivingEntity target = dragon.getTarget();
         if (target == null || !target.isAlive()) {
             return getBlockInView(dragon);
@@ -250,9 +267,33 @@ public class DragonUtils {
         if (dragon.doesWantToLand()) {
             return ground;
         }
-        double y = dragon.attackDecision ? target.getY() : target.getY() + RANGED_PURSUIT_HEIGHT;
+        double y;
+        if (dive) {
+            // a block above the target's feet, like 1.12's flyTowardsTarget (target y + 1): aimed at the feet, a
+            // dragon chasing a running player slid along the ground, slowed by its friction, and fell behind
+            y = target.getY() + 1.0D;
+        } else {
+            y = Math.max(target.getY() + RANGED_PURSUIT_HEIGHT, coverTop(dragon, radialPos) + COVER_CLEARANCE);
+        }
         int maxHeight = getMaximumFlightHeightForPos(dragon.level(), radialPos);
         return new BlockPos(radialPos.getX(), Math.min(Mth.floor(y), maxHeight), radialPos.getZ());
+    }
+
+    /**
+     * The highest top of whatever stands around {@code pos} (leaves included: MOTION_BLOCKING) within the dragon's
+     * width plus 2 blocks, sampled every 2 blocks. A dragon is several blocks wide, so checking only the block
+     * under the point let a chase point sit in a small clearing below the treetops, and the dragon came down
+     * onto the leaves around it and crawled along them.
+     */
+    private static int coverTop(EntityDragonBase dragon, BlockPos pos) {
+        int r = Math.min(Mth.ceil(dragon.getBbWidth()) + 2, 12);
+        int top = dragon.level().getMinBuildHeight();
+        for (int x = -r; x <= r; x += 2) {
+            for (int z = -r; z <= r; z += 2) {
+                top = Math.max(top, dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, pos.offset(x, 0, z)).getY());
+            }
+        }
+        return top;
     }
 
     public static BlockPos getWaterBlockInView(EntityDragonBase dragon) {
