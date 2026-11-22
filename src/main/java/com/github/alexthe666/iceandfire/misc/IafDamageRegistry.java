@@ -124,6 +124,9 @@ public class IafDamageRegistry {
         public void addTags(HolderLookup.Provider pProvider) {
             this.tag(DamageTypeTags.BYPASSES_ARMOR).add(GORGON_DMG_TYPE);
             this.tag(DamageTypeTags.BYPASSES_EFFECTS).add(GORGON_DMG_TYPE);
+            // Dragon fire (breath and fire charges) is fire damage, as in the 1.12 version: Fire Resistance and
+            // fire immunity block it completely, and Fire Protection reduces it.
+            this.tag(DamageTypeTags.IS_FIRE).add(DRAGON_FIRE_TYPE);
         }
     }
 }
