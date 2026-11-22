@@ -1,13 +1,16 @@
 package com.github.alexthe666.iceandfire.entity.tile;
 
+import com.github.alexthe666.iceandfire.IceAndFire;
+import com.github.alexthe666.iceandfire.enums.EnumParticles;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.SpawnData;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,11 +19,15 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 
 public class TileEntityDreadSpawner extends SpawnerBlockEntity {
+    // The spawner with a required spawn count whose server tick is running (server thread only)
+    @Nullable
+    private static TileEntityDreadSpawner tickingSpawner;
     private final BlockEntityType<?> type;
     private final DreadSpawnerBaseLogic spawner = new DreadSpawnerBaseLogic() {
         @Override
         public void broadcastEvent(Level p_155767_, @NotNull BlockPos p_155768_, int p_155769_) {
-            p_155767_.blockEvent(p_155768_, Blocks.SPAWNER, p_155769_, 0);
+            // The block event has to name the block that's actually there, or the client never gets it
+            p_155767_.blockEvent(p_155768_, p_155767_.getBlockState(p_155768_).getBlock(), p_155769_, 0);
         }
 
         @Override
@@ -34,6 +41,11 @@ public class TileEntityDreadSpawner extends SpawnerBlockEntity {
         }
 
         @Override
+        protected void spawnIdleParticle(Level level, double x, double y, double z) {
+            TileEntityDreadSpawner.this.spawnIdleParticle(level, x, y, z);
+        }
+
+        @Override
         @javax.annotation.Nullable
         public net.minecraft.world.level.block.entity.BlockEntity getSpawnerBlockEntity() {
             return TileEntityDreadSpawner.this;
@@ -41,8 +53,49 @@ public class TileEntityDreadSpawner extends SpawnerBlockEntity {
     };
 
     public TileEntityDreadSpawner(BlockPos pos, BlockState state) {
+        this(pos, state, IafTileEntityRegistry.DREAD_SPAWNER.get());
+    }
+
+    protected TileEntityDreadSpawner(BlockPos pos, BlockState state, BlockEntityType<?> type) {
         super(pos, state);
-        this.type = IafTileEntityRegistry.DREAD_SPAWNER.get();
+        this.type = type;
+    }
+
+    protected void spawnIdleParticle(Level level, double x, double y, double z) {
+        IceAndFire.PROXY.spawnParticle(EnumParticles.Dread_Torch, x, y, z, 0.0D, 0.0D, 0.0D);
+    }
+
+    @Nullable
+    public static TileEntityDreadSpawner getTickingSpawner() {
+        return tickingSpawner;
+    }
+
+    public int getRequiredSpawnCount() {
+        return this.spawner.getRequiredSpawnCount();
+    }
+
+    public void setRequiredSpawnCount(int count) {
+        this.spawner.setRequiredSpawnCount(count);
+        this.setChanged();
+    }
+
+    /** Called for each mob this spawner spawns; once the count reaches 0 the client is told so it drops the red particles. */
+    public void onRequiredSpawn() {
+        int count = this.getRequiredSpawnCount();
+        if (count <= 0 || this.level == null) {
+            return;
+        }
+        this.setRequiredSpawnCount(count - 1);
+        if (count == 1) {
+            BlockState state = this.level.getBlockState(this.worldPosition);
+            this.level.sendBlockUpdated(this.worldPosition, state, state, 3);
+        }
+    }
+
+    // Spawn eggs call this; the vanilla version sets SpawnerBlockEntity's own (unused) spawner instead of this one
+    @Override
+    public void setEntityId(@NotNull EntityType<?> entityType, @NotNull RandomSource random) {
+        this.spawner.setEntityId(entityType, this.level, random, this.worldPosition);
     }
 
     @Override
@@ -62,7 +115,15 @@ public class TileEntityDreadSpawner extends SpawnerBlockEntity {
     }
 
     public static void serverTick(Level p_155762_, BlockPos p_155763_, BlockState p_155764_, TileEntityDreadSpawner p_155765_) {
-        p_155765_.spawner.serverTick((ServerLevel) p_155762_, p_155763_);
+        // Vanilla spawns the mobs inside this call, so mobs joining the world meanwhile are this spawner's (see
+        // ServerEvents.onSpawnerMobJoin). Forge's spawner events can't be used for this: PositionCheck passes no
+        // spawner and FinalizeSpawn skips spawners with custom NBT.
+        tickingSpawner = p_155765_.getRequiredSpawnCount() > 0 ? p_155765_ : null;
+        try {
+            p_155765_.spawner.serverTick((ServerLevel) p_155762_, p_155763_);
+        } finally {
+            tickingSpawner = null;
+        }
     }
 
     @Override

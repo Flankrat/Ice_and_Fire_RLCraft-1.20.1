@@ -185,6 +185,7 @@ public class IafBlockRegistry {
     public static final RegistryObject<Block> DREADWOOD_PLANKS_LOCK = register("dreadwood_planks_lock", BlockDreadWoodLock::new);
     public static final RegistryObject<Block> DREAD_PORTAL = registerWithRender("dread_portal", BlockDreadPortal::new);
     public static final RegistryObject<Block> DREAD_SPAWNER = register("dread_spawner", BlockDreadSpawner::new);
+    public static final RegistryObject<Block> MONSTER_SPAWNER = register("monster_spawner", BlockMonsterSpawner::new);
     public static final RegistryObject<TorchBlock> BURNT_TORCH = registerWallBlock("burnt_torch", BlockBurntTorch::new);
     public static final RegistryObject<BlockBurntTorchWall> BURNT_TORCH_WALL = registerWallTorch("burnt_torch_wall", BlockBurntTorchWall::new);
     public static final RegistryObject<Block> GHOST_CHEST = registerWithRender("ghost_chest", BlockGhostChest::new);

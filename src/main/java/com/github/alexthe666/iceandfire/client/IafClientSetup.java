@@ -156,6 +156,7 @@ public class IafClientSetup {
         BlockEntityRenderers.register(IafTileEntityRegistry.PIXIE_JAR.get(), RenderJar::new);
         BlockEntityRenderers.register(IafTileEntityRegistry.DREAD_PORTAL.get(), RenderDreadPortal::new);
         BlockEntityRenderers.register(IafTileEntityRegistry.DREAD_SPAWNER.get(), RenderDreadSpawner::new);
+        BlockEntityRenderers.register(IafTileEntityRegistry.MONSTER_SPAWNER.get(), RenderDreadSpawner::new);
         BlockEntityRenderers.register(IafTileEntityRegistry.GHOST_CHEST.get(), RenderGhostChest::new);
 
     }
@@ -285,6 +286,7 @@ public class IafClientSetup {
             ItemBlockRenderTypes.setRenderLayer(IafBlockRegistry.PIXIE_HOUSE_DARK_OAK.get(),
                     RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(IafBlockRegistry.DREAD_SPAWNER.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(IafBlockRegistry.MONSTER_SPAWNER.get(), RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(IafBlockRegistry.DREAD_TORCH_WALL.get(),
                     RenderType.cutout());
             ItemBlockRenderTypes.setRenderLayer(IafBlockRegistry.BURNT_TORCH_WALL.get(),
