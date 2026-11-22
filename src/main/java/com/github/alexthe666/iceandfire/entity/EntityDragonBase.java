@@ -1562,17 +1562,26 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
         //
         // Do not use this during the initial take-off transition: flyTicks is reset when Hovering
         // becomes Flying, so the short grace period lets the dragon gain real clearance first.
-        // Also keep true aerial pursuit/tackle attacks airborne when the target is clearly above us.
+        //
+        // Not while chasing a live target either. In 1.12 a flying dragon with a target only landed
+        // after its tackle hit (or for the usual long-flight reasons), never just for touching the
+        // ground. Landing it on touchdown dropped a diving dragon into the trees next to a player it
+        // couldn't reach, where it got stuck. A chasing dragon only flies low when it dives on a clear
+        // line (see DragonUtils.getBlockWithTarget), and that dive ends in the tackle.
+        //
+        // And not while it's still climbing toward an air target well above it (a dragon taking off from a
+        // pit or rough ground, or a wandering one brushing a hill or treetop on the way to its next point):
+        // that is part of its flight, not a landing, and landing it there made it drop back down right after
+        // taking off. 1.12 had no touch-down landing at all.
         LivingEntity combatTarget = this.getTarget();
-        boolean targetNeedsAirPursuit = combatTarget != null
-                && combatTarget.isAlive()
-                && !combatTarget.onGround()
-                && combatTarget.getY() > this.getY() + 3.0D;
+        boolean chasing = combatTarget != null && combatTarget.isAlive();
+        boolean climbing = this.airTarget != null && this.airTarget.getY() > this.getY() + 3.0D;
         boolean touchingDownFromLowFlight = this.isFlying()
                 && this.flyTicks > 20
                 && !this.isOverAir()
                 && !this.isTackling()
-                && !targetNeedsAirPursuit;
+                && !chasing
+                && !climbing;
 
         return touchingDownFromLowFlight
                 || this.flyTicks > 6000
@@ -2612,6 +2621,42 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
         }
     }
 
+    /**
+     * True when nothing solid (leaves included) is between this dragon's middle and the target's eyes, so it
+     * can see the target. In 1.12 a dragon only breathed at a target it could see and only tackled along a
+     * clear line; one that couldn't see its target stayed up in the air.
+     */
+    public boolean hasClearLineTo(LivingEntity target) {
+        return clearLine(this.position().add(0, this.getBbHeight() * 0.5D, 0), target.getEyePosition());
+    }
+
+    /**
+     * True when the dragon's whole body has a clear way down to the target, not just a line of sight: the lines
+     * from its middle, from its left and right sides (half its width out, across the line to the target) and
+     * from its feet are all clear. A big dragon diving at a player in a small clearing otherwise caught the
+     * treetops around it and crawled along the leaves.
+     */
+    public boolean hasClearDiveTo(LivingEntity target) {
+        Vec3 mid = this.position().add(0, this.getBbHeight() * 0.5D, 0);
+        Vec3 aim = target.getEyePosition();
+        if (!clearLine(mid, aim)) {
+            return false;
+        }
+        Vec3 flat = new Vec3(aim.x - mid.x, 0, aim.z - mid.z);
+        double half = Math.min(this.getBbWidth() * 0.5D, 4.0D);
+        if (flat.lengthSqr() > 1.0E-4D) {
+            Vec3 side = new Vec3(-flat.z, 0, flat.x).normalize().scale(half);
+            if (!clearLine(mid.add(side), aim.add(side.scale(0.5D))) || !clearLine(mid.subtract(side), aim.subtract(side.scale(0.5D)))) {
+                return false;
+            }
+        }
+        return clearLine(this.position().add(0, 0.5D, 0), target.position().add(0, 0.5D, 0));
+    }
+
+    private boolean clearLine(Vec3 from, Vec3 to) {
+        return this.level().clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getType() != HitResult.Type.BLOCK;
+    }
+
     public boolean isDirectPathBetweenPoints(Vec3 vec1, Vec3 vec2) {
         final BlockHitResult rayTrace = this.level().clip(new ClipContext(vec1, new Vec3(vec2.x, vec2.y + (double) this.getBbHeight() * 0.5D, vec2.z), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
         return rayTrace.getType() != HitResult.Type.BLOCK;
@@ -2959,12 +3004,61 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
 
     public abstract void stimulateFire(double burnX, double burnY, double burnZ, int syncType);
 
-    // 随机化攻击决策：地面和飞行时都随机（1.12）；目标抗本元素时总是近战
+    // 随机化攻击决策：地面和飞行时都随机（1.12）；目标抗本元素时（试了7秒吐息后）总是近战
     public void randomizeAttacks() {
         // 1.12 picks melee or ranged at random in the air too. Melee in the air is the diving tackle
         // (DragonServerTickManager); ranged flies above the target and breathes (IafDragonFlightManager).
         // Always picking ranged in the air left an attacking dragon breathing from above without coming down.
-        this.attackDecision = getRandom().nextBoolean() || this.isTargetResistantToBreath(this.getTarget());
+        LivingEntity target = this.getTarget();
+        if (this.hasGivenUpOnBreath(target)) {
+            this.attackDecision = true;
+        } else if (this.isTryingBreathOn(target) && (this.isFlying() || this.isHovering())) {
+            // in the air against a breath-proof target it hasn't figured out yet: keep breathing (see trackBreathProofTarget)
+            this.attackDecision = false;
+        } else {
+            this.attackDecision = getRandom().nextBoolean();
+        }
+    }
+
+    /** Ticks a dragon keeps trying its breath on a target it can see but can't hurt before it goes for melee. */
+    public static final int BREATH_GIVE_UP_TICKS = 140;
+    // the breath-proof target the dragon is "learning" about, and for how many ticks it has seen it
+    @Nullable
+    private LivingEntity breathProofTarget;
+    private int breathProofTicks;
+
+    /**
+     * Called every tick (DragonServerTickManager) with the dragon's attack target. Counts the ticks the dragon
+     * has had a clear line to a target its breath can't hurt ({@link #isTargetResistantToBreath}). For the first
+     * {@link #BREATH_GIVE_UP_TICKS} ticks (7 s) a dragon in the air only uses its breath, as if it hasn't noticed
+     * yet that it does nothing (on the ground it fights as usual); after that it gives up on its breath against
+     * that target and only goes for melee ({@link #hasGivenUpOnBreath}). Resets when the target changes or loses
+     * its resistance.
+     */
+    public void trackBreathProofTarget(@Nullable LivingEntity target) {
+        if (target == null || !target.isAlive() || !this.isTargetResistantToBreath(target)) {
+            this.breathProofTarget = null;
+            this.breathProofTicks = 0;
+            return;
+        }
+        if (target != this.breathProofTarget) {
+            this.breathProofTarget = target;
+            this.breathProofTicks = 0;
+        }
+        // only time it can see the target counts as "trying its breath on it"
+        if (this.breathProofTicks <= BREATH_GIVE_UP_TICKS && this.hasClearLineTo(target)) {
+            this.breathProofTicks++;
+        }
+    }
+
+    /** True while the dragon is still trying its breath on this breath-proof target (it hasn't given up yet). */
+    public boolean isTryingBreathOn(@Nullable LivingEntity target) {
+        return target != null && target == this.breathProofTarget && this.breathProofTicks <= BREATH_GIVE_UP_TICKS;
+    }
+
+    /** True once the dragon has tried its breath on this breath-proof target long enough (see trackBreathProofTarget). */
+    public boolean hasGivenUpOnBreath(@Nullable LivingEntity target) {
+        return target != null && target == this.breathProofTarget && this.breathProofTicks > BREATH_GIVE_UP_TICKS;
     }
 
     /**
@@ -2973,7 +3067,8 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
      * blocked it), an ice or lightning dragon against Trinkets and Baubles' Ice or Lightning Resistance
      * (that mod cancels this mod's ice and lightning breath damage for those effects, like its 1.12
      * version did), or any dragon against a full set of blooded armor of its own element (see
-     * IafDragonDestructionManager.applyDragonEffect). Such a dragon closes in and bites instead.
+     * IafDragonDestructionManager.applyDragonEffect). After trying its breath for a while (see
+     * trackBreathProofTarget), such a dragon closes in and bites instead.
      */
     public boolean isTargetResistantToBreath(@Nullable LivingEntity target) {
         if (target == null) {
