@@ -69,6 +69,8 @@ public class IafClientSetup {
                 manager -> new RenderDragonBase(manager, FIRE_DRAGON_BASE_MODEL, 0));
         EntityRenderers.register(IafEntityRegistry.ICE_DRAGON.get(),
                 manager -> new RenderDragonBase(manager, ICE_DRAGON_BASE_MODEL, 1));
+        EntityRenderers.register(IafEntityRegistry.BLACK_FROST_DRAGON.get(),
+                manager -> new RenderBlackFrostDragon(manager, ICE_DRAGON_BASE_MODEL));
         EntityRenderers.register(IafEntityRegistry.LIGHTNING_DRAGON.get(),
                 manager -> new RenderLightningDragon(manager, LIGHTNING_DRAGON_BASE_MODEL, 2));
         EntityRenderers.register(IafEntityRegistry.SHIVAXI_DRAGON.get(),
@@ -136,6 +138,7 @@ public class IafClientSetup {
         EntityRenderers.register(IafEntityRegistry.DREAD_SCUTTLER.get(), RenderDreadScuttler::new);
         EntityRenderers.register(IafEntityRegistry.DREAD_THRALL.get(), RenderDreadThrall::new);
         EntityRenderers.register(IafEntityRegistry.DREAD_LICH.get(), RenderDreadLich::new);
+        EntityRenderers.register(IafEntityRegistry.DREAD_QUEEN.get(), RenderDreadQueen::new);
         EntityRenderers.register(IafEntityRegistry.DREAD_LICH_SKULL.get(), RenderDreadLichSkull::new);
         EntityRenderers.register(IafEntityRegistry.DREAD_KNIGHT.get(), RenderDreadKnight::new);
         EntityRenderers.register(IafEntityRegistry.DREAD_HORSE.get(), RenderDreadHorse::new);
