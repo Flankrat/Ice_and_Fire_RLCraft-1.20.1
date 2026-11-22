@@ -149,6 +149,7 @@ public class IafConfig {
     public static boolean dragonWeaponIceAbility = true;
     public static boolean dragonWeaponLightningAbility = true;
     public static int villagerHouseWeight = 5;
+    public static int villageAnimalFarmWeight = 5;
     public static boolean allowAttributeOverriding = true;
     public static boolean scaleArmorBreathProtect = false;
     public static boolean hydraHeartPassRegen = true;
@@ -370,6 +371,7 @@ public class IafConfig {
             dragonWeaponIceAbility = ConfigHolder.SERVER.dragonWeaponIceAbility.get();
             dragonWeaponLightningAbility = ConfigHolder.SERVER.dragonWeaponLightningAbility.get();
             villagerHouseWeight = ConfigHolder.SERVER.villagerHouseWeight.get();
+            villageAnimalFarmWeight = ConfigHolder.SERVER.villageAnimalFarmWeight.get();
             allowAttributeOverriding = ConfigHolder.SERVER.allowAttributeOverriding.get();
             pathfindingDebug = ConfigHolder.SERVER.pathfindingDebug.get();
             scaleArmorBreathProtect = ConfigHolder.SERVER.scaleArmorBreathProtect.get();
