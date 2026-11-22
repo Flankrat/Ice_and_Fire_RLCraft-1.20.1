@@ -1,11 +1,9 @@
 package com.github.alexthe666.iceandfire.entity;
 
 import com.github.alexthe666.iceandfire.IafConfig;
-import com.github.alexthe666.iceandfire.entity.util.DragonUtils;
 import com.github.alexthe666.iceandfire.entity.util.IFlyingMount;
 import com.github.alexthe666.iceandfire.util.IAFMath;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -126,13 +124,8 @@ public class IafDragonFlightManager {
             this.dragon = dragonBase;
         }
 
-        
-        /** How fast an AI dragon turns while flying (degrees per tick), as in the original mod. */
-        private static final float TURN_SPEED = 4.0F;
-        /** How far below a dragon resting on something its target has to be before it flies off the edge first. */
+        /** How far below a dragon resting on something its air target has to be before it flies off the edge first. */
         private static final double LEDGE_DROP = 4.0D;
-        /** Blocks above its target that a dragon attacking from range flies at (see tick()). */
-        private static final double RANGED_PURSUIT_HEIGHT = 6.0D;
 
         // direction findWayOff() picked last, kept for a second so the dragon doesn't re-pick every tick
         private Vec3 wayOff;
@@ -163,43 +156,39 @@ public class IafDragonFlightManager {
             return wayOff;
         }
 
+        /**
+         * Kettle5000's flight: turn toward the air target at up to 10 degrees a tick and keep adding a
+         * small push straight at it (stronger when close), with the speed capped per growth stage.
+         */
         @Override
         public void tick() {
             if (dragon.horizontalCollision) {
-                this.speedModifier = 0.1D;
+                // flew into something: slow down and let the navigator pick a new air target
+                this.speedModifier = 0.02D;
                 dragon.airTarget = null;
                 return;
             }
+
             if (dragon.airTarget == null) {
                 return;
             }
-            final Vec3 target = Vec3.atCenterOf(dragon.airTarget);
-            double distX = target.x - dragon.getX();
-            double distY = target.y - dragon.getY();
-            double distZ = target.z - dragon.getZ();
+            final double dx = dragon.airTarget.getX() - dragon.getX();
+            final double dy = dragon.airTarget.getY() - dragon.getY();
+            final double dz = dragon.airTarget.getZ() - dragon.getZ();
 
-            // 1.12: while it attacks from range (breath/fire charges, attackDecision false) a flying dragon
-            // chases its target from the air instead of diving onto it; only its melee pick dives (the
-            // tackle). Diving made it touch down beside the target and fall back to a slow ground chase.
-            // It flies a few blocks above the target: high enough not to skim into the ground next to it,
-            // close enough that its next pick can be the tackle (that needs it within melee range).
-            LivingEntity combatTarget = dragon.getTarget();
-            if (combatTarget != null && combatTarget.isAlive() && !dragon.attackDecision
-                    && dragon.getControllingPassenger() == null) {
-                double cruiseY = Math.min(combatTarget.getY() + RANGED_PURSUIT_HEIGHT,
-                        DragonUtils.getMaximumFlightHeightForPos(dragon.level(), dragon.airTarget));
-                distY = cruiseY - dragon.getY();
+            final double distanceSqr = dx * dx + dy * dy + dz * dz;
+
+            if (distanceSqr < 1.0D) {
+                return;
             }
 
-            // Something solid under the dragon while its target is below it (a dragon on a roof, cliff or
-            // pillar, or a wide dragon whose body still rests on an edge): it can't drop through the block, so
-            // the downward part of the move did nothing and only slowed the sideways part to a crawl, and with
-            // the target under its body it stopped right above it. It scraped along the top for 15-30 seconds.
-            // Fly the shortest way off the block at full speed first (1.12 flight also moved sideways at full
-            // speed whatever the height difference); the normal chase takes over once it's over open air.
-            // Its heading is set here directly: breath attacks keep snapping its facing to the target.
+            // Something solid under the dragon while its air target is well below it (a dragon on a roof,
+            // cliff or pillar, or a wide dragon whose body still rests on an edge): it can't drop through
+            // the block, so the downward push does nothing, and with the target right under it there's
+            // almost no sideways push either, so it scraped along the top for 15-30 seconds. Fly the
+            // shortest way off the block first; the normal flight takes over once it's over open air.
             // Only for a target well below (a few blocks is a normal landing next to it, not a ledge).
-            if (distY < -LEDGE_DROP && (dragon.onGround() || !dragon.isOverAir())) {
+            if (dy < -LEDGE_DROP && (dragon.onGround() || !dragon.isOverAir())) {
                 Vec3 wayOff = findWayOff();
                 if (wayOff != null) {
                     final double escapeSpeed = 0.15D + (dragon.getDragonStage() * 0.05D); // same top speed as below
@@ -210,54 +199,32 @@ public class IafDragonFlightManager {
                 }
             }
 
-            // Original mod: a steep climb or dive shortens the horizontal part of the move.
-            // Clamped so a target almost straight above/below can't flip the heading around.
-            double planeDist = Math.sqrt(distX * distX + distZ * distZ);
-            if (planeDist > 1.0E-3D) {
-                double yDistMod = Mth.clamp(1.0D - Math.abs(distY * 0.7D) / planeDist, 0.1D, 1.0D);
-                distX *= yDistMod;
-                distZ *= yDistMod;
-                planeDist *= yDistMod;
-            }
-            final double dist = Math.sqrt(distX * distX + distZ * distZ + distY * distY);
-            if (dist <= 1.0D) {
-                return;
-            }
+            // ----------------------------------------
+            // ROTATION: Slowly face the target (yaw only)
+            // ----------------------------------------
 
-            // Turn toward the target at a fixed rate. Speed builds up while the dragon is lined up
-            // and drops while it is still turning, so it flies in arcs instead of sliding sideways.
-            final float oldYaw = dragon.getYRot();
-            if (planeDist > 1.0E-3D) {
-                float targetYaw = (float) (Mth.atan2(distZ, distX) * Mth.RAD_TO_DEG) - 90.0F;
-                dragon.setYRot(IafDragonFlightManager.approachDegrees(oldYaw, targetYaw, TURN_SPEED));
-            }
+            final float targetYaw = (float) (Mth.atan2(-dx, dz) * Mth.RAD_TO_DEG);
+
+            dragon.setYRot(
+                Mth.approachDegrees(dragon.getYRot(), targetYaw, 10.0F)
+            );
+
             dragon.yBodyRot = dragon.getYRot();
-            if (IafDragonFlightManager.degreesDifferenceAbs(oldYaw, dragon.getYRot()) < 3.0F) {
-                speedModifier = IafDragonFlightManager.approach((float) speedModifier, 1.8F, 0.005F * (1.8F / (float) Math.max(speedModifier, 0.1D)));
-            } else {
-                speedModifier = IafDragonFlightManager.approach((float) speedModifier, 0.2F, 0.025F);
-            }
 
-            final float pitch = (float) (-(Mth.atan2(-distY, planeDist) * Mth.RAD_TO_DEG));
-            double speed = speedModifier * dragon.getFlightSpeedModifier();
-            speed *= Math.min(1.0D, dist / 50.0D + 0.3D); // slow down close to the target
+            // ----------------------------------------
+            // MOVEMENT: Always move toward target
+            // ----------------------------------------
 
-            // Thrust goes along the way the dragon is FACING, not straight at the target.
-            final float headingRad = (dragon.getYRot() + 90.0F) * Mth.DEG_TO_RAD;
-            final double x = speed * Mth.cos(headingRad) * Math.abs(distX / dist);
-            final double y = speed * Mth.sin(pitch * Mth.DEG_TO_RAD) * Math.abs(distY / dist);
-            final double z = speed * Mth.sin(headingRad) * Math.abs(distZ / dist);
-            final double motionCap = 0.2D;
+            final double movementSpeed = (0.01D / Math.sqrt(distanceSqr)) + 0.001D;
             Vec3 delta = dragon.getDeltaMovement().add(
-                    Mth.clamp(x * 0.2D, -motionCap, motionCap),
-                    Mth.clamp(y * 0.2D, -motionCap, motionCap),
-                    Mth.clamp(z * 0.2D, -motionCap, motionCap));
-
-            // Keep the port's tuned top speed per growth stage.
-            final double maxSpeed = 0.15D + (dragon.getDragonStage() * 0.05D);
-            final double length = delta.length();
-            if (length > maxSpeed) {
-                delta = delta.scale(maxSpeed / length);
+                    dx * movementSpeed,
+                    dy * movementSpeed,
+                    dz * movementSpeed
+                );
+            double intensity = delta.length();
+            double maxspeed = 0.15 + (dragon.getDragonStage() * 0.05);
+            if (intensity > maxspeed) {
+                delta = delta.scale(maxspeed / intensity);
             }
             dragon.setDeltaMovement(delta);
         }

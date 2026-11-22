@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -158,36 +159,28 @@ public class DragonUtils {
         return inWaterEscortPos;
     }
 
+    /**
+     * Next wander point for a flying dragon (Kettle5000's flight). A dragon with a home picks a spot
+     * within the wander distance of home, at cruising height above home; otherwise a spot about four
+     * body lengths ahead of it, at cruising height above the ground there. Cruising height is the
+     * "Dragon Cruise Flight Height" config, capped by "Max Dragon Flight Height". A dragon that wants
+     * to land gets the ground under that spot instead. Never null.
+     */
     public static BlockPos getBlockInView(EntityDragonBase dragon) {
-        // 1.12.2 RLI&F semantics: a dragon with a home position does not run a separate
-        // "return to roost" goal. Its ordinary aerial wandering is simply centered on home.
-        // This naturally brings a roaming dragon back toward the nest without fighting combat AI.
-        float radius = 0.75F * (0.7F * dragon.getRenderSize() / 3) * -7
-                - dragon.getRandom().nextInt(Math.max(1, dragon.getDragonStage() * 6));
+        float radius = dragon.getRenderSize() * 4.0F;
         float neg = dragon.getRandom().nextBoolean() ? 1 : -1;
         float renderYawOffset = dragon.yBodyRot;
-        int maximumFlightHeight = getMaximumFlightHeightForPos(dragon.level(), dragon.blockPosition());
 
         if (dragon.hasHomePosition && dragon.homePos != null) {
-            BlockPos dragonPos = dragon.blockPosition();
-            BlockPos ground = dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, dragonPos);
-            int distFromGround = Mth.floor(dragon.getY()) - ground.getY();
-            int wander = Math.max(1, IafConfig.dragonWanderFromHomeDistance);
-
             for (int i = 0; i < 10; i++) {
-                BlockPos home = dragon.homePos.getPosition();
-                int targetY = distFromGround > 16
-                        ? (int) Math.min(maximumFlightHeight, dragon.getY() + dragon.getRandom().nextInt(17) - 8)
-                        : Mth.floor(dragon.getY()) + dragon.getRandom().nextInt(16) + 1;
-                targetY = Math.min(targetY, maximumFlightHeight);
-
+                BlockPos homePos = dragon.homePos.getPosition();
                 BlockPos pos = new BlockPos(
-                        home.getX() + dragon.getRandom().nextInt(wander * 2) - wander,
-                        targetY,
-                        home.getZ() + dragon.getRandom().nextInt(wander * 2) - wander
+                        homePos.getX() + dragon.getRandom().nextInt(IafConfig.dragonWanderFromHomeDistance * 2) - IafConfig.dragonWanderFromHomeDistance,
+                        Math.min(IafConfig.maxDragonFlight, homePos.getY() + IafConfig.dragonFlightHeight),
+                        homePos.getZ() + dragon.getRandom().nextInt(IafConfig.dragonWanderFromHomeDistance * 2) - IafConfig.dragonWanderFromHomeDistance
                 );
-                if (!dragon.isTargetBlocked(Vec3.atCenterOf(pos))
-                        && dragon.distanceToSqr(Vec3.atCenterOf(pos)) > 6) {
+                // far enough to be worth flying to, and a clear line to it
+                if (dragon.blockPosition().distManhattan(pos) > dragon.getDragonStage() && !dragon.isTargetBlocked(Vec3.atCenterOf(pos))) {
                     return pos;
                 }
             }
@@ -198,32 +191,68 @@ public class DragonUtils {
         double extraZ = radius * Mth.cos(angle);
         BlockPos radialPos = BlockPos.containing(dragon.getX() + extraX, 0, dragon.getZ() + extraZ);
         BlockPos ground = dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, radialPos);
-        int distFromGround = Mth.floor(dragon.getY()) - ground.getY();
-        int targetY = distFromGround > 16
-                ? (int) Math.min(getMaximumFlightHeightForPos(dragon.level(), radialPos), dragon.getY() + dragon.getRandom().nextInt(17) - 8)
-                : Mth.floor(dragon.getY()) + dragon.getRandom().nextInt(16) + 1;
-        BlockPos newPos = new BlockPos(radialPos.getX(), targetY, radialPos.getZ());
-        BlockPos pos = dragon.doesWantToLand() ? ground : newPos;
-        if (dragon.distanceToSqr(Vec3.atCenterOf(newPos)) > 6
-                && !dragon.isTargetBlocked(Vec3.atCenterOf(newPos))) {
-            return pos;
-        }
-        return null;
+        BlockPos newPos = radialPos.above(Math.min(IafConfig.maxDragonFlight, ground.getY() + IafConfig.dragonFlightHeight));
+        return dragon.doesWantToLand() ? ground : newPos;
     }
 
+    /** Blocks above its target that a dragon attacking from range flies at (see getBlockWithTarget). */
+    private static final double RANGED_PURSUIT_HEIGHT = 6.0D;
+
     /**
-     * Air target for a dragon with an attack target: the target's own position (as the 1.12.2
-     * air-target AI did), kept under the local flight ceiling. Falls back to
-     * {@link #getBlockInView} when there is no live target.
+     * Air target for a dragon chasing its attack target ({@link #getBlockInView} without a target).
+     * Kettle5000's flight picks a point next to the target; the height depends on the attack the dragon
+     * picked, as in the 1.12 version:
+     * <ul>
+     *   <li>melee ({@code attackDecision} true): the target's own height, so the dragon dives at it and
+     *       DragonServerTickManager's tackle hits it;</li>
+     *   <li>ranged (breath / charges): {@link #RANGED_PURSUIT_HEIGHT} blocks above the target, so it
+     *       attacks from the air instead of diving to the ground beside the target, but stays close
+     *       enough that its next pick can be the tackle (a melee pick farther away than the ranged
+     *       threshold is switched straight back to ranged).</li>
+     * </ul>
+     * Both are kept under the local flight ceiling. A dragon that wants to land gets the ground there.
      */
     public static BlockPos getBlockWithTarget(EntityDragonBase dragon) {
         LivingEntity target = dragon.getTarget();
         if (target == null || !target.isAlive()) {
             return getBlockInView(dragon);
         }
-        BlockPos pos = target.blockPosition();
-        int maxHeight = getMaximumFlightHeightForPos(dragon.level(), pos);
-        return pos.getY() > maxHeight ? new BlockPos(pos.getX(), maxHeight, pos.getZ()) : pos;
+        RandomSource random = dragon.getRandom();
+        double size = dragon.getRenderSize();
+        double dx = target.getX() - dragon.getX();
+        double dz = target.getZ() - dragon.getZ();
+        double distance = Math.sqrt(dx * dx + dz * dz);
+        // direction from the dragon to the target (the dragon's facing if it's right above it)
+        double dirX;
+        double dirZ;
+        if (distance > 1.0E-6D) {
+            dirX = dx / distance;
+            dirZ = dz / distance;
+        } else {
+            dirX = -Mth.sin(dragon.yBodyRot * Mth.DEG_TO_RAD);
+            dirZ = Mth.cos(dragon.yBodyRot * Mth.DEG_TO_RAD);
+        }
+        // a point on the dragon-to-target line, at most a tenth of `offset` before or past the target (a
+        // larger offset when the dragon is already close), so successive passes don't all aim at the same block
+        double reach = size + 2.0D;
+        double offset;
+        if (distance > reach) {
+            double baseOffset = Math.max(6.0D, size);
+            offset = baseOffset + random.nextDouble() * baseOffset;
+        } else {
+            offset = size * 3.0D + random.nextDouble() * 2.0D;
+        }
+        double deviation = (random.nextDouble() * 2.0D - 1.0D) * 0.1D;
+        double destinationX = target.getX() + dirX * offset * deviation;
+        double destinationZ = target.getZ() + dirZ * offset * deviation;
+        BlockPos radialPos = BlockPos.containing(destinationX, 0, destinationZ);
+        BlockPos ground = dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, radialPos);
+        if (dragon.doesWantToLand()) {
+            return ground;
+        }
+        double y = dragon.attackDecision ? target.getY() : target.getY() + RANGED_PURSUIT_HEIGHT;
+        int maxHeight = getMaximumFlightHeightForPos(dragon.level(), radialPos);
+        return new BlockPos(radialPos.getX(), Math.min(Mth.floor(y), maxHeight), radialPos.getZ());
     }
 
     public static BlockPos getWaterBlockInView(EntityDragonBase dragon) {
