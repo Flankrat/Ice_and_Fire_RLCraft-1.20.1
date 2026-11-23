@@ -1,0 +1,8 @@
+{
+  "type": "iceandfire:smelting_to_tag",
+  "category": "misc",
+  "ingredient": {"item": "iceandfire:bronze_alloy"},
+  "result": {"tag": "forge:ingots/bronze", "count": 1},
+  "experience": 1.0,
+  "cookingtime": 200
+}

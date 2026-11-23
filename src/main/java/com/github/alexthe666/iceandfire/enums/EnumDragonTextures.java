@@ -1,8 +1,11 @@
 package com.github.alexthe666.iceandfire.enums;
 
+import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.entity.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
+import java.time.LocalDate;
+
 
 public enum EnumDragonTextures {
     VARIANT1("red_", "blue_", "electric_"),
@@ -162,6 +165,34 @@ public enum EnumDragonTextures {
     }
 
 
+    /** Spooky Season Dragons: October 28 to November 2, as in 1.12. Cached, so it's checked once per game start. */
+    public static boolean isSpookySeason() {
+        if (!IafConfig.spookySeason) {
+            return false;
+        }
+        if (spookyCache == null) {
+            LocalDate today = LocalDate.now();
+            int date = today.getMonthValue() * 100 + today.getDayOfMonth();
+            spookyCache = date >= 1028 && date <= 1102;
+        }
+        return spookyCache;
+    }
+
+    private static Boolean spookyCache = null;
+
+    // The skeleton texture for the dragon's element and stage
+    private static ResourceLocation getSkeletonTexture(EntityDragonBase dragon, EnumDragonTextures t) {
+        ResourceLocation[] stages;
+        if (dragon instanceof EntityIceDragon) {
+            stages = new ResourceLocation[]{t.ICESTAGE1SKELETONTEXTURE, t.ICESTAGE2SKELETONTEXTURE, t.ICESTAGE3SKELETONTEXTURE, t.ICESTAGE4SKELETONTEXTURE, t.ICESTAGE5SKELETONTEXTURE};
+        } else if (dragon instanceof EntityLightningDragon) {
+            stages = new ResourceLocation[]{t.LIGHTNINGSTAGE1SKELETONTEXTURE, t.LIGHTNINGSTAGE2SKELETONTEXTURE, t.LIGHTNINGSTAGE3SKELETONTEXTURE, t.LIGHTNINGSTAGE4SKELETONTEXTURE, t.LIGHTNINGSTAGE5SKELETONTEXTURE};
+        } else {
+            stages = new ResourceLocation[]{t.FIRESTAGE1SKELETONTEXTURE, t.FIRESTAGE2SKELETONTEXTURE, t.FIRESTAGE3SKELETONTEXTURE, t.FIRESTAGE4SKELETONTEXTURE, t.FIRESTAGE5SKELETONTEXTURE};
+        }
+        return stages[Math.max(0, Math.min(4, dragon.getDragonStage() - 1))];
+    }
+
     public static ResourceLocation getTextureFromDragon(EntityDragonBase dragon) {
         // Shivaxi is a lightning dragon subclass, so it must be checked before
         // EntityLightningDragon or it falls through to the ordinary electric variant.
@@ -232,6 +263,9 @@ public enum EnumDragonTextures {
 
     private static ResourceLocation getFireDragonTextures(EntityDragonBase dragon) {
         EnumDragonTextures textures = getDragonEnum(dragon);
+        if (isSpookySeason()) {
+            return getSkeletonTexture(dragon, textures);
+        }
         if (dragon.isModelDead()) {
             if (dragon.getDeathStage() >= (dragon.getAgeInDays() / 5) / 2) {
                 switch (dragon.getDragonStage()) {
@@ -300,6 +334,9 @@ public enum EnumDragonTextures {
 
     private static ResourceLocation getIceDragonTextures(EntityDragonBase dragon) {
         EnumDragonTextures textures = getDragonEnum(dragon);
+        if (isSpookySeason()) {
+            return getSkeletonTexture(dragon, textures);
+        }
         if (dragon.isModelDead()) {
             if (dragon.getDeathStage() >= (dragon.getAgeInDays() / 5) / 2) {
                 switch (dragon.getDragonStage()) {
@@ -391,6 +428,9 @@ public enum EnumDragonTextures {
 
     private static ResourceLocation getLightningDragonTextures(EntityDragonBase dragon) {
         EnumDragonTextures textures = getDragonEnum(dragon);
+        if (isSpookySeason()) {
+            return getSkeletonTexture(dragon, textures);
+        }
         if (dragon.isModelDead()) {
             if (dragon.getDeathStage() >= (dragon.getAgeInDays() / 5) / 2) {
                 switch (dragon.getDragonStage()) {

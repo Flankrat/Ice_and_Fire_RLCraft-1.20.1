@@ -1,5 +1,6 @@
 package com.github.alexthe666.iceandfire.entity;
 
+import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.item.IafItemRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -43,7 +44,11 @@ public class EntityTideTrident extends ThrownTrident {
     @Override
     protected void onHitEntity(EntityHitResult result) {
         Entity entity = result.getEntity();
-        float f = 12.0F;
+        // Tide Trident Base Damage, times Tide Trident Underwater Damage Multiplier when the trident is in water (as in 1.12)
+        float f = (float) IafConfig.tideTridentBaseDamage;
+        if (this.isInWater()) {
+            f *= (float) IafConfig.tideTridentUnderwaterDamageMultiplier;
+        }
         if (entity instanceof LivingEntity) {
             LivingEntity livingentity = (LivingEntity) entity;
             f += EnchantmentHelper.getDamageBonus(this.tridentItem, livingentity.getMobType());

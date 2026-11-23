@@ -62,7 +62,7 @@ public class RenderDragonBase extends MobRenderer<EntityDragonBase, AdvancedEnti
         // Give it a distinct cache namespace so it can never reuse an ordinary electric dragon's layered texture.
         String baseTexture = (entity instanceof EntityShivaxiDragon ? "shivaxi_" : "")
                 + entity.getVariantName(entity.getVariant()) + entity.getDragonStage() + entity.isModelDead()
-                + entity.isMale() + entity.isSkeletal() + entity.isSleeping() + entity.isBlinking();
+                + entity.isMale() + entity.isSkeletal() + entity.isSleeping() + entity.isBlinking() + EnumDragonTextures.isSpookySeason();
         ResourceLocation resourcelocation = LAYERED_TEXTURE_CACHE.get(baseTexture);
         if (resourcelocation == null) {
             resourcelocation = new ResourceLocation("iceandfire:" + "dragon_texture_" + baseTexture);

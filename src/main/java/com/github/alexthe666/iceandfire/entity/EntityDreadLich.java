@@ -22,6 +22,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -192,9 +193,19 @@ public class EntityDreadLich extends EntityDreadMob implements IAnimatedEntity, 
         animationTick = tick;
     }
 
+    // From the 1.12 version: a lich with the GuaranteeKey NBT flag (for example placed by a structure) always drops the Gravemaster's Key
+    private boolean guaranteeKey = false;
+    private static final ResourceLocation LOOT_GUARANTEE_KEY = new ResourceLocation(IceAndFire.MODID, "entities/dread_lich_guarantee_key");
+
+    @Override
+    protected @NotNull ResourceLocation getDefaultLootTable() {
+        return this.guaranteeKey ? LOOT_GUARANTEE_KEY : super.getDefaultLootTable();
+    }
+
     @Override
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
+        compound.putBoolean("GuaranteeKey", this.guaranteeKey);
         compound.putInt("Variant", this.getVariant());
         compound.putInt("MinionCount", this.getMinionCount());
     }
@@ -202,6 +213,7 @@ public class EntityDreadLich extends EntityDreadMob implements IAnimatedEntity, 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
+        this.guaranteeKey = compound.getBoolean("GuaranteeKey");
         this.setVariant(compound.getInt("Variant"));
         this.setMinionCount(compound.getInt("MinionCount"));
     }

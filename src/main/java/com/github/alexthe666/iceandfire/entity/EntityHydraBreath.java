@@ -4,6 +4,7 @@ import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.IceAndFire;
 import com.github.alexthe666.iceandfire.entity.util.IDragonProjectile;
 import com.github.alexthe666.iceandfire.enums.EnumParticles;
+import com.github.alexthe666.iceandfire.misc.IafMobEffects;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -144,7 +145,7 @@ public class EntityHydraBreath extends Fireball implements IDragonProjectile {
                     }
                     entity.hurt(level().damageSources().mobAttack(dragon), (float) IafConfig.hydraBreathAttackDamage);
                     if (entity instanceof LivingEntity) {
-                        ((LivingEntity) entity).addEffect(new MobEffectInstance(MobEffects.POISON, 60, 0));
+                        ((LivingEntity) entity).addEffect(new MobEffectInstance(IafConfig.hydraBreathAcid ? IafMobEffects.ACID.get() : MobEffects.POISON, 60, 0));
                     }
 
                 }

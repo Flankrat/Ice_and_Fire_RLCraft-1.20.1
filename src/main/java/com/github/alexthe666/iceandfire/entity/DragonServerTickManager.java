@@ -61,7 +61,11 @@ public class DragonServerTickManager {
         if (dragon.getTarget() != null && !DragonUtils.isAlive(dragon.getTarget())) {
             dragon.setTarget(null);
         }
+        if (dragon.caffeineTicks > 0) {
+            dragon.caffeineTicks--;
+        }
         if (IafConfig.doDragonsSleep
+                && !dragon.isCaffeinated()
                 && !dragon.isInWater()
                 && !dragon.isSleeping()
                 && dragon.onGround()

@@ -28,6 +28,14 @@ public final class BloodedSetEffect {
         if (isHoldingMatchingWeapon(player, element))
             return;
 
+        // Blooded Dragon Armor Set Effect Cooldown (0 = none)
+        if (IafConfig.bloodedDragonArmorSetEffectCooldown > 0) {
+            net.minecraft.world.item.Item chest = player.getItemBySlot(EquipmentSlot.CHEST).getItem();
+            if (player.getCooldowns().isOnCooldown(chest))
+                return;
+            player.getCooldowns().addCooldown(chest, IafConfig.bloodedDragonArmorSetEffectCooldown);
+        }
+
         switch (element) {
             case FIRE -> applyFireEffect(player, target);
             case ICE -> applyIceEffect(player, target);
