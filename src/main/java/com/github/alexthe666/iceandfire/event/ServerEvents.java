@@ -1,14 +1,8 @@
 package com.github.alexthe666.iceandfire.event;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.core.BlockPos;
-import com.github.alexthe666.iceandfire.entity.util.IDreadMob;
-import com.github.alexthe666.iceandfire.block.IDreadBlock;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraftforge.event.entity.EntityTeleportEvent;
-import net.minecraftforge.event.entity.EntityMountEvent;
 import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.IceAndFire;
+import com.github.alexthe666.iceandfire.block.IDreadBlock;
 import com.github.alexthe666.iceandfire.block.IafBlockRegistry;
 import com.github.alexthe666.iceandfire.datagen.tags.IafItemTags;
 import com.github.alexthe666.iceandfire.entity.*;
@@ -16,8 +10,10 @@ import com.github.alexthe666.iceandfire.entity.ai.AiDebug;
 import com.github.alexthe666.iceandfire.entity.ai.EntitySheepAIFollowCyclops;
 import com.github.alexthe666.iceandfire.entity.ai.VillagerAIFearUntamed;
 import com.github.alexthe666.iceandfire.entity.props.EntityDataProvider;
+import com.github.alexthe666.iceandfire.entity.tile.TileEntityDreadSpawner;
 import com.github.alexthe666.iceandfire.entity.util.DragonUtils;
 import com.github.alexthe666.iceandfire.entity.util.IAnimalFear;
+import com.github.alexthe666.iceandfire.entity.util.IDreadMob;
 import com.github.alexthe666.iceandfire.entity.util.IVillagerFear;
 import com.github.alexthe666.iceandfire.item.*;
 import com.github.alexthe666.iceandfire.item.blooded.BloodedDragonType;
@@ -33,6 +29,7 @@ import com.github.alexthe666.iceandfire.pathfinding.raycoms.pathjobs.AbstractPat
 import com.github.alexthe666.iceandfire.world.gen.WorldGenFireDragonCave;
 import com.github.alexthe666.iceandfire.world.gen.WorldGenIceDragonCave;
 import com.github.alexthe666.iceandfire.world.gen.WorldGenLightningDragonCave;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -46,7 +43,9 @@ import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.WitherSkeleton;
 import net.minecraft.world.entity.player.Player;
@@ -70,7 +69,10 @@ import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraftforge.event.LootTableLoadEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
+import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
@@ -568,6 +570,12 @@ public class ServerEvents {
 
     @SubscribeEvent
     public void onBreakBlock(BlockEvent.BreakEvent event) {
+        // From the 1.12 version: a spawner with a required spawn count can't be broken in survival until it's met
+        if (event.getPlayer() != null && !event.getPlayer().isCreative()
+            && event.getLevel().getBlockEntity(event.getPos()) instanceof TileEntityDreadSpawner spawner && spawner.getRequiredSpawnCount() > 0) {
+            event.setCanceled(true);
+            return;
+        }
         if (event.getPlayer() != null && (event.getState().getBlock() instanceof AbstractChestBlock || event.getState().getBlock() == IafBlockRegistry.GOLD_PILE.get() || event.getState().getBlock() == IafBlockRegistry.SILVER_PILE.get() || event.getState().getBlock() == IafBlockRegistry.COPPER_PILE.get() || event.getState().getBlock() == IafBlockRegistry.DIAMOND_PILE.get())) {
             final float dist = IafConfig.dragonGoldSearchLength;
             List<Entity> list = event.getLevel().getEntities(event.getPlayer(), event.getPlayer().getBoundingBox().inflate(dist, dist, dist));
@@ -582,6 +590,17 @@ public class ServerEvents {
                     }
                 }
             }
+        }
+    }
+
+    // A mob joining the world while an Ice and Fire spawner ticks was spawned by it, so that spawner's required spawn
+    // count goes down. Only the bottom mob of a stack counts, so jockeys count once. Lowest priority: if another mod
+    // cancels the join, this never sees it.
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onSpawnerMobJoin(EntityJoinLevelEvent event) {
+        TileEntityDreadSpawner spawner = TileEntityDreadSpawner.getTickingSpawner();
+        if (spawner != null && !event.getLevel().isClientSide && event.getEntity() instanceof Mob mob && mob.getVehicle() == null) {
+            spawner.onRequiredSpawn();
         }
     }
 
