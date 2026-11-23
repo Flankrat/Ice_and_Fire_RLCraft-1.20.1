@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 public class IafConfig {
     public static boolean customMainMenu = true;
     public static boolean useVanillaFont = false;
@@ -221,7 +220,6 @@ public class IafConfig {
     public static String bloodedArmorSetEffectMode = "attack";
     public static int bloodedDragonArmorSetEffectCooldown = 0;
 
-
     public static void bakeClient(final ModConfig config) {
         try {
             customMainMenu = ConfigHolder.CLIENT.customMainMenu.get();
@@ -340,6 +338,7 @@ public class IafConfig {
             generateMausoleums = ConfigHolder.SERVER.generateMausoleums.get();
             spawnLiches = ConfigHolder.SERVER.spawnLiches.get();
             lichSpawnRate = ConfigHolder.SERVER.lichSpawnRate.get();
+            dreadQueenMaxHealth = ConfigHolder.SERVER.dreadQueenMaxHealth.get();
             lichSpawnChance = ConfigHolder.SERVER.lichSpawnChance.get();
             hydraMaxHealth = ConfigHolder.SERVER.hydraMaxHealth.get();
             generateHydraChance = ConfigHolder.SERVER.generateHydraChance.get();

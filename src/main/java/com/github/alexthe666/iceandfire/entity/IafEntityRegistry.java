@@ -196,6 +196,12 @@ public class IafEntityRegistry {
             EntityType.Builder.of(EntityDreadBeast::new, MobCategory.MONSTER).sized(1.2F, 0.9F), "dread_beast");
     public static final RegistryObject<EntityType<EntityDreadScuttler>> DREAD_SCUTTLER = registerEntity(
             EntityType.Builder.of(EntityDreadScuttler::new, MobCategory.MONSTER).sized(1.5F, 1.3F), "dread_scuttler");
+    // From the 1.12 version: the Dread Queen boss and the Black Frost dragon she rides
+    public static final RegistryObject<EntityType<EntityDreadQueen>> DREAD_QUEEN = registerEntity(
+            EntityType.Builder.of(EntityDreadQueen::new, MobCategory.MONSTER).sized(0.6F, 1.8F).setTrackingRange(128), "dread_queen");
+    public static final RegistryObject<EntityType<EntityBlackFrostDragon>> BLACK_FROST_DRAGON = registerEntity(
+            EntityType.Builder.<EntityBlackFrostDragon>of(EntityBlackFrostDragon::new, MobCategory.MONSTER).sized(0.78F, 1.2F)
+                    .setTrackingRange(256).clientTrackingRange(10), "black_frost_dragon");
     public static final RegistryObject<EntityType<EntityDreadLich>> DREAD_LICH = registerEntity(
             EntityType.Builder.of(EntityDreadLich::new, MobCategory.MONSTER).sized(0.6F, 1.8F), "dread_lich");
     public static final RegistryObject<EntityType<EntityDreadLichSkull>> DREAD_LICH_SKULL = registerEntity(
@@ -260,6 +266,8 @@ public class IafEntityRegistry {
         creationEvent.put(MOB_SKULL.get(), EntityMobSkull.bakeAttributes().build());
         creationEvent.put(DREAD_THRALL.get(), EntityDreadThrall.bakeAttributes().build());
         creationEvent.put(DREAD_LICH.get(), EntityDreadLich.bakeAttributes().build());
+        creationEvent.put(DREAD_QUEEN.get(), EntityDreadQueen.bakeAttributes().build());
+        creationEvent.put(BLACK_FROST_DRAGON.get(), EntityIceDragon.bakeAttributes().build());
         creationEvent.put(DREAD_BEAST.get(), EntityDreadBeast.bakeAttributes().build());
         creationEvent.put(DREAD_HORSE.get(), EntityDreadHorse.bakeAttributes().build());
         creationEvent.put(DREAD_GHOUL.get(), EntityDreadGhoul.bakeAttributes().build());

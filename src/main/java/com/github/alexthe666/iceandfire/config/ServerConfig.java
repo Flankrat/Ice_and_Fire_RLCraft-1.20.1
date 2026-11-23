@@ -1,6 +1,5 @@
 package com.github.alexthe666.iceandfire.config;
 
-
 import net.minecraftforge.common.ForgeConfigSpec;
 import java.util.List;
 
@@ -183,6 +182,7 @@ public class ServerConfig {
     public final ForgeConfigSpec.BooleanValue generateMausoleums;
     public final ForgeConfigSpec.BooleanValue spawnLiches;
     public final ForgeConfigSpec.IntValue lichSpawnRate;
+    public final ForgeConfigSpec.DoubleValue dreadQueenMaxHealth;
     public final ForgeConfigSpec.IntValue lichSpawnChance;
     public final ForgeConfigSpec.DoubleValue hydraMaxHealth;
     public final ForgeConfigSpec.IntValue generateHydraChance;
@@ -209,7 +209,6 @@ public class ServerConfig {
     public final ForgeConfigSpec.BooleanValue scaleArmorBreathProtect;
     public final ForgeConfigSpec.BooleanValue hydraHeartPassRegen;
     public final ForgeConfigSpec.BooleanValue cyclopsEyeWeaknessApply;
-
 
     public ServerConfig(final ForgeConfigSpec.Builder builder) {
         builder.push("Generation");
@@ -422,6 +421,7 @@ public class ServerConfig {
         builder.push("Others");
         this.spawnLiches = buildBoolean(builder, "Spawn Liches", "all", true, "True if dread liches are allowed to spawn");
         this.lichSpawnRate = buildInt(builder, "Lich Spawn Weight", "all", 2, 1, 10000, "Dread Lich spawn weight. Lower = lower chance to spawn");
+        this.dreadQueenMaxHealth = buildDouble(builder, "Dread Queen Max Health", "all", 750, 1, 1000000, "Maximum health of the Dread Queen");
         this.lichSpawnChance = buildInt(builder, "Lich Spawn Chance", "all", 30, 1, 10000, "Dread Lich spawn chance. Lower = higher chance to spawn");
         this.dreadTargetingCheckSight = buildBoolean(builder, "Dread Targeting Check Sight", "all", true, "If true, dread mobs need to see a target before attacking it");
         this.dreadTargetingEntityBlacklist = buildStringList(builder, "Dread Targeting Entity Blacklist", List.of(), "Entities (like minecraft:villager) that dread mobs won't target");

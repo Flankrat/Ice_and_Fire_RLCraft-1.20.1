@@ -3,6 +3,7 @@ package com.github.alexthe666.iceandfire.entity;
 import com.github.alexthe666.citadel.animation.Animation;
 import com.github.alexthe666.citadel.animation.IAnimatedEntity;
 import com.github.alexthe666.iceandfire.IafConfig;
+import com.github.alexthe666.iceandfire.entity.ai.DreadAIMountDragon;
 import com.github.alexthe666.iceandfire.entity.ai.DreadAITargetNonDread;
 import com.github.alexthe666.iceandfire.entity.util.DragonUtils;
 import com.github.alexthe666.iceandfire.entity.util.IAnimalFear;
@@ -33,16 +34,23 @@ import javax.annotation.Nullable;
 public class EntityDreadQueen extends EntityDreadMob implements IAnimatedEntity, IVillagerFear, IAnimalFear {
 
     public static Animation ANIMATION_SPAWN = Animation.create(40);
-    private final ServerBossEvent bossInfo = (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.PROGRESS));
+    // Darkens the sky like the 1.12 version's boss bar
+    private final ServerBossEvent bossInfo = (ServerBossEvent) (new ServerBossEvent(this.getDisplayName(), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.PROGRESS)).setDarkenScreen(true);
     private int animationTick;
     private Animation currentAnimation;
 
     public EntityDreadQueen(EntityType t, Level worldIn) {
         super(t, worldIn);
+        // Attributes are built before the config loads, so the configured health is applied per queen
+        if (this.getAttribute(Attributes.MAX_HEALTH).getBaseValue() != IafConfig.dreadQueenMaxHealth) {
+            this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(IafConfig.dreadQueenMaxHealth);
+            this.setHealth(this.getMaxHealth());
+        }
     }
 
     @Override
     protected void registerGoals() {
+        this.goalSelector.addGoal(0, new DreadAIMountDragon(this));
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0D, true));
         this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0D));
@@ -98,7 +106,6 @@ public class EntityDreadQueen extends EntityDreadMob implements IAnimatedEntity,
         this.bossInfo.setName(this.getDisplayName());
     }
 
-
     @Override
     public void startSeenByPlayer(@NotNull ServerPlayer player) {
         super.startSeenByPlayer(player);
@@ -110,7 +117,6 @@ public class EntityDreadQueen extends EntityDreadMob implements IAnimatedEntity,
         super.stopSeenByPlayer(player);
         this.bossInfo.removePlayer(player);
     }
-
 
     @Override
     @Nullable
