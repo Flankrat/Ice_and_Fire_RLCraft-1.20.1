@@ -150,6 +150,8 @@ dependencies {
     implementation fg.deobf("curse.maven:curios-309927:6418456")
     // Optional: only touched through compat/EnhancedVisualsCompat when the mod is loaded.
     compileOnly fg.deobf("curse.maven:enhancedvisuals-255389:9080707")
+    // Optional: the glacier biome is placed through compat/TerraBlenderCompat only when TerraBlender is loaded.
+    compileOnly fg.deobf("com.github.glitchfiend:TerraBlender-forge:1.20.1-3.0.1.10")
 
     compileOnly "io.github.llamalad7:mixinextras-common:0.3.6"
     annotationProcessor "io.github.llamalad7:mixinextras-common:0.3.6"

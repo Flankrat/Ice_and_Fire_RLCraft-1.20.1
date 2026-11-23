@@ -214,6 +214,14 @@ public class ServerEvents {
                 IafVillagerRegistry.addBuildingToPool(templatePoolRegistry, processorListRegistry, new ResourceLocation("village/" + type + "/houses"), "iceandfire:village/" + type + "_scriber_1", IafConfig.villagerHouseWeight);
             }
         }
+        // From the 1.12 version: the animal farm, a fenced pen with animals whose wood and animals suit the village
+        if (IafConfig.villageAnimalFarmWeight > 0) {
+            Registry<StructureTemplatePool> templatePoolRegistry = event.getServer().registryAccess().registry(Registries.TEMPLATE_POOL).orElseThrow();
+            Registry<StructureProcessorList> processorListRegistry = event.getServer().registryAccess().registry(Registries.PROCESSOR_LIST).orElseThrow();
+            for (String type : VILLAGE_TYPES) {
+                IafVillagerRegistry.addBuildingToPool(templatePoolRegistry, processorListRegistry, new ResourceLocation("village/" + type + "/houses"), "iceandfire:village/" + type + "_animal_farm_1", IafConfig.villageAnimalFarmWeight);
+            }
+        }
 
     }
 

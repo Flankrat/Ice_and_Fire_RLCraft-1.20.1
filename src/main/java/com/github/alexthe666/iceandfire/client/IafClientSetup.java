@@ -139,6 +139,7 @@ public class IafClientSetup {
         EntityRenderers.register(IafEntityRegistry.DREAD_THRALL.get(), RenderDreadThrall::new);
         EntityRenderers.register(IafEntityRegistry.DREAD_LICH.get(), RenderDreadLich::new);
         EntityRenderers.register(IafEntityRegistry.DREAD_QUEEN.get(), RenderDreadQueen::new);
+        EntityRenderers.register(IafEntityRegistry.SNOW_VILLAGER.get(), RenderSnowVillager::new);
         EntityRenderers.register(IafEntityRegistry.DREAD_LICH_SKULL.get(), RenderDreadLichSkull::new);
         EntityRenderers.register(IafEntityRegistry.DREAD_KNIGHT.get(), RenderDreadKnight::new);
         EntityRenderers.register(IafEntityRegistry.DREAD_HORSE.get(), RenderDreadHorse::new);

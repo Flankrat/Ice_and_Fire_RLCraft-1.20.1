@@ -12,6 +12,11 @@ public class ServerConfig {
     public final ForgeConfigSpec.IntValue dragonDenGoldAmount;
     public final ForgeConfigSpec.BooleanValue spawnGlaciers;
     public final ForgeConfigSpec.IntValue glacierSpawnChance;
+    public final ForgeConfigSpec.BooleanValue generateSnowVillages;
+    public final ForgeConfigSpec.IntValue generateSnowVillageChance;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> snowVillageDimensions;
+    public final ForgeConfigSpec.BooleanValue snowVillageDimensionWhitelist;
+    public final ForgeConfigSpec.BooleanValue allowSnowForSapphireTrade;
     public final ForgeConfigSpec.IntValue oreToStoneRatioForDragonCaves;
     public final ForgeConfigSpec.IntValue dragonEggTime;
     public final ForgeConfigSpec.IntValue dragonGriefing;
@@ -205,6 +210,7 @@ public class ServerConfig {
     public final ForgeConfigSpec.BooleanValue dragonWeaponIceAbility;
     public final ForgeConfigSpec.BooleanValue dragonWeaponLightningAbility;
     public ForgeConfigSpec.IntValue villagerHouseWeight;
+    public ForgeConfigSpec.IntValue villageAnimalFarmWeight;
     public ForgeConfigSpec.BooleanValue allowAttributeOverriding;
     public final ForgeConfigSpec.BooleanValue scaleArmorBreathProtect;
     public final ForgeConfigSpec.BooleanValue hydraHeartPassRegen;
@@ -233,6 +239,11 @@ public class ServerConfig {
 
         this.spawnGlaciers = buildBoolean(builder, "Generate Glaciers", "all", true, "Whether to generate glacier biomes or not");
         this.glacierSpawnChance = buildInt(builder, "Glacier Spawn Weight", "all", 4, 1, 10000, "Glacier Spawn Weight. Higher number = more common");
+        this.generateSnowVillages = buildBoolean(builder, "Generate Snow Villages", "all", true, "Whether to generate snow villages (in cold snowy biomes) or not");
+        this.generateSnowVillageChance = buildInt(builder, "Generate Snow Village Chance", "all", 100, 1, 10000, "About one snow village per this many cold snowy chunks. Lower = more common");
+        this.snowVillageDimensions = buildStringList(builder, "Snow Village Dimensions", List.of("minecraft:overworld"), "Dimensions snow villages can (whitelist) or can't (blacklist) generate in");
+        this.snowVillageDimensionWhitelist = buildBoolean(builder, "Snow Village Dimension Use Whitelist", "all", true, "If true, Snow Village Dimensions is a whitelist; if false, a blacklist");
+        this.allowSnowForSapphireTrade = buildBoolean(builder, "Snow Villager Allow Craftsman Snow Trade", "all", true, "Whether craftsman snow villagers buy snow blocks for sapphires");
 
         this.generateMausoleums = buildBoolean(builder, "Generate Mausoleums", "all", true, "True if mausoleums are allowed to generate");
 
@@ -438,6 +449,7 @@ public class ServerConfig {
         this.ghostAttackStrength = buildDouble(builder, "Ghost Attack Strength", "all", 3F, 0.0F, 10000.0F, "Maximum ghost attack strength.");
         this.ghostSpawnFromPlayerDeaths = buildBoolean(builder, "Ghost Spawn from PvP deaths", "all", true, "True if ghosts can rarely spawn from brutal PvP deaths.");
         this.villagerHouseWeight = buildInt(builder, "Villager Scribe House Weight", "all", 5, 0, 10000, "Villager Scribe House generation weight. Lower = lower chance to spawn");
+        this.villageAnimalFarmWeight = buildInt(builder, "Village Animal Farm Weight", "all", 5, 0, 10000, "Generation weight of the animal farm (a fenced pen with animals) in villages. 0 = none");
 
         this.allowAttributeOverriding = buildBoolean(builder, "Allow Attribute Overriding", "all", true, "Allows attributes for mobs to be overridden via the config file. One might want to disable this if other mods are enabled that change mob attributes e.g armor, health etc...");
         builder.pop();

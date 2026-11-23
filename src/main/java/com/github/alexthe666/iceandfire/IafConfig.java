@@ -21,6 +21,11 @@ public class IafConfig {
     public static int dragonDenGoldAmount = 4;
     public static boolean spawnGlaciers = true;
     public static int glacierSpawnChance = 4;
+    public static boolean generateSnowVillages = true;
+    public static int generateSnowVillageChance = 100;
+    public static Set<ResourceLocation> snowVillageDimensions = Set.of(new ResourceLocation("minecraft:overworld"));
+    public static boolean snowVillageDimensionWhitelist = true;
+    public static boolean allowSnowForSapphireTrade = true;
     public static int oreToStoneRatioForDragonCaves = 45;
     public static int dragonEggTime = 7200;
     public static int dragonGriefing = 0;
@@ -144,6 +149,7 @@ public class IafConfig {
     public static boolean dragonWeaponIceAbility = true;
     public static boolean dragonWeaponLightningAbility = true;
     public static int villagerHouseWeight = 5;
+    public static int villageAnimalFarmWeight = 5;
     public static boolean allowAttributeOverriding = true;
     public static boolean scaleArmorBreathProtect = false;
     public static boolean hydraHeartPassRegen = true;
@@ -240,6 +246,11 @@ public class IafConfig {
             dragonDenGoldAmount = ConfigHolder.SERVER.dragonDenGoldAmount.get();
             spawnGlaciers = ConfigHolder.SERVER.spawnGlaciers.get();
             glacierSpawnChance = ConfigHolder.SERVER.glacierSpawnChance.get();
+            generateSnowVillages = ConfigHolder.SERVER.generateSnowVillages.get();
+            generateSnowVillageChance = ConfigHolder.SERVER.generateSnowVillageChance.get();
+            snowVillageDimensions = parseIds(ConfigHolder.SERVER.snowVillageDimensions.get(), "Snow Village Dimensions");
+            snowVillageDimensionWhitelist = ConfigHolder.SERVER.snowVillageDimensionWhitelist.get();
+            allowSnowForSapphireTrade = ConfigHolder.SERVER.allowSnowForSapphireTrade.get();
             oreToStoneRatioForDragonCaves = ConfigHolder.SERVER.oreToStoneRatioForDragonCaves.get();
             dragonEggTime = ConfigHolder.SERVER.dragonEggTime.get();
             dragonGriefing = ConfigHolder.SERVER.dragonGriefing.get();
@@ -360,6 +371,7 @@ public class IafConfig {
             dragonWeaponIceAbility = ConfigHolder.SERVER.dragonWeaponIceAbility.get();
             dragonWeaponLightningAbility = ConfigHolder.SERVER.dragonWeaponLightningAbility.get();
             villagerHouseWeight = ConfigHolder.SERVER.villagerHouseWeight.get();
+            villageAnimalFarmWeight = ConfigHolder.SERVER.villageAnimalFarmWeight.get();
             allowAttributeOverriding = ConfigHolder.SERVER.allowAttributeOverriding.get();
             pathfindingDebug = ConfigHolder.SERVER.pathfindingDebug.get();
             scaleArmorBreathProtect = ConfigHolder.SERVER.scaleArmorBreathProtect.get();

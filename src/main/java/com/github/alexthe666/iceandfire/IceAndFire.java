@@ -4,6 +4,7 @@ import com.github.alexthe666.iceandfire.block.IafBlockRegistry;
 import com.github.alexthe666.iceandfire.client.ClientProxy;
 import com.github.alexthe666.iceandfire.compat.FirstAidCompat;
 import com.github.alexthe666.iceandfire.compat.ModCompatList;
+import com.github.alexthe666.iceandfire.compat.TerraBlenderCompat;
 import com.github.alexthe666.iceandfire.config.ConfigHolder;
 import com.github.alexthe666.iceandfire.entity.IafEntityRegistry;
 import com.github.alexthe666.iceandfire.entity.IafVillagerRegistry;
@@ -19,6 +20,7 @@ import com.github.alexthe666.iceandfire.recipe.IafBannerPatterns;
 import com.github.alexthe666.iceandfire.recipe.IafRecipeRegistry;
 import com.github.alexthe666.iceandfire.recipe.IafRecipeSerializers;
 import com.github.alexthe666.iceandfire.world.*;
+import com.github.alexthe666.iceandfire.world.structure.IafStructurePieceTypes;
 import com.mojang.serialization.Codec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -86,7 +88,6 @@ public class IceAndFire {
 
                 MinecraftForge.EVENT_BUS.addListener(IceAndFire::onServerStarted);
 
-
                 final DeferredRegister<Codec<? extends BiomeModifier>> biomeModifiers = DeferredRegister
                                 .create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, IceAndFire.MODID);
                 biomeModifiers.register(modBus);
@@ -104,6 +105,7 @@ public class IceAndFire {
                 IafRecipeRegistry.RECIPE_TYPE.register(modBus);
                 IafBannerPatterns.BANNERS.register(modBus);
                 IafStructureTypes.STRUCTURE_TYPES.register(modBus);
+                IafStructurePieceTypes.PIECE_TYPES.register(modBus);
                 IafContainerRegistry.CONTAINERS.register(modBus);
                 IafRecipeSerializers.SERIALIZERS.register(modBus);
                 IafProcessors.PROCESSORS.register(modBus);
@@ -223,6 +225,10 @@ public class IceAndFire {
                 ModCompatList.isEVon = ModList.get().isLoaded("enhancedvisuals");
                 if (ModList.get().isLoaded("firstaid")) {
                         FirstAidCompat.init();
+                }
+                // Region registration has to happen during setup's enqueued work, before worlds load
+                if (ModList.get().isLoaded("terrablender")) {
+                        event.enqueueWork(TerraBlenderCompat::init);
                 }
         }
 

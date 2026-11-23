@@ -196,6 +196,9 @@ public class IafEntityRegistry {
             EntityType.Builder.of(EntityDreadBeast::new, MobCategory.MONSTER).sized(1.2F, 0.9F), "dread_beast");
     public static final RegistryObject<EntityType<EntityDreadScuttler>> DREAD_SCUTTLER = registerEntity(
             EntityType.Builder.of(EntityDreadScuttler::new, MobCategory.MONSTER).sized(1.5F, 1.3F), "dread_scuttler");
+    // From the 1.12 version: the snow villagers of snow villages
+    public static final RegistryObject<EntityType<EntitySnowVillager>> SNOW_VILLAGER = registerEntity(
+            EntityType.Builder.<EntitySnowVillager>of(EntitySnowVillager::new, MobCategory.MISC).sized(0.6F, 1.95F).clientTrackingRange(10), "snow_villager");
     // From the 1.12 version: the Dread Queen boss and the Black Frost dragon she rides
     public static final RegistryObject<EntityType<EntityDreadQueen>> DREAD_QUEEN = registerEntity(
             EntityType.Builder.of(EntityDreadQueen::new, MobCategory.MONSTER).sized(0.6F, 1.8F).setTrackingRange(128), "dread_queen");
@@ -267,6 +270,7 @@ public class IafEntityRegistry {
         creationEvent.put(DREAD_THRALL.get(), EntityDreadThrall.bakeAttributes().build());
         creationEvent.put(DREAD_LICH.get(), EntityDreadLich.bakeAttributes().build());
         creationEvent.put(DREAD_QUEEN.get(), EntityDreadQueen.bakeAttributes().build());
+        creationEvent.put(SNOW_VILLAGER.get(), EntitySnowVillager.bakeAttributes().build());
         creationEvent.put(BLACK_FROST_DRAGON.get(), EntityIceDragon.bakeAttributes().build());
         creationEvent.put(DREAD_BEAST.get(), EntityDreadBeast.bakeAttributes().build());
         creationEvent.put(DREAD_HORSE.get(), EntityDreadHorse.bakeAttributes().build());
