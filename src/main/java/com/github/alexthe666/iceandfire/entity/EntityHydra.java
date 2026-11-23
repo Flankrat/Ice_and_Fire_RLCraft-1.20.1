@@ -82,18 +82,24 @@ public class EntityHydra extends Monster implements IAnimatedEntity, IMultipartE
     public static AttributeSupplier.Builder bakeAttributes() {
         return Mob.createMobAttributes()
             //HEALTH
-            .add(Attributes.MAX_HEALTH, IafConfig.hydraMaxHealth)
+            .add(Attributes.MAX_HEALTH, getSpawnHealth())
             //SPEED
             .add(Attributes.MOVEMENT_SPEED, 0.3D)
             //ATTACK
-            .add(Attributes.ATTACK_DAMAGE, 3.0D)
+            .add(Attributes.ATTACK_DAMAGE, IafConfig.hydraBiteAttackStrength)
             //ARMOR
             .add(Attributes.ARMOR, 1.0D);
     }
 
     @Override
     public void setConfigurableAttributes() {
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(IafConfig.hydraMaxHealth);
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(getSpawnHealth());
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(IafConfig.hydraBiteAttackStrength);
+    }
+
+    // Base Hydra Health, or Hydra Max Health when it's 0
+    private static double getSpawnHealth() {
+        return IafConfig.hydraBaseHealth > 0 ? IafConfig.hydraBaseHealth : IafConfig.hydraMaxHealth;
     }
 
     @Override

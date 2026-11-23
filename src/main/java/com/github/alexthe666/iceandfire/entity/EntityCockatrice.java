@@ -57,6 +57,12 @@ import java.util.List;
 
 public class EntityCockatrice extends TamableAnimal implements IAnimatedEntity, IBlacklistedFromStatues, IVillagerFear, IHasCustomizableAttributes {
 
+    // Cockatrice Spawn Check Rechecks: an extra 1 in (N + 1) roll for natural spawns
+    @Override
+    public boolean checkSpawnRules(@NotNull net.minecraft.world.level.LevelAccessor worldIn, @NotNull net.minecraft.world.entity.MobSpawnType spawnReasonIn) {
+        return this.getRandom().nextInt(IafConfig.cockatriceSpawnCheckChance + 1) == 0 && super.checkSpawnRules(worldIn, spawnReasonIn);
+    }
+
     public static final Animation ANIMATION_JUMPAT = Animation.create(30);
     public static final Animation ANIMATION_WATTLESHAKE = Animation.create(20);
     public static final Animation ANIMATION_BITE = Animation.create(15);

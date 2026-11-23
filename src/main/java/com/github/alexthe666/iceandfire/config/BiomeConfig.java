@@ -15,6 +15,7 @@ import java.util.Map;
 
 public class BiomeConfig {
     public static final Map.Entry<String, SpawnBiomeData> oreGenBiomes = Map.entry("iceandfire:ore_gen_biomes", DefaultBiomes.OVERWORLD);
+    public static final Map.Entry<String, SpawnBiomeData> rubyBiomes = Map.entry("iceandfire:ruby_gen_biomes", DefaultBiomes.HOT_SANDY);
     public static final Map.Entry<String, SpawnBiomeData> sapphireBiomes = Map.entry("iceandfire:sapphire_gen_biomes", DefaultBiomes.VERY_SNOWY);
     public static final Map.Entry<String, SpawnBiomeData> fireLilyBiomes = Map.entry("iceandfire:fire_lily_biomes", DefaultBiomes.VERY_HOT);
     public static final Map.Entry<String, SpawnBiomeData> frostLilyBiomes = Map.entry("iceandfire:frost_lily_biomes", DefaultBiomes.VERY_SNOWY);

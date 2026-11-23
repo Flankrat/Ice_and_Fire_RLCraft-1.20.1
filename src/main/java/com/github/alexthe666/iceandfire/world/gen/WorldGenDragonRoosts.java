@@ -7,6 +7,7 @@ import com.github.alexthe666.iceandfire.entity.EntityDragonBase;
 import com.github.alexthe666.iceandfire.entity.util.HomePosition;
 import com.github.alexthe666.iceandfire.util.WorldUtil;
 import com.github.alexthe666.iceandfire.world.IafWorldData;
+import com.github.alexthe666.iceandfire.world.IafWorldRegistry;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -50,6 +51,10 @@ public abstract class WorldGenDragonRoosts extends Feature<NoneFeatureConfigurat
 
     @Override
     public boolean place(@NotNull final FeaturePlaceContext<NoneFeatureConfiguration> context) {
+        // Dimension lists from the world gen config
+        if (!IafWorldRegistry.isDimensionAllowed(context.level(), true)) {
+            return false;
+        }
         BlockPos origin = WorldGenChunkSafety.centeredSurfaceOrigin(context.level(), context.origin(), Heightmap.Types.WORLD_SURFACE_WG);
 
         // Dragon roosts are land features.  WORLD_SURFACE_WG returns the air block above
@@ -60,7 +65,7 @@ public abstract class WorldGenDragonRoosts extends Feature<NoneFeatureConfigurat
             return false;
         }
 
-        if (!WorldUtil.canGenerate(IafConfig.generateDragonRoostChance, context.level(), context.random(), origin, getId(), true)) {
+        if (!WorldUtil.canGenerate(IafWorldRegistry.getChanceForBiome(context.level(), origin, IafConfig.generateDragonRoostChanceForBiome, IafConfig.generateDragonRoostChance), context.level(), context.random(), origin, getId(), true)) {
             return false;
         }
 

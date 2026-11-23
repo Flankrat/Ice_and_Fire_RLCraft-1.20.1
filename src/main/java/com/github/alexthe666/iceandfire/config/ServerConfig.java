@@ -1,5 +1,7 @@
 package com.github.alexthe666.iceandfire.config;
 
+
+import java.util.List;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ServerConfig {
@@ -19,6 +21,67 @@ public class ServerConfig {
     public final ForgeConfigSpec.IntValue dragonFluteDistance;
     public final ForgeConfigSpec.DoubleValue dragonHealth;
     public final ForgeConfigSpec.IntValue dragonAttackDamage;
+
+    // Options ported from the 1.12 version (each one is read through IafConfig)
+    public final ForgeConfigSpec.BooleanValue generateDragonDens;
+    public final ForgeConfigSpec.BooleanValue generateDragonRoosts;
+    public final ForgeConfigSpec.IntValue generateDragonSkeletonMaximumStage;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> generateDragonDenChanceForBiome;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> generateDragonRoostChanceForBiome;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> dragonDimensionList;
+    public final ForgeConfigSpec.BooleanValue dragonDimensionWhitelist;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> chunkGenDimensionList;
+    public final ForgeConfigSpec.BooleanValue chunkGenDimensionWhitelist;
+    public final ForgeConfigSpec.BooleanValue generateSilverOre;
+    public final ForgeConfigSpec.BooleanValue generateSapphireOre;
+    public final ForgeConfigSpec.BooleanValue generateRubyOre;
+    public final ForgeConfigSpec.BooleanValue generateCyclopsCaves;
+    public final ForgeConfigSpec.BooleanValue generateWanderingCyclops;
+    public final ForgeConfigSpec.BooleanValue generatePixieVillages;
+    public final ForgeConfigSpec.BooleanValue generateSirenIslands;
+    public final ForgeConfigSpec.BooleanValue generateMyrmexColonies;
+    public final ForgeConfigSpec.BooleanValue generateHydraCaves;
+    public final ForgeConfigSpec.BooleanValue spawnDeathWorm;
+    public final ForgeConfigSpec.IntValue deathWormSpawnCheckChance;
+    public final ForgeConfigSpec.IntValue cockatriceSpawnCheckChance;
+    public final ForgeConfigSpec.IntValue trollSpawnCheckChance;
+    public final ForgeConfigSpec.IntValue trollSpawnCheckHeight;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> trollSpawnCheckHeightForBiome;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> trollSpawnTypeForBiome;
+    public final ForgeConfigSpec.BooleanValue spawnHippocampus;
+    public final ForgeConfigSpec.BooleanValue spawnSeaSerpents;
+    public final ForgeConfigSpec.BooleanValue spawnStymphalianBirds;
+    public final ForgeConfigSpec.IntValue dragonFireChargeDamage;
+    public final ForgeConfigSpec.IntValue dragonIceChargeDamage;
+    public final ForgeConfigSpec.IntValue dragonLightningChargeDamage;
+    public final ForgeConfigSpec.IntValue dragonFireExplosionDamage;
+    public final ForgeConfigSpec.IntValue dragonIceExplosionDamage;
+    public final ForgeConfigSpec.IntValue dragonLightningExplosionDamage;
+    public final ForgeConfigSpec.IntValue dragonChargeExplosionDamage;
+    public final ForgeConfigSpec.DoubleValue dragonBiteHeal;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> dragonGriefingBlockChance;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> dragonGriefingEffectChance;
+    public final ForgeConfigSpec.BooleanValue lightningDragonKnockback;
+    public final ForgeConfigSpec.BooleanValue breathDamageBypassImmunities;
+    public final ForgeConfigSpec.BooleanValue dragonAffectedBlocksRevert;
+    public final ForgeConfigSpec.DoubleValue amphithereTameDamage;
+    public final ForgeConfigSpec.DoubleValue hydraBaseHealth;
+    public final ForgeConfigSpec.DoubleValue hydraBiteAttackStrength;
+    public final ForgeConfigSpec.DoubleValue hydraBreathAttackDamage;
+    public final ForgeConfigSpec.BooleanValue dreadTargetingCheckSight;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> dreadTargetingEntityBlacklist;
+    public final ForgeConfigSpec.DoubleValue myrmexSwarmerAttackStrength;
+    public final ForgeConfigSpec.DoubleValue myrmexSwarmerMaxHealth;
+    public final ForgeConfigSpec.IntValue pixieCooldown;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> stoneEntityBlacklist;
+    public final ForgeConfigSpec.BooleanValue stymphalianBirdFeatherProjectileItem;
+    public final ForgeConfigSpec.ConfigValue<List<? extends Double>> chainLightningDamagePerHop;
+    public final ForgeConfigSpec.BooleanValue chainLightningBypassesArmor;
+    public final ForgeConfigSpec.IntValue chainLightningCooldown;
+    public final ForgeConfigSpec.ConfigValue<List<? extends String>> chainLightningEntityBlacklist;
+    public final ForgeConfigSpec.BooleanValue chainLightningParalysis;
+    public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> chainLightningParalysisTicksPerHop;
+    public final ForgeConfigSpec.IntValue chainLightningRange;
     public final ForgeConfigSpec.DoubleValue dragonAttackDamageFire;
     public final ForgeConfigSpec.DoubleValue dragonAttackDamageIce;
     public final ForgeConfigSpec.DoubleValue dragonAttackDamageLightning;
@@ -147,6 +210,13 @@ public class ServerConfig {
         this.generateDragonRoostChance = buildInt(builder, "Generate Dragon Roost Chance", "all", 360, 1, 10000, "1 out of this number chance per chunk for generation");
         this.dragonDenGoldAmount = buildInt(builder, "Dragon Den Gold Amount", "all", 4, 1, 10000, "1 out of this number chance per block that gold will generate in dragon lairs.");
         this.oreToStoneRatioForDragonCaves = buildInt(builder, "Dragon Cave Ore Ratio", "all", 45, 1, 10000, "Ratio of Stone(this number) to Ores in Dragon Caves");
+        this.generateDragonDens = buildBoolean(builder, "Generate Dragon Caves", "all", true, "Whether to generate dragon caves (dens) or not");
+        this.generateDragonRoosts = buildBoolean(builder, "Generate Dragon Roosts", "all", true, "Whether to generate dragon roosts or not");
+        this.generateDragonSkeletonMaximumStage = buildInt(builder, "Generate Dragon Skeletons Max Stage", "all", 5, 1, 5, "The highest life stage a generated dragon skeleton can be");
+        this.generateDragonDenChanceForBiome = buildStringList(builder, "Generate Dragon Caves Biome Chance", List.of(), "Dragon cave chance for specific biomes, as biome_id=chance (1 out of chance per chunk). Overrides Generate Dragon Cave Chance in those biomes");
+        this.generateDragonRoostChanceForBiome = buildStringList(builder, "Generate Dragon Roosts Biome Chance", List.of(), "Dragon roost chance for specific biomes, as biome_id=chance (1 out of chance per chunk). Overrides Generate Dragon Roost Chance in those biomes");
+        this.dragonDimensionList = buildStringList(builder, "Dragon Dimension List", List.of("minecraft:overworld"), "Dimensions (like minecraft:overworld) for dragon caves, roosts and skeletons. A whitelist or blacklist depending on Dragon Dimension Use Whitelist");
+        this.dragonDimensionWhitelist = buildBoolean(builder, "Dragon Dimension Use Whitelist", "all", true, "If true, dragon generation only happens in the Dragon Dimension List. If false, it happens everywhere except those dimensions");
         builder.pop();
         builder.push("Structures-Features");
         this.dangerousWorldGenDistanceLimit = buildInt(builder, "Dangerous World Gen Dist From Spawn", "all", 200, 1, 10000, "How far away dangerous structures(dragon roosts, cyclops caves, etc.) must be from spawn.");
@@ -161,6 +231,12 @@ public class ServerConfig {
 
         this.generateGorgonTemple = buildBoolean(builder, "Generate Gorgon Temple", "all", true, "True if gorgon temples are allowed to spawn");
 
+        this.chunkGenDimensionList = buildStringList(builder, "World Gen Dimension List", List.of("minecraft:overworld"), "Dimensions (like minecraft:overworld) for all Ice and Fire world gen features. A whitelist or blacklist depending on World Gen Dimension Use Whitelist");
+        this.chunkGenDimensionWhitelist = buildBoolean(builder, "World Gen Dimension Use Whitelist", "all", true, "If true, Ice and Fire world gen features only generate in the World Gen Dimension List. If false, they generate everywhere except those dimensions");
+        this.generateSilverOre = buildBoolean(builder, "Generate Silver Ore", "all", true, "Whether to generate silver ore or not");
+        this.generateSapphireOre = buildBoolean(builder, "Generate Sapphire Ore", "all", true, "Whether to generate sapphire ore or not");
+        this.generateRubyOre = buildBoolean(builder, "Generate Ruby Ore", "all", true, "Whether to generate ruby ore in hot, sandy biomes (the ruby ore biome config) or not");
+
         builder.pop();
         builder.pop();
         builder.push("Dragons");
@@ -168,6 +244,9 @@ public class ServerConfig {
         this.dragonGriefing = buildInt(builder, "Dragon Griefing", "all", 0, 0, 2, "Dragon griefing - 2 is no griefing, 1 is breaking weak blocks, 0 is default. This value is also affected by minecrafts mob griefing rule.");
         this.tamedDragonGriefing = buildBoolean(builder, "Tamed Dragon Griefing", "all", true, "True if tamed dragons can follow the griefing rules.");
         this.dragonBlockBreakingDropChance = buildDouble(builder, "Dragon Block Breaking Drop Chance", "all", 0.1F, 0.0F, 1.0F, "The percentage chance for a block to drop as an item when a dragon breaks it.");
+        this.dragonGriefingBlockChance = buildStringList(builder, "Dragon Griefing Block Drop Chance", List.of(), "Drop chance (0-100) for specific blocks broken by a dragon, as block_id=chance. Blocks not listed use Dragon Block Breaking Drop Chance");
+        this.dragonGriefingEffectChance = buildStringList(builder, "Dragon Griefing Block Effect Chance", List.of(), "Chance (0-100) for the break sound and particles to play for specific blocks broken by a dragon, as block_id=chance. Blocks not listed always play them");
+        this.dragonAffectedBlocksRevert = buildBoolean(builder, "Dragon Affected Blocks Revert", "all", true, "If true, charred, frozen and crackled blocks left by dragon breath slowly turn back into their normal block");
         builder.pop();
         builder.push("Attributes");
         this.dragonEggTime = buildInt(builder, "Dragon Egg Hatch Time", "all", 7200, 1, Integer.MAX_VALUE, "How long it takes(in ticks) for a dragon egg to hatch");
@@ -180,6 +259,15 @@ public class ServerConfig {
         this.dragonAttackDamageLightning = buildDouble(builder, "Dragon Attack Damage(Lightning breath)", "all", 3.5F, 0, 10000, "Damage dealt from a successful lightning breath attack. Attack Damage is scaled to by age, so a stage 5 dragon will deal 5x as much as this number");
         this.lightningDragonParalysis = buildBoolean(builder, "Lightning Dragon Paralysis", "all", true, "Apply Lycanites Mobs paralysis to targets hit by lightning dragon breath when Lycanites Mobs is loaded.");
         this.lightningDragonParalysisTicks = buildInt(builder, "Lightning Dragon Paralysis Ticks", "all", 10, 1, 1000, "Duration in ticks of the Lycanites Mobs paralysis applied by lightning dragon breath.");
+        this.lightningDragonKnockback = buildBoolean(builder, "Lightning Dragon Knockback", "all", true, "If true, lightning dragon breath and charges knock their target back");
+        this.breathDamageBypassImmunities = buildBoolean(builder, "Dragon Breath Can Damage Immune Targets", "all", false, "If true, dragon fire also hurts targets that are immune to fire (Fire Resistance, fire-immune mobs)");
+        this.dragonFireChargeDamage = buildInt(builder, "Fire Dragon Charge Damage", "all", 0, 0, 10000, "Damage of a direct hit from a fire dragon charge. 0 uses the fire breath damage times the dragon's stage");
+        this.dragonIceChargeDamage = buildInt(builder, "Ice Dragon Charge Damage", "all", 0, 0, 10000, "Damage of a direct hit from an ice dragon charge. 0 uses the ice breath damage times the dragon's stage");
+        this.dragonLightningChargeDamage = buildInt(builder, "Lightning Dragon Charge Damage", "all", 0, 0, 10000, "Damage of a direct hit from a lightning dragon charge. 0 uses the lightning breath damage times the dragon's stage");
+        this.dragonChargeExplosionDamage = buildInt(builder, "Dragon Charge Explosion Damage", "all", 6, 0, 10000, "Splash damage per dragon stage of a dragon charge explosion (lower further from the center)");
+        this.dragonFireExplosionDamage = buildInt(builder, "Fire Dragon Explosion Damage", "all", 7, 0, 10000, "Damage multiplier of a thrown fire dragon breath bottle explosion");
+        this.dragonIceExplosionDamage = buildInt(builder, "Ice Dragon Explosion Damage", "all", 7, 0, 10000, "Damage multiplier of a thrown ice dragon breath bottle explosion");
+        this.dragonLightningExplosionDamage = buildInt(builder, "Lightning Dragon Explosion Damage", "all", 7, 0, 10000, "Damage multiplier of a thrown lightning dragon breath bottle explosion");
         this.dragonFlightSpeedMod = buildDouble(builder, "Dragon Flight Speed Modifier", "all", 1F, 0.0F, 2.0F, "Change this to slow down or speed up dragon or amphithere flight.");
         this.dragonMovedWronglyFix = buildBoolean(builder, "Dragon Moved Wrongly Error Fix", "all", false, "Enable this if your server is being bombarded with moved wrongly or moved too fast console messages. REQUIRES RESTART!");
         builder.pop();
@@ -188,6 +276,7 @@ public class ServerConfig {
         this.dragonFlightHeight = buildInt(builder, "Dragon Cruise Flight Height", "all", 48, 16, 128, "Cruising height above the ground (in blocks) for dragon AI flight. Escorting dragons fly at 2/3 of this value, hippogryphs at 1/2.");
         this.dragonGoldSearchLength = buildInt(builder, "Dragon Gold Search Length", "all", 30, 0, 10000, "How far away dragons will detect gold blocks being destroyed or chests being opened");
         this.canDragonsHealFromBiting = buildBoolean(builder, "Dragon Bite Heal", "all", true, "Whether the bite attack from a dragon heals them or not.");
+        this.dragonBiteHeal = buildDouble(builder, "Dragon Bite Healing Percentage", "all", 0.5D, 0.0D, 1.0D, "Fraction of a bite's damage that the dragon heals for, when Dragon Bite Heal is on");
         this.canDragonsDespawn = buildBoolean(builder, "Dragons Despawn", "all", true, "True if dragons can despawn. Note that if this is false there may be SERIOUS lag issues.");
         this.doDragonsSleep = buildBoolean(builder, "Tamed Dragons Sleep", "all", true, "True if tamed dragons go to sleep at night.");
         this.dragonDigWhenStuck = buildBoolean(builder, "Dragons Dig When Stuck", "all", true, "True if dragons can break blocks if they get stuck. Turn this off if your dragons randomly explode.");
@@ -210,6 +299,8 @@ public class ServerConfig {
         this.spawnPixiesChance = buildInt(builder, "Spawn Pixies Chance", "all", 60, 1, 10000, "1 out of this number chance per chunk for generation");
         this.pixieVillageSize = buildInt(builder, "Pixie Village Size", "all", 5, 1, 10000, "size of pixie villages");
         this.pixiesStealItems = buildBoolean(builder, "Pixies Steal Items", "all", true, "True if pixies are allowed to steal from players");
+        this.generatePixieVillages = buildBoolean(builder, "Generate Pixie Villages", "all", true, "Whether to generate pixie villages or not");
+        this.pixieCooldown = buildInt(builder, "Pixie Dust Production Cooldown", "all", 24000, 100, Integer.MAX_VALUE, "Ticks between pixie dust drops from a pixie in a jar");
         builder.pop();
         builder.push("Cyclops");
         this.spawnCyclopsCaveChance = buildInt(builder, "Spawn Cyclops Cave Chance", "all", 100, 1, 10000, "1 out of this number chance per chunk for generation");
@@ -219,6 +310,8 @@ public class ServerConfig {
         this.cyclopsAttackStrength = buildDouble(builder, "Cyclops Attack Strength", "all", 15, 1, 10000, "Cyclops attack strength");
         this.cyclopsBiteStrength = buildDouble(builder, "Cyclops Bite Strength", "all", 40, 1, 10000, "Amount of damage done with cyclops bite attack.");
         this.cyclopsGriefing = buildBoolean(builder, "Cyclops Griefing", "all", true, "Whether or not cyclops can break logs or leaves in their way");
+        this.generateCyclopsCaves = buildBoolean(builder, "Generate Cyclops Caves", "all", true, "Whether to generate cyclops caves or not");
+        this.generateWanderingCyclops = buildBoolean(builder, "Generate Wandering Cyclops", "all", true, "Whether to spawn wandering cyclopes during world generation or not");
         builder.pop();
         builder.push("Sirens");
         this.sirenMaxHealth = buildDouble(builder, "Siren Max Health", "all", 50, 1, 10000, "Maximum siren health");
@@ -226,6 +319,7 @@ public class ServerConfig {
         this.generateSirenChance = buildInt(builder, "Spawn Sirens Chance", "all", 400, 1, 10000, "1 out of this number chance per chunk for generation");
         this.sirenMaxSingTime = buildInt(builder, "Siren Max Sing Time", "all", 12000, 100, 24000, "how long(in ticks) can a siren use its sing effect on a player, without a cooldown.");
         this.sirenTimeBetweenSongs = buildInt(builder, "Siren Time Between Songs", "all", 2000, 100, 24000, "how long(in ticks) a siren has to wait after failing to lure in a player");
+        this.generateSirenIslands = buildBoolean(builder, "Generate Siren Islands", "all", true, "Whether to generate siren islands or not");
         builder.pop();
         builder.push("DeathWorms");
         this.deathWormTargetSearchLength = buildInt(builder, "Death Worm Target Search Length", "all", 64, 1, 10000, "How many blocks away can death worms spot potential prey. Note that increasing this could cause lag");
@@ -233,14 +327,17 @@ public class ServerConfig {
         this.deathWormAttackStrength = buildDouble(builder, "Death Worm Base Attack Strength", "all", 3, 1, 10000, "Default deathworm attack strength, this is scaled to the worm's particular size");
         this.deathWormAttackMonsters = buildBoolean(builder, "Death Worms Target Monsters", "all", true, "True if wild deathworms are allowed to target and attack monsters");
         this.deathWormSpawnRate = buildInt(builder, "Death Worm Spawn Weight", "all", 30, 1, 10000, "Deathworm spawn weight. Higher = lower chance to spawn");
+        this.spawnDeathWorm = buildBoolean(builder, "Spawn Death Worms", "all", true, "Whether to spawn death worms during world generation or not");
+        this.deathWormSpawnCheckChance = buildInt(builder, "Death Worm Spawn Check Rechecks", "all", 0, 0, 10, "Extra 1 out of (this + 1) chance a death worm spawn has to pass. Higher = fewer death worms");
         builder.pop();
         builder.push("Cockatrice");
         this.cockatriceMaxHealth = buildDouble(builder, "Cockatrice Health", "all", 40, 1, 10000, "Maximum cockatrice health");
         this.cockatriceChickenSearchLength = buildInt(builder, "Cockatrice chicken Search Length", "all", 32, 1, 10000, "How many blocks away can cockatrices detect chickens. Note that increasing this could cause lag.");
-        this.cockatriceEggChance = buildInt(builder, "Cockatrice chicken Search Length", "all", 30, 1, Integer.MAX_VALUE, "1 out of this number chance per 6000 ticks for a chicken to lay a cockatrice egg.");
+        this.cockatriceEggChance = buildInt(builder, "Chicken Rotten Egg Chance", "all", 30, 1, Integer.MAX_VALUE, "1 out of this number chance per 6000 ticks for a chicken to lay a cockatrice egg.");
         this.chickensLayRottenEggs = buildBoolean(builder, "Chickens Lay Rotten Eggs", "all", true, "True if chickens lay rotten eggs.");
         this.spawnCockatrices = buildBoolean(builder, "Spawn Cockatrices", "all", true, "True if cockatrices are allowed to spawn");
         this.cockatriceSpawnRate = buildInt(builder, "Cockatrice Spawn Weight", "all", 4, 1, 10000, "Cockatrice spawn weight. Lower = lower chance to spawn");
+        this.cockatriceSpawnCheckChance = buildInt(builder, "Cockatrice Spawn Check Rechecks", "all", 0, 0, 10, "Extra 1 out of (this + 1) chance a cockatrice spawn has to pass. Higher = fewer cockatrices");
         builder.pop();
         builder.push("Stymphalians");
         this.stymphalianBirdTargetSearchLength = buildInt(builder, "Stymphalian Bird Target Search Length", "all", 64, 1, 10000, "How many blocks away can stymphalian birds spot potential prey. Note that increasing this could cause lag.");
@@ -251,6 +348,8 @@ public class ServerConfig {
         this.stymphalianBirdsDataTagDrops = buildBoolean(builder, "Stymphalian Birds drop ore dict items", "all", true, "True if stymphalian birds can drop items registered in the ore dictionary to ingotCopper, ingotBronze, nuggetCopper, nuggetBronze.");
         this.stympahlianBirdAttackAnimals = buildBoolean(builder, "Stymphalian Birds Target Animals", "all", false, "True if stymphalian birds are allowed to target and attack animals");
         this.stymphalianBirdSpawnChance = buildInt(builder, "Spawn Stymhphalian Bird Chance", "all", 100, 1, 10000, "1 out of this number chance per chunk for generation");
+        this.spawnStymphalianBirds = buildBoolean(builder, "Spawn Stymphalian Birds", "all", true, "Whether to spawn stymphalian birds during world generation or not");
+        this.stymphalianBirdFeatherProjectileItem = buildBoolean(builder, "Stymphalian Bird Feather Projectile Item", "all", true, "If true, feathers shot by stymphalian birds can turn into a feather item (see Stymphalian Bird Feather Drop Chance)");
         builder.pop();
         builder.push("Trolls");
         this.spawnTrolls = buildBoolean(builder, "Spawn Trolls", "all", true, "True if trolls are allowed to spawn");
@@ -258,16 +357,23 @@ public class ServerConfig {
         this.trollSpawnRate = buildInt(builder, "Troll Spawn Weight", "all", 40, 1, 10000, "Troll spawn weight. Lower = lower chance to spawn");
         this.trollMaxHealth = buildDouble(builder, "Troll Max Health", "all", 50, 1, 10000, "Maximum troll health");
         this.trollAttackStrength = buildDouble(builder, "Troll Attack Strength", "all", 10, 1, 10000, "Troll attack strength");
+        this.trollSpawnCheckChance = buildInt(builder, "Troll Spawn Check Rechecks", "all", 0, 0, 10, "Extra 1 out of this chance a troll spawn has to pass (0 = no extra check). Higher = fewer trolls");
+        this.trollSpawnCheckHeight = buildInt(builder, "Troll Spawn Check Height", "all", 320, -64, 320, "Trolls can't spawn above this Y level");
+        this.trollSpawnCheckHeightForBiome = buildStringList(builder, "Troll Spawn Check Height For Biome", List.of(), "Troll spawn height limit for specific biomes, as biome_id=height. Overrides Troll Spawn Check Height there");
+        this.trollSpawnTypeForBiome = buildStringList(builder, "Troll Spawn Type For Biome", List.of(), "Troll type for specific biomes, as biome_id=type (forest, frost or mountain). Overrides the type picked from the biome");
         builder.pop();
         builder.push("Myrmex");
         this.myrmexPregnantTicks = buildInt(builder, "Myrmex Gestation Length", "all", 2500, 1, 10000, "How many ticks it takes for a Myrmex Queen to produce an egg.");
         this.myrmexEggTicks = buildInt(builder, "Myrmex Hatch Length", "all", 3000, 1, 10000, "How many ticks it takes for a Myrmex Egg to hatch.");
-        this.myrmexLarvaTicks = buildInt(builder, "Myrmex Hatch Length", "all", 35000, 1, 100000, "How many ticks it takes for a Myrmex to move from a larva to a pupa, and from a pupa to an adult.");
+        this.myrmexLarvaTicks = buildInt(builder, "Myrmex Life Stage Length", "all", 35000, 1, 100000, "How many ticks it takes for a Myrmex to move from a larva to a pupa, and from a pupa to an adult.");
         this.myrmexColonyGenChance = buildInt(builder, "Myrmex Colony Gen Chance", "all", 150, 1, 10000, "One out of this number chance per chunk to generate a myrmex hive.");
         this.myrmexColonySize = buildInt(builder, "Myrmex Colony Max Size", "all", 80, 10, 10000, "How many maximum individuals a myrmex colony can have.");
         this.myrmexBaseAttackStrength = buildDouble(builder, "Myrmex Base Attack Strength", "all", 3, 1, 10000, "Base Myrmex(worker) attack strength");
         this.myrmexMaximumWanderRadius = buildInt(builder, "Myrmex Maximum Wander Radius", "all", 50, 25, 4000, "The maximum radius myrmex area allowed to wander/forage");
         this.myrmexHiveIgnoreDaytime = buildBoolean(builder, "Myrmex Hive Ignore Daytime", "all", false, "Myrmex hives will ignore daytime");
+        this.generateMyrmexColonies = buildBoolean(builder, "Generate Myrmex Colonies", "all", true, "Whether to generate myrmex colonies or not");
+        this.myrmexSwarmerAttackStrength = buildDouble(builder, "Myrmex Swarmer Attack Strength", "all", 2, 1, 10000, "Myrmex swarmer attack strength");
+        this.myrmexSwarmerMaxHealth = buildDouble(builder, "Myrmex Swarmer Max Health", "all", 5, 1, 10000, "Maximum myrmex swarmer health");
         builder.pop();
         builder.push("Amphitheres");
         this.spawnAmphitheres = buildBoolean(builder, "Spawn Amphitheres", "all", true, "True if amphitheres are allowed to spawn");
@@ -277,16 +383,19 @@ public class ServerConfig {
         this.amphithereFlightSpeed = buildDouble(builder, "Amphithere Flight Speed", "all", 1.75F, 0.0F, 3.0F, "How fast amphitheres fly.");
         this.amphithereMaxHealth = buildDouble(builder, "Amphithere Max Health", "all", 50, 1, 10000, "Maximum amphithere health");
         this.amphithereAttackStrength = buildDouble(builder, "Amphithere Attack Strength", "all", 7, 1, 10000, "Amphithere attack strength");
+        this.amphithereTameDamage = buildDouble(builder, "Amphithere Taming Bite Damage", "all", 1, 0, 10000, "Damage an untamed amphithere deals each time it bites its rider while being tamed");
         builder.pop();
         builder.push("SeaSerpents");
         this.seaSerpentSpawnChance = buildInt(builder, "Spawn Sea Serpent Chance", "all", 250, 1, 10000, "1 out of this number chance per chunk for generation");
         this.seaSerpentGriefing = buildBoolean(builder, "Sea Serpent Griefing", "all", true, "Whether or not sea serpents can break weak blocks in their way");
         this.seaSerpentBaseHealth = buildDouble(builder, "Sea Serpent Base Health", "all", 20, 1, 10000, "Default sea serpent health, this is scaled to the sea serpent's particular size");
         this.seaSerpentAttackStrength = buildDouble(builder, "Sea Serpent Base Attack Strength", "all", 4, 1, 10000, "Default sea serpent attack strength, this is scaled to the sea serpent's particular size");
+        this.spawnSeaSerpents = buildBoolean(builder, "Spawn Sea Serpents", "all", true, "Whether to spawn sea serpents during world generation or not");
         builder.pop();
         builder.push("Hippocampus");
         this.hippocampusSpawnChance = buildInt(builder, "Spawn Hippocampus Chance", "all", 40, 1, 10000, "1 out of this number chance per chunk for generation");
         this.hippocampusSwimSpeedMod = buildDouble(builder, "Hippocampus Swim Speed Modifier", "all", 1F, 0.0F, 2.0F, "Change this to slow down or speed up hippocampus swimming.");
+        this.spawnHippocampus = buildBoolean(builder, "Spawn Hippocampus", "all", true, "Whether to spawn hippocampi during world generation or not");
         builder.pop();
         builder.push("Hippogryph");
         this.spawnHippogryphs = buildBoolean(builder, "Spawn Hippogryphs", "all", true, "True if hippogryphs are allowed to spawn");
@@ -295,14 +404,21 @@ public class ServerConfig {
         builder.pop();
         builder.push("Gorgons");
         this.gorgonMaxHealth = buildDouble(builder, "Gorgon Max Health", "all", 100, 1, 10000, "Maximum gorgon health");
+        this.stoneEntityBlacklist = buildStringList(builder, "Stone Entity Blacklist", List.of(), "Entities (like minecraft:wither) that gorgons and the gorgon head can't turn to stone, on top of the iceandfire:immune_to_gorgon_stone tag");
         builder.pop();
         builder.push("Others");
         this.spawnLiches = buildBoolean(builder, "Spawn Liches", "all", true, "True if dread liches are allowed to spawn");
         this.lichSpawnRate = buildInt(builder, "Lich Spawn Weight", "all", 2, 1, 10000, "Dread Lich spawn weight. Lower = lower chance to spawn");
         this.lichSpawnChance = buildInt(builder, "Lich Spawn Chance", "all", 30, 1, 10000, "Dread Lich spawn chance. Lower = higher chance to spawn");
+        this.dreadTargetingCheckSight = buildBoolean(builder, "Dread Targeting Check Sight", "all", true, "If true, dread mobs need to see a target before attacking it");
+        this.dreadTargetingEntityBlacklist = buildStringList(builder, "Dread Targeting Entity Blacklist", List.of(), "Entities (like minecraft:villager) that dread mobs won't target");
 
         this.hydraMaxHealth = buildDouble(builder, "Hydra Max Health", "all", 250, 1, 10000, "Maximum hydra health");
         this.generateHydraChance = buildInt(builder, "Hydra Caves Gen Chance", "all", 60, 1, 10000, "One out of this number chance per chunk to generate a hydra cave.");
+        this.generateHydraCaves = buildBoolean(builder, "Generate Hydra Caves", "all", true, "Whether to generate hydra caves or not");
+        this.hydraBaseHealth = buildDouble(builder, "Base Hydra Health", "all", 0, 0, 100000, "Health a hydra spawns with. 0 uses Hydra Max Health. Hydra Max Health still sets how much damage cuts off a head");
+        this.hydraBiteAttackStrength = buildDouble(builder, "Hydra Attack Strength", "all", 3, 0, 10000, "Hydra bite attack strength");
+        this.hydraBreathAttackDamage = buildDouble(builder, "Hydra Breath Attack Damage", "all", 2, 0, 10000, "Damage of a hydra breath hit");
 
         this.ghostMaxHealth = buildDouble(builder, "Ghost Max Health", "all", 30F, 1.0F, 10000.0F, "Maximum ghost health.");
         this.ghostAttackStrength = buildDouble(builder, "Ghost Attack Strength", "all", 3F, 0.0F, 10000.0F, "Maximum ghost attack strength.");
@@ -320,6 +436,15 @@ public class ServerConfig {
         this.dragonWeaponIceAbility = buildBoolean(builder, "Dragon Bone Ice Abilities", "all", true, "True if the dragon bone ice sword freezes attackers.");
         this.dragonWeaponLightningAbility = buildBoolean(builder, "Dragon Bone Lightning Abilities", "all", true, "True if the dragon bone lightning sword strikes attackers.");
         builder.pop();
+        builder.push("Chain Lightning");
+        this.chainLightningDamagePerHop = builder.comment("Damage of each hop of chain lightning (lightning dragon bone weapons, blooded armor), first hop first. The number of entries is the number of hops").translation("Chain Lightning Base Damage").defineList("Chain Lightning Base Damage", List.of(5.0D, 4.0D, 3.0D, 2.0D, 1.0D), o -> o instanceof Number);
+        this.chainLightningBypassesArmor = buildBoolean(builder, "Chain Lightning Bypasses Armor", "all", true, "If true, chain lightning damage ignores armor");
+        this.chainLightningCooldown = buildInt(builder, "Chain Lightning Cooldown", "all", 10, 0, 10000, "Ticks the weapon is on cooldown after it makes chain lightning");
+        this.chainLightningEntityBlacklist = buildStringList(builder, "Chain Lightning Entity Blacklist", List.of(), "Entities (like minecraft:villager) that chain lightning won't jump to");
+        this.chainLightningParalysis = buildBoolean(builder, "Chain Lightning Paralysis", "all", false, "If true, every hop applies Lycanites Mobs paralysis (needs Lycanites Mobs)");
+        this.chainLightningParalysisTicksPerHop = builder.comment("Paralysis length in ticks for each hop, first hop first").translation("Chain Lightning Paralysis Ticks").defineList("Chain Lightning Paralysis Ticks", List.of(10, 8, 6, 4, 2), o -> o instanceof Integer);
+        this.chainLightningRange = buildInt(builder, "Chain Lightning Range", "all", 8, 1, 64, "How far chain lightning can jump from one target to the next, in blocks");
+        builder.pop();
         builder.push("Pathfinding");
         this.dragonPathfindingThreads = buildInt(builder, "Dragon Pathfinding Threads", "all", 3, 1, Integer.MAX_VALUE, "Maximum threads to use for dragon/myrmex pathfinding. Increase this number if pathing is slow and you have many cores.");
         this.maxDragonPathingNodes = buildInt(builder, "Dragon Max Pathfinding Nodes", "all", 5000, 1, Integer.MAX_VALUE, "Maximum nodes for dragons/myrmex to path too. Decrease this is dragon pathfinding is super slow or intensive.");
@@ -333,6 +458,11 @@ public class ServerConfig {
         this.cyclopsEyeWeaknessApply = buildBoolean(builder, "Cyclops Eye gives enemy weakness", "all", true, "Enable cyclops eye passive gives nearby enemies weakness.");
 
         builder.pop();
+    }
+
+    // A list of strings; entries are checked when they're read, so a typo only skips that entry
+    private static ForgeConfigSpec.ConfigValue<List<? extends String>> buildStringList(ForgeConfigSpec.Builder builder, String name, List<String> defaultValue, String comment) {
+        return builder.comment(comment).translation(name).defineList(name, defaultValue, o -> o instanceof String);
     }
 
     private static ForgeConfigSpec.BooleanValue buildBoolean(ForgeConfigSpec.Builder builder, String name, String catagory, boolean defaultValue, String comment) {

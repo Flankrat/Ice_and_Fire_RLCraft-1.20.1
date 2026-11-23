@@ -52,8 +52,15 @@ public class EntityDragonLightningCharge extends EntityDragonCharge implements I
     }
 
     @Override
+    public float getChargeDamage() {
+        return IafConfig.dragonLightningChargeDamage;
+    }
+
+    @Override
     protected void onDirectHit(LivingEntity target, EntityDragonBase dragon) {
-        target.knockback(0.9D, dragon.getX() - target.getX(), dragon.getZ() - target.getZ());
+        if (IafConfig.lightningDragonKnockback) {
+            target.knockback(0.9D, dragon.getX() - target.getX(), dragon.getZ() - target.getZ());
+        }
         if (IafConfig.lightningDragonParalysis) {
             LycanitesCompat.applyParalysis(target, IafConfig.lightningDragonParalysisTicks);
         }

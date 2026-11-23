@@ -1,6 +1,7 @@
 package com.github.alexthe666.iceandfire.enums;
 
 import com.github.alexthe666.citadel.server.item.CustomArmorMaterial;
+import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.config.BiomeConfig;
 import com.github.alexthe666.iceandfire.item.IafItemRegistry;
 import com.github.alexthe666.iceandfire.item.ItemTrollArmor;
@@ -61,6 +62,15 @@ public enum EnumTroll {
     }
 
     public static EnumTroll getBiomeType(Holder<Biome> biome) {
+        // Troll Spawn Type For Biome overrides the type picked from the biome configs
+        String forced = biome.unwrapKey().map(key -> IafConfig.trollSpawnTypeForBiome.get(key.location())).orElse(null);
+        if (forced != null) {
+            for (EnumTroll type : values()) {
+                if (type.name().equalsIgnoreCase(forced)) {
+                    return type;
+                }
+            }
+        }
         List<EnumTroll> types = new ArrayList<>();
         if (BiomeConfig.test(BiomeConfig.snowyTrollBiomes, biome)) {
             types.add(EnumTroll.FROST);

@@ -1,5 +1,6 @@
 package com.github.alexthe666.iceandfire.entity.tile;
 
+import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.IceAndFire;
 import com.github.alexthe666.iceandfire.entity.EntityPixie;
 import com.github.alexthe666.iceandfire.entity.IafEntityRegistry;
@@ -112,7 +113,7 @@ public class TileEntityJar extends BlockEntity {
                 pos.getY() + (double) (entityJar.rand.nextFloat() * PARTICLE_HEIGHT),
                 pos.getZ() + 0.5F + (double) (entityJar.rand.nextFloat() * PARTICLE_WIDTH * 2F) - PARTICLE_WIDTH, EntityPixie.PARTICLE_RGB[entityJar.pixieType][0], EntityPixie.PARTICLE_RGB[entityJar.pixieType][1], EntityPixie.PARTICLE_RGB[entityJar.pixieType][2]);
         }
-        if (entityJar.ticksExisted % 24000 == 0 && !entityJar.hasProduced && entityJar.hasPixie) {
+        if (entityJar.ticksExisted % IafConfig.pixieCooldown == 0 && !entityJar.hasProduced && entityJar.hasPixie) {
             entityJar.hasProduced = true;
             if (!level.isClientSide) {
                 IceAndFire.sendMSGToAll(new MessageUpdatePixieJar(pos.asLong(), entityJar.hasProduced));

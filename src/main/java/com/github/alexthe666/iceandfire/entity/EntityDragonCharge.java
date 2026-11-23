@@ -132,7 +132,8 @@ public abstract class EntityDragonCharge extends Projectile implements IDragonPr
                         return;
                     }
                     if (shootingEntity instanceof EntityDragonBase) {
-                        float damageAmount = getDamage() * ((EntityDragonBase) shootingEntity).getDragonStage();
+                        // A configured charge damage is flat (as in 1.12); 0 keeps breath damage times stage
+                        float damageAmount = getChargeDamage() > 0 ? getChargeDamage() : getDamage() * ((EntityDragonBase) shootingEntity).getDragonStage();
 
                         EntityDragonBase shootingDragon = (EntityDragonBase) shootingEntity;
                         Entity cause = shootingDragon.getRidingPlayer() != null ? shootingDragon.getRidingPlayer() : shootingDragon;
@@ -170,6 +171,11 @@ public abstract class EntityDragonCharge extends Projectile implements IDragonPr
     public abstract void destroyArea(Level world, BlockPos center, EntityDragonBase destroyer);
 
     public abstract float getDamage();
+
+    /** Flat direct-hit damage from the config, or 0 to use {@link #getDamage()} times the dragon's stage. */
+    public float getChargeDamage() {
+        return 0;
+    }
 
     /**
      * Element-specific direct-hit behaviour kept separate from block-griefing/explosion logic,

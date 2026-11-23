@@ -55,10 +55,14 @@ public abstract class WorldGenDragonCave extends Feature<NoneFeatureConfiguratio
 
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+        // Dimension lists from the world gen config
+        if (!IafWorldRegistry.isDimensionAllowed(context.level(), true)) {
+            return false;
+        }
         WorldGenLevel worldIn = context.level();
         RandomSource rand = context.random();
         BlockPos position = context.origin();
-        if (rand.nextInt(IafConfig.generateDragonDenChance) != 0 || !IafWorldRegistry.isFarEnoughFromSpawn(worldIn, position) || !IafWorldRegistry.isFarEnoughFromDangerousGen(worldIn, position, getId(), getFeatureType())) {
+        if (rand.nextInt(IafWorldRegistry.getChanceForBiome(worldIn, position, IafConfig.generateDragonDenChanceForBiome, IafConfig.generateDragonDenChance)) != 0 || !IafWorldRegistry.isFarEnoughFromSpawn(worldIn, position) || !IafWorldRegistry.isFarEnoughFromDangerousGen(worldIn, position, getId(), getFeatureType())) {
             return false;
         }
         boolean isMale = rand.nextBoolean();

@@ -260,9 +260,9 @@ public class ServerEvents {
             }
             event.setAmount(event.getAmount() * multi);
         }
-        if (IafConfig.scaleArmorBreathProtect && (event.getSource().is(IafDamageRegistry.DRAGON_FIRE_TYPE) || event.getSource().is(IafDamageRegistry.DRAGON_ICE_TYPE) || event.getSource().is(IafDamageRegistry.DRAGON_LIGHTNING_TYPE))) {
+        if (IafConfig.scaleArmorBreathProtect && ((event.getSource().is(IafDamageRegistry.DRAGON_FIRE_TYPE) || event.getSource().is(IafDamageRegistry.DRAGON_FIRE_UNBLOCKABLE_TYPE)) || event.getSource().is(IafDamageRegistry.DRAGON_ICE_TYPE) || event.getSource().is(IafDamageRegistry.DRAGON_LIGHTNING_TYPE))) {
 
-            if (event.getSource().is(IafDamageRegistry.DRAGON_FIRE_TYPE) && ItemBloodedArmor.hasFullArmorSet(event.getEntity(), BloodedDragonType.DragonElement.FIRE)) {
+            if ((event.getSource().is(IafDamageRegistry.DRAGON_FIRE_TYPE) || event.getSource().is(IafDamageRegistry.DRAGON_FIRE_UNBLOCKABLE_TYPE)) && ItemBloodedArmor.hasFullArmorSet(event.getEntity(), BloodedDragonType.DragonElement.FIRE)) {
                 event.setCanceled(true);
                 return;
             }

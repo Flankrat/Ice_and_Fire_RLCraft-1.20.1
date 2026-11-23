@@ -22,13 +22,18 @@ public class SpawnDeathWorm extends Feature<NoneFeatureConfiguration> {
 
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+        // Dimension lists from the world gen config
+        if (!IafWorldRegistry.isDimensionAllowed(context.level(), false)) {
+            return false;
+        }
         WorldGenLevel worldIn = context.level();
         RandomSource rand = context.random();
         BlockPos position = context.origin();
         position = worldIn.getHeightmapPos(Heightmap.Types.WORLD_SURFACE_WG, position.offset(8, 0, 8));
 
         if (IafWorldRegistry.isFarEnoughFromSpawn(worldIn, position)) {
-            if (rand.nextInt(IafConfig.deathWormSpawnRate + 1) == 0) {
+            // Death Worm Spawn Check Rechecks adds a second roll on top of the spawn rate
+            if (rand.nextInt(IafConfig.deathWormSpawnRate + 1) == 0 && rand.nextInt(IafConfig.deathWormSpawnCheckChance + 1) == 0) {
                 EntityDeathWorm deathWorm = IafEntityRegistry.DEATH_WORM.get().create(worldIn.getLevel());
                 deathWorm.setPos(position.getX() + 0.5F, position.getY() + 1, position.getZ() + 0.5F);
                 deathWorm.finalizeSpawn(worldIn, worldIn.getCurrentDifficultyAt(position), MobSpawnType.CHUNK_GENERATION, null, null);

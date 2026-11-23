@@ -117,8 +117,13 @@ public class EntityTroll extends Monster implements IAnimatedEntity, IVillagerFe
     public boolean checkSpawnRules(LevelAccessor worldIn, @NotNull MobSpawnType spawnReasonIn) {
         BlockPos pos = this.blockPosition();
         BlockPos heightAt = worldIn.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos);
-        boolean rngCheck = true;
-        return rngCheck && pos.getY() < heightAt.getY() - 10 && super.checkSpawnRules(worldIn, spawnReasonIn);
+        // Troll Spawn Check Rechecks: an extra 1 in N roll (0 = none)
+        boolean rngCheck = IafConfig.trollSpawnCheckChance <= 0 || this.getRandom().nextInt(IafConfig.trollSpawnCheckChance) == 0;
+        // Troll Spawn Check Height (or the biome's override): no spawning above this Y, except from spawners (as in 1.12)
+        int maxHeight = worldIn.getBiome(pos).unwrapKey()
+            .map(key -> IafConfig.trollSpawnCheckHeightForBiome.getOrDefault(key.location(), IafConfig.trollSpawnCheckHeight))
+            .orElse(IafConfig.trollSpawnCheckHeight);
+        return rngCheck && (spawnReasonIn == MobSpawnType.SPAWNER || pos.getY() <= maxHeight) && pos.getY() < heightAt.getY() - 10 && super.checkSpawnRules(worldIn, spawnReasonIn);
     }
 
     @Override

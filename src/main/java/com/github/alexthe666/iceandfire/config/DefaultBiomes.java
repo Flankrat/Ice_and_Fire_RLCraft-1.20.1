@@ -61,6 +61,11 @@ public class DefaultBiomes {
             .addBiomeEntry(BiomeEntryType.BIOME_TAG, false, IS_HOT_OVERWORLD.location().toString(), 0)
             .addBiomeEntry(BiomeEntryType.REGISTRY_NAME, false, "byg:firecracker_shrubland", 1);
 
+    // Hot and sandy biomes (deserts, badlands), where the 1.12 version generated ruby ore
+    public static final SpawnBiomeData HOT_SANDY = new SpawnBiomeData()
+            .addBiomeEntry(BiomeEntryType.BIOME_TAG, false, IS_HOT_OVERWORLD.location().toString(), 0)
+            .addBiomeEntry(BiomeEntryType.BIOME_TAG, false, IS_SANDY.location().toString(), 0);
+
     public static final SpawnBiomeData VERY_SNOWY = new SpawnBiomeData()
             .addBiomeEntry(BiomeEntryType.BIOME_TAG, false, IS_OVERWORLD.location().toString(), 0)
             .addBiomeEntry(BiomeEntryType.BIOME_TAG, false, IS_SNOWY.location().toString(), 0)

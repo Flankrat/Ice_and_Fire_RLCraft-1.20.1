@@ -63,6 +63,11 @@ public class EntityDragonIceCharge extends EntityDragonCharge {
     }
 
     @Override
+    public float getChargeDamage() {
+        return IafConfig.dragonIceChargeDamage;
+    }
+
+    @Override
     protected void onDirectHit(LivingEntity target, EntityDragonBase dragon) {
         EntityDataProvider.getCapability(target).ifPresent(data -> data.frozenData.setFrozen(target, 200));
     }
