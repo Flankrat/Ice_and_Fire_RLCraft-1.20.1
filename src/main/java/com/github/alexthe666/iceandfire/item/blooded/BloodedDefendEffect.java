@@ -14,17 +14,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Blooded armor's "defend" mode, as in the 1.12 version: when a mob hits the wearer in melee, a blooded armor
- * piece strikes back at the attacker with its element. With First Aid the piece on the hit body part fires;
+ * Blooded armor's set effect, as in the 1.12 version (the armor only defends; it adds nothing to the wearer's own
+ * hits): when a mob hits the wearer in melee, a blooded armor piece strikes back at the attacker with its element. With First Aid the piece on the hit body part fires;
  * without it, a random piece fires, and only when all four pieces are blooded (any elements). The pieces share
  * Blooded Dragon Armor Set Effect Cooldown.
  */
 public final class BloodedDefendEffect {
     private BloodedDefendEffect() {
-    }
-
-    public static boolean isDefendMode() {
-        return "defend".equalsIgnoreCase(IafConfig.bloodedArmorSetEffectMode);
     }
 
     /** Melee hits only: not arrows, fire, explosions or magic, and the attacker is the direct source. */
@@ -73,12 +69,10 @@ public final class BloodedDefendEffect {
                 }
                 ChainLightningUtils.createChainLightning(wearer.level(), attacker, wearer, 0, false);
             }
-            // arcane burst around the attacker (it also knocks everything back)
-            case GOLD -> BloodedArcaneBurst.burst(wearer, attacker, null);
+            // gold dragon magic at the attacker only
+            case GOLD -> BloodedArcaneStrike.strike(wearer, attacker);
         }
-        if (armor.getDragonType().getElement() != BloodedDragonType.DragonElement.GOLD) {
-            attacker.knockback(1.0F, wearer.getX() - attacker.getX(), wearer.getZ() - attacker.getZ());
-        }
+        attacker.knockback(1.0F, wearer.getX() - attacker.getX(), wearer.getZ() - attacker.getZ());
     }
 
     // Starts the shared cooldown if it isn't running; the cooldown is shown on the worn chestplate

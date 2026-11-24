@@ -233,7 +233,6 @@ public class IafConfig {
     public static double tideTridentUnderwaterDamageMultiplier = 1;
     public static double fishingSpearThrownDamage = 5;
     public static boolean fishingSpearCatchesFish = true;
-    public static String bloodedArmorSetEffectMode = "attack";
     public static int bloodedDragonArmorSetEffectCooldown = 0;
 
     public static void bakeClient(final ModConfig config) {
@@ -464,7 +463,6 @@ public class IafConfig {
             tideTridentUnderwaterDamageMultiplier = ConfigHolder.SERVER.tideTridentUnderwaterDamageMultiplier.get();
             fishingSpearThrownDamage = ConfigHolder.SERVER.fishingSpearThrownDamage.get();
             fishingSpearCatchesFish = ConfigHolder.SERVER.fishingSpearCatchesFish.get();
-            bloodedArmorSetEffectMode = ConfigHolder.SERVER.bloodedArmorSetEffectMode.get();
             bloodedDragonArmorSetEffectCooldown = ConfigHolder.SERVER.bloodedDragonArmorSetEffectCooldown.get();
         } catch (Exception e) {
             IceAndFire.LOGGER.warn("An exception was caused trying to load the common config for Ice and Fire.");
