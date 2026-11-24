@@ -35,6 +35,14 @@ public class CommonProxy {
         }
     }
 
+    // The client options (like the model choices) apply as soon as the file is edited
+    @SubscribeEvent
+    public static void onModConfigReload(final ModConfigEvent.Reloading event) {
+        if (event.getConfig().getSpec() == ConfigHolder.CLIENT_SPEC) {
+            IafConfig.bakeClient(event.getConfig());
+        }
+    }
+
     public void setReferencedHive(MyrmexHive hive) {
 
     }
