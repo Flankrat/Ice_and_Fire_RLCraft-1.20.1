@@ -87,6 +87,15 @@ public class IceAndFire {
                 PROXY.init();
 
                 MinecraftForge.EVENT_BUS.addListener(IceAndFire::onServerStarted);
+                // send Dragonforge Mode to a joining player, or to everyone on /reload, before recipes and tags
+                MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.OnDatapackSyncEvent event) -> {
+                        MessageSyncDragonforgeMode message = new MessageSyncDragonforgeMode("individual".equalsIgnoreCase(IafConfig.dragonforgeMode));
+                        if (event.getPlayer() != null) {
+                                sendMSGToPlayer(message, event.getPlayer());
+                        } else {
+                                event.getPlayerList().getPlayers().forEach(player -> sendMSGToPlayer(message, player));
+                        }
+                });
 
                 final DeferredRegister<Codec<? extends BiomeModifier>> biomeModifiers = DeferredRegister
                                 .create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, IceAndFire.MODID);
@@ -224,6 +233,10 @@ public class IceAndFire {
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageChainLightningFX.class,
                                 MessageChainLightningFX::write, MessageChainLightningFX::read,
                                 MessageHandler.handle(MessageChainLightningFX.Handler::handle));
+                // server to client only: a client can't send it to the server
+                NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageSyncDragonforgeMode.class,
+                                MessageSyncDragonforgeMode::write, MessageSyncDragonforgeMode::read,
+                                MessageSyncDragonforgeMode::handle, java.util.Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 event.enqueueWork(() -> {
                         PROXY.setup();
                         IafLootRegistry.init();

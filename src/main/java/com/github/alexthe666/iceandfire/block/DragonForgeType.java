@@ -56,9 +56,21 @@ public enum DragonForgeType implements StringRepresentable {
     /** The dragon types that have their own forge blocks in individual mode. */
     public static final DragonForgeType[] DRAGON_TYPES = {FIRE, ICE, LIGHTNING, GOLD};
 
-    /** True when Dragonforge Mode is "individual": per-type forge blocks work and the shared ones don't. */
+    // the mode the server sent this client (MessageSyncDragonforgeMode); null when not connected to a server
+    private static volatile String serverMode;
+
+    /** Client: the server's Dragonforge Mode (null on disconnect, to fall back to the local config). */
+    public static void setServerMode(@javax.annotation.Nullable String mode) {
+        serverMode = mode;
+    }
+
+    /**
+     * True when Dragonforge Mode is "individual": per-type forge blocks work and the shared ones don't. On a client
+     * connected to a server this is the server's setting; otherwise the config.
+     */
     public static boolean individualForges() {
-        return "individual".equalsIgnoreCase(com.github.alexthe666.iceandfire.IafConfig.dragonforgeMode);
+        String mode = serverMode != null ? serverMode : com.github.alexthe666.iceandfire.IafConfig.dragonforgeMode;
+        return "individual".equalsIgnoreCase(mode);
     }
 
     /** Whether a forge block with this fixed type (null = the shared block) works in the current mode. */
