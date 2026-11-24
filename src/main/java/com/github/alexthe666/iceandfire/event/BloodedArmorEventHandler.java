@@ -24,7 +24,11 @@ public class BloodedArmorEventHandler {
 
         // Attack mode: the wearer's hits carry the set's element
         if (!BloodedDefendEffect.isDefendMode()) {
-            BloodedSetEffect.tryApplySetEffect(player, target, event.getAmount());
+            float extra = BloodedSetEffect.tryApplySetEffect(player, target, event.getAmount());
+            if (extra > 0.0F) {
+                // LivingDamageEvent's amount is already past armor, so the added burst damage ignores armor like magic
+                event.setAmount(event.getAmount() + extra);
+            }
         }
     }
 

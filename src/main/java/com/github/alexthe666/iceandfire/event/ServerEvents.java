@@ -43,6 +43,7 @@ import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
@@ -278,7 +279,8 @@ public class ServerEvents {
             }
             event.setAmount(event.getAmount() * multi);
         }
-        if (IafConfig.scaleArmorBreathProtect && ((event.getSource().is(IafDamageRegistry.DRAGON_FIRE_TYPE) || event.getSource().is(IafDamageRegistry.DRAGON_FIRE_UNBLOCKABLE_TYPE)) || event.getSource().is(IafDamageRegistry.DRAGON_ICE_TYPE) || event.getSource().is(IafDamageRegistry.DRAGON_LIGHTNING_TYPE))) {
+        boolean goldBreath = isGoldDragonMagic(event.getSource());
+        if (IafConfig.scaleArmorBreathProtect && ((event.getSource().is(IafDamageRegistry.DRAGON_FIRE_TYPE) || event.getSource().is(IafDamageRegistry.DRAGON_FIRE_UNBLOCKABLE_TYPE)) || event.getSource().is(IafDamageRegistry.DRAGON_ICE_TYPE) || event.getSource().is(IafDamageRegistry.DRAGON_LIGHTNING_TYPE) || goldBreath)) {
 
             if ((event.getSource().is(IafDamageRegistry.DRAGON_FIRE_TYPE) || event.getSource().is(IafDamageRegistry.DRAGON_FIRE_UNBLOCKABLE_TYPE)) && ItemBloodedArmor.hasFullArmorSet(event.getEntity(), BloodedDragonType.DragonElement.FIRE)) {
                 event.setCanceled(true);
@@ -289,6 +291,10 @@ public class ServerEvents {
                 return;
             }
             if (event.getSource().is(IafDamageRegistry.DRAGON_LIGHTNING_TYPE) && ItemBloodedArmor.hasFullArmorSet(event.getEntity(), BloodedDragonType.DragonElement.LIGHTNING)) {
+                event.setCanceled(true);
+                return;
+            }
+            if (goldBreath && ItemBloodedArmor.hasFullArmorSet(event.getEntity(), BloodedDragonType.DragonElement.GOLD)) {
                 event.setCanceled(true);
                 return;
             }
@@ -308,6 +314,10 @@ public class ServerEvents {
             }
             event.setAmount(event.getAmount() * multi);
         }
+    }
+
+    private static boolean isGoldDragonMagic(DamageSource source) {
+        return (source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC)) && source.getEntity() instanceof EntityGoldDragon;
     }
 
     @SubscribeEvent

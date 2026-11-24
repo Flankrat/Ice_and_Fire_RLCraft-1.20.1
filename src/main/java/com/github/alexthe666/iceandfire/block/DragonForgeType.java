@@ -1,5 +1,6 @@
 package com.github.alexthe666.iceandfire.block;
 
+import com.github.alexthe666.iceandfire.entity.DragonType;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +12,8 @@ public enum DragonForgeType implements StringRepresentable {
     NONE("none", 0),
     FIRE("fire", 0),
     ICE("ice", 1),
-    LIGHTNING("lightning", 2);
+    LIGHTNING("lightning", 2),
+    GOLD("gold", 3);
 
     private final String name;
     private final int legacyId;
@@ -35,11 +37,22 @@ public enum DragonForgeType implements StringRepresentable {
         return switch (id) {
             case 1 -> ICE;
             case 2 -> LIGHTNING;
+            case 3 -> GOLD;
             default -> FIRE;
         };
     }
 
     /** 判断是否为有效龙类型（非NONE） */
+    public static DragonForgeType fromDragonType(DragonType type) {
+        if (type == DragonType.ICE)
+            return ICE;
+        if (type == DragonType.LIGHTNING)
+            return LIGHTNING;
+        if (type == DragonType.GOLD)
+            return GOLD;
+        return FIRE;
+    }
+
     public boolean isActive() {
         return this != NONE;
     }

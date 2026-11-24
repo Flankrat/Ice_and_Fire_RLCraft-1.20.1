@@ -52,6 +52,14 @@ public class IafDragonDestructionManager {
             statusDuration = 3;
             damageScale = (float) IafConfig.dragonAttackDamageLightning;
             forgeType = DragonForgeType.LIGHTNING;
+        } else if (dragon.dragonType == DragonType.GOLD) {
+            // Gold breath never harms blocks: it only powers dragon forges
+            BlockPos.betweenClosedStream(center.offset(-1, -1, -1), center.offset(1, 1, 1)).forEach(position -> {
+                if (level.getBlockEntity(position) instanceof TileEntityDragonforgeInput forge) {
+                    forge.onHitWithFlame(DragonForgeType.GOLD);
+                }
+            });
+            return;
         } else {
             return;
         }

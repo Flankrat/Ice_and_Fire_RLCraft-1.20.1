@@ -196,6 +196,7 @@ public class ServerConfig {
     public final ForgeConfigSpec.BooleanValue explosiveDragonBreath;
     public final ForgeConfigSpec.DoubleValue weezerTinkersDisarmChance; // FIXME :: Unused
     public final ForgeConfigSpec.BooleanValue chunkLoadSummonCrystal;
+    public final ForgeConfigSpec.BooleanValue dragonforgeInvalidRecipesMakeAsh;
     public ForgeConfigSpec.IntValue dangerousWorldGenDistanceLimit;
     public ForgeConfigSpec.IntValue dangerousWorldGenSeparationLimit;
     public final ForgeConfigSpec.DoubleValue dragonFlightSpeedMod;
@@ -460,6 +461,7 @@ public class ServerConfig {
         this.weezerTinkers = buildBoolean(builder, "Weezer", "all", true, "Disable this to remove easter egg with tinkers installed.");
         this.weezerTinkersDisarmChance = buildDouble(builder, "Easter Egg Tinkers Tool Disarm chance", "all", 0.2F, 0F, 1F, "Percentage of critical strike that will disarm with easter egg tinkers material.");
         this.chunkLoadSummonCrystal = buildBoolean(builder, "Chunk Load Summon Crystal", "all", true, "True if the summon crystal can load chunks to find dragons.");
+        this.dragonforgeInvalidRecipesMakeAsh = buildBoolean(builder, "Dragonforge Invalid Recipes Make Ash", "all", true, "True if a dragon forge cooks items that have no recipe for the breathing dragon's type into ash (or dragon ice). False: the forge only lures, and takes breath from, dragons whose type has a recipe for the items in it, so nothing is ever turned into ash.");
         this.manuscriptsInVanillaChests = buildBoolean(builder, "Manuscripts In Vanilla Chests", "all", false, "If true, dungeon, mineshaft, desert and jungle temple and stronghold chests can have manuscripts");
         this.copperInVanillaChests = buildBoolean(builder, "Copper In Vanilla Chests", "all", false, "If true, the manuscript chests plus igloo, woodland mansion and village weaponsmith chests can have copper ingots");
         this.tideTridentBaseDamage = buildDouble(builder, "Tide Trident Base Damage", "all", 12, 1, 1000, "Damage of a thrown tide trident, before enchantments");

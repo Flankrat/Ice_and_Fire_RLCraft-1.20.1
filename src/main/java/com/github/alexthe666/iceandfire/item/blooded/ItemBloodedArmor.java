@@ -61,6 +61,7 @@ public class ItemBloodedArmor extends ArmorItem implements IProtectAgainstDragon
             case FIRE -> ChatFormatting.DARK_RED;
             case ICE -> ChatFormatting.AQUA;
             case LIGHTNING -> ChatFormatting.LIGHT_PURPLE;
+            case GOLD -> ChatFormatting.GOLD;
         };
 
         tooltip.add(Component.translatable("dragon." + dragonType.getColorName())
@@ -80,6 +81,7 @@ public class ItemBloodedArmor extends ArmorItem implements IProtectAgainstDragon
             case FIRE -> "item.iceandfire.blooded_set.fire";
             case ICE -> "item.iceandfire.blooded_set.ice";
             case LIGHTNING -> "item.iceandfire.blooded_set.lightning";
+            case GOLD -> "item.iceandfire.blooded_set.gold";
         };
         tooltip.add(
                 Component.literal(wornCount + "/4: ").append(Component.translatable(effectKey)).withStyle(descColor));
@@ -149,7 +151,8 @@ public class ItemBloodedArmor extends ArmorItem implements IProtectAgainstDragon
             }
             boolean inner = slot == EquipmentSlot.LEGS || slot == EquipmentSlot.HEAD;
             return switch (armor.getDragonType().getElement()) {
-                case FIRE -> new com.github.alexthe666.iceandfire.client.model.armor.ModelBloodedFireArmor(inner);
+                // gold has no model of its own yet, so it uses the fire dragon's shape
+                case FIRE, GOLD -> new com.github.alexthe666.iceandfire.client.model.armor.ModelBloodedFireArmor(inner);
                 case ICE -> new com.github.alexthe666.iceandfire.client.model.armor.ModelBloodedIceArmor(inner);
                 case LIGHTNING ->
                         new com.github.alexthe666.iceandfire.client.model.armor.ModelBloodedLightningArmor(inner);

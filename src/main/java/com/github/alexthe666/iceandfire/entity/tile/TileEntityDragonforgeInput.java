@@ -14,6 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
@@ -144,7 +145,7 @@ public class TileEntityDragonforgeInput extends BlockEntity {
         boolean dragonSelected = false;
 
         for (EntityDragonBase dragon : level.getEntitiesOfClass(EntityDragonBase.class, searchArea)) {
-            if (!dragonSelected && (dragon.isChained() || dragon.isTame()) && canSeeInput(dragon, targetPosition)) {
+            if (!dragonSelected && (dragon.isChained() || dragon.isTame()) && core.acceptsBreathFrom(DragonForgeType.fromDragonType(dragon.dragonType)) && canSeeInput(dragon, targetPosition)) {
                 dragon.burningTarget = this.worldPosition;
                 dragonSelected = true;
             } else if (dragon.burningTarget == this.worldPosition) {
@@ -155,7 +156,7 @@ public class TileEntityDragonforgeInput extends BlockEntity {
     }
 
     public boolean isAssembled() {
-        return (core != null && core.assembled() && core.canSmelt());
+        return (core != null && core.assembled() && core.canSmeltForAnyDragon());
     }
 
     public void resetCore() {
@@ -167,7 +168,10 @@ public class TileEntityDragonforgeInput extends BlockEntity {
             HitResult rayTrace = this.level.clip(new ClipContext(dragon.getHeadPosition(), target, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, dragon));
             double distance = dragon.getHeadPosition().distanceTo(rayTrace.getLocation());
 
-            return distance < 10.0F + dragon.getBbWidth();
+            // the line of sight must end on this input (as in 1.12); otherwise any block near the dragon's head
+            // counted as "seeing" every forge within the lure range, and nearby forges stole the dragon from each other
+            return rayTrace instanceof BlockHitResult blockHit && blockHit.getType() == HitResult.Type.BLOCK
+                    && blockHit.getBlockPos().equals(this.worldPosition) && distance < 10.0F + dragon.getBbWidth();
         }
 
         return false;

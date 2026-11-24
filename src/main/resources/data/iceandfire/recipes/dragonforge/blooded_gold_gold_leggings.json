@@ -1,0 +1,14 @@
+{
+  "type": "iceandfire:dragonforge",
+  "dragon_type": "gold",
+  "cook_time": 1000,
+  "input": {
+    "item": "iceandfire:armor_gold_leggings"
+  },
+  "blood": {
+    "item": "iceandfire:gold_dragon_blood"
+  },
+  "result": {
+    "item": "iceandfire:blooded_gold_gold_leggings"
+  }
+}

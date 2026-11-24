@@ -1355,6 +1355,7 @@
   "item.iceandfire.blooded_set.fire": "Attacks ignite and knock back targets",
   "item.iceandfire.blooded_set.ice": "Attacks freeze, slow, and knock back targets",
   "item.iceandfire.blooded_set.lightning": "Attacks trigger chain lightning and knock back targets",
+  "item.iceandfire.blooded_set.gold": "Attacks release an arcane burst: armor-ignoring magic damage to nearby foes (more against fire, ice and lightning dragons) that knocks them back",
   "item.iceandfire.dragonegg_gold": "Gold Dragon Egg",
   "item.iceandfire.dragonscales_gold": "Gold Dragon Scales",
   "item.iceandfire.dragon_skull_gold": "Gold Dragon Skull",

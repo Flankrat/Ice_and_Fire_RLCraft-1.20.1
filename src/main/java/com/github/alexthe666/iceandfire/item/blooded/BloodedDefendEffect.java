@@ -73,8 +73,12 @@ public final class BloodedDefendEffect {
                 }
                 ChainLightningUtils.createChainLightning(wearer.level(), attacker, wearer, 0, false);
             }
+            // arcane burst around the attacker (it also knocks everything back)
+            case GOLD -> BloodedArcaneBurst.burst(wearer, attacker, null);
         }
-        attacker.knockback(1.0F, wearer.getX() - attacker.getX(), wearer.getZ() - attacker.getZ());
+        if (armor.getDragonType().getElement() != BloodedDragonType.DragonElement.GOLD) {
+            attacker.knockback(1.0F, wearer.getX() - attacker.getX(), wearer.getZ() - attacker.getZ());
+        }
     }
 
     // Starts the shared cooldown if it isn't running; the cooldown is shown on the worn chestplate

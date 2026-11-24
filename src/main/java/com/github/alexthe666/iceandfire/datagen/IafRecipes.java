@@ -347,6 +347,9 @@ public class IafRecipes extends RecipeProvider {
         compact(consumer, IafItemRegistry.DRAGONSCALES_BLACK.get(), IafBlockRegistry.DRAGON_SCALE_BLACK.get());
 
         for (EnumDragonArmor type : EnumDragonArmor.values()) {
+            // the gold set's recipes are hand-written in src/main/resources, without the recipe-book unlock
+            if (type == EnumDragonArmor.armor_gold)
+                continue;
             armorSet(consumer, type.armorMaterial.getRepairIngredient(),
                     type.helmet.get(),
                     type.chestplate.get(),

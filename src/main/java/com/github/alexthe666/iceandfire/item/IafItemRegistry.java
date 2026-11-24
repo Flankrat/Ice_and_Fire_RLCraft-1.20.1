@@ -625,14 +625,16 @@ public class IafItemRegistry {
         EnumTroll.initArmors();
         for (BloodedDragonType type : BloodedDragonType.values()) {
             String prefix = "blooded_" + type.getId();
+            // the blooded gold set stays out of the creative tab
+            boolean inTab = type.getElement() != BloodedDragonType.DragonElement.GOLD;
             RegistryObject<Item> helmet = registerItem(prefix + "_helmet",
-                    () -> new ItemBloodedArmor(type, ArmorItem.Type.HELMET));
+                    () -> new ItemBloodedArmor(type, ArmorItem.Type.HELMET), inTab);
             RegistryObject<Item> chestplate = registerItem(prefix + "_chestplate",
-                    () -> new ItemBloodedArmor(type, ArmorItem.Type.CHESTPLATE));
+                    () -> new ItemBloodedArmor(type, ArmorItem.Type.CHESTPLATE), inTab);
             RegistryObject<Item> leggings = registerItem(prefix + "_leggings",
-                    () -> new ItemBloodedArmor(type, ArmorItem.Type.LEGGINGS));
+                    () -> new ItemBloodedArmor(type, ArmorItem.Type.LEGGINGS), inTab);
             RegistryObject<Item> boots = registerItem(prefix + "_boots",
-                    () -> new ItemBloodedArmor(type, ArmorItem.Type.BOOTS));
+                    () -> new ItemBloodedArmor(type, ArmorItem.Type.BOOTS), inTab);
             BLOODED_ARMOR_SETS.put(type, new BloodedArmorSet(helmet, chestplate, leggings, boots));
         }
     }

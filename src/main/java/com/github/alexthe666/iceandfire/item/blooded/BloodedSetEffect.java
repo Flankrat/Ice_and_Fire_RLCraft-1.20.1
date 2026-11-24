@@ -17,22 +17,27 @@ public final class BloodedSetEffect {
     private BloodedSetEffect() {
     }
 
-    public static void tryApplySetEffect(Player player, LivingEntity target, float damage) {
-        if (player.level().isClientSide)
-            return;
+    /**
+     * Applies the full set's effect to the wearer's hit.
+     *
+     * @return extra damage to add to this hit (the gold set's burst damage against the target), else 0
+     */
+    public static float tryApplySetEffect(Player player, LivingEntity target, float damage) {
+        if (player.level().isClientSide || BloodedArcaneBurst.isBursting())
+            return 0.0F;
 
         BloodedDragonType.DragonElement element = getFullSetElement(player);
         if (element == null)
-            return;
+            return 0.0F;
 
         if (isHoldingMatchingWeapon(player, element))
-            return;
+            return 0.0F;
 
         // Blooded Dragon Armor Set Effect Cooldown (0 = none)
         if (IafConfig.bloodedDragonArmorSetEffectCooldown > 0) {
             net.minecraft.world.item.Item chest = player.getItemBySlot(EquipmentSlot.CHEST).getItem();
             if (player.getCooldowns().isOnCooldown(chest))
-                return;
+                return 0.0F;
             player.getCooldowns().addCooldown(chest, IafConfig.bloodedDragonArmorSetEffectCooldown);
         }
 
@@ -40,7 +45,13 @@ public final class BloodedSetEffect {
             case FIRE -> applyFireEffect(player, target);
             case ICE -> applyIceEffect(player, target);
             case LIGHTNING -> applyLightningEffect(player, target, damage);
+            case GOLD -> {
+                // the target is still invulnerable from this hit, so its share of the burst rides on the hit
+                BloodedArcaneBurst.burst(player, target, target);
+                return BloodedArcaneBurst.damageAgainst(target);
+            }
         }
+        return 0.0F;
     }
 
     private static BloodedDragonType.DragonElement getFullSetElement(Player player) {
@@ -71,6 +82,8 @@ public final class BloodedSetEffect {
                 case FIRE -> mainHand.is(IafItemRegistry.DRAGONBONE_SWORD_FIRE.get());
                 case ICE -> mainHand.is(IafItemRegistry.DRAGONBONE_SWORD_ICE.get());
                 case LIGHTNING -> mainHand.is(IafItemRegistry.DRAGONBONE_SWORD_LIGHTNING.get());
+                // no gold dragonbone sword yet
+                case GOLD -> false;
             };
         }
 

@@ -4,23 +4,31 @@ import com.github.alexthe666.iceandfire.block.IafBlockRegistry;
 import com.github.alexthe666.iceandfire.compat.jei.firedragonforge.FireDragonForgeCategory;
 import com.github.alexthe666.iceandfire.compat.jei.icedragonforge.IceDragonForgeCategory;
 import com.github.alexthe666.iceandfire.compat.jei.lightningdragonforge.LightningDragonForgeCategory;
+import com.github.alexthe666.iceandfire.enums.EnumDragonArmor;
 import com.github.alexthe666.iceandfire.enums.EnumSkullType;
+import com.github.alexthe666.iceandfire.item.blooded.BloodedDragonType;
 import com.github.alexthe666.iceandfire.item.IafItemRegistry;
 import com.github.alexthe666.iceandfire.recipe.DragonForgeRecipe;
 import com.github.alexthe666.iceandfire.recipe.IafRecipeRegistry;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.ModIds;
+import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -120,4 +128,24 @@ public class IceAndFireJEIPlugin implements IModPlugin {
         return MOD;
     }
 
+
+    @Override
+    public void onRuntimeAvailable(@NotNull IJeiRuntime runtime) {
+        // The gold dragonscale and blooded gold sets are a secret: hide the items and the recipes that make them.
+        // (Gold dragon forge recipes never show, since there is no gold forge category.)
+        List<Item> hidden = new ArrayList<>(List.of(EnumDragonArmor.armor_gold.helmet.get(), EnumDragonArmor.armor_gold.chestplate.get(),
+                EnumDragonArmor.armor_gold.leggings.get(), EnumDragonArmor.armor_gold.boots.get()));
+        IafItemRegistry.BloodedArmorSet blooded = IafItemRegistry.BLOODED_ARMOR_SETS.get(BloodedDragonType.GOLD_GOLD);
+        hidden.addAll(List.of(blooded.helmet().get(), blooded.chestplate().get(), blooded.leggings().get(), blooded.boots().get()));
+
+        runtime.getIngredientManager().removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK,
+                hidden.stream().map(ItemStack::new).collect(Collectors.toList()));
+
+        if (Minecraft.getInstance().level != null) {
+            List<CraftingRecipe> recipes = Minecraft.getInstance().level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
+                    .filter(recipe -> hidden.contains(recipe.getResultItem(Minecraft.getInstance().level.registryAccess()).getItem()))
+                    .collect(Collectors.toList());
+            runtime.getRecipeManager().hideRecipes(RecipeTypes.CRAFTING, recipes);
+        }
+    }
 }

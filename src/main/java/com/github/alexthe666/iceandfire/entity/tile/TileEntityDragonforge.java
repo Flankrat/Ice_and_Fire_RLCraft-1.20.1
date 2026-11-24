@@ -1,5 +1,6 @@
 package com.github.alexthe666.iceandfire.entity.tile;
 
+import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.IceAndFire;
 import com.github.alexthe666.iceandfire.block.BlockDragonforgeBricks;
 import com.github.alexthe666.iceandfire.block.BlockDragonforgeCore;
@@ -273,8 +274,37 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
         if (cookStack.isEmpty())
             return false;
 
-        ItemStack forgeRecipeOutput = getCurrentResult();
+        if (!IafConfig.dragonforgeInvalidRecipesMakeAsh && getCurrentRecipe().isEmpty())
+            return false;
 
+        return outputFits(getCurrentResult());
+    }
+
+    public Optional<DragonForgeRecipe> getRecipeFor(DragonForgeType type) {
+        ItemStack input = this.forgeItemStacks.get(0);
+        ItemStack blood = this.forgeItemStacks.get(1);
+        return getRecipes().stream()
+                .filter(recipe -> recipe.getDragonType().equals(type.getTypeId()) && recipe.isValidInput(input) && recipe.isValidBlood(blood))
+                .findFirst();
+    }
+
+    public boolean acceptsBreathFrom(DragonForgeType type) {
+        return IafConfig.dragonforgeInvalidRecipesMakeAsh || getRecipeFor(type).isPresent();
+    }
+
+    public boolean canSmeltForAnyDragon() {
+        if (IafConfig.dragonforgeInvalidRecipesMakeAsh)
+            return canSmelt();
+        if (this.forgeItemStacks.get(0).isEmpty())
+            return false;
+        for (DragonForgeType type : DragonForgeType.values()) {
+            if (type.isActive() && getRecipeFor(type).map(recipe -> outputFits(recipe.assemble(this, level.registryAccess()))).orElse(false))
+                return true;
+        }
+        return false;
+    }
+
+    private boolean outputFits(ItemStack forgeRecipeOutput) {
         if (forgeRecipeOutput.isEmpty())
             return false;
 
@@ -379,6 +409,9 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
      */
     public void transferPower(int i, DragonForgeType type) {
         if (!level.isClientSide) {
+            if (type != null && type.isActive() && !acceptsBreathFrom(type)) {
+                return;
+            }
             if (type != null && type.isActive()) {
                 BlockDragonforgeCore.setState(type, true, level, worldPosition);
                 this.fireType = type.getLegacyId();
