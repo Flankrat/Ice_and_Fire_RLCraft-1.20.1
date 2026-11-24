@@ -12,15 +12,11 @@ Lorsque leur nombre est suffisant, des
 particules d'enchantement dérivent des
 bibliothèques vers la coquille.
 
-
-
-
-<image><drawings_golddragon.png 278 70 435 4 72 83 1>
-
 Ni feu, ni eau, ni pluie ne sont requis.
 Tant que suffisamment de bibliothèques
 entourent l'œuf, il absorbe lentement
 cette énergie enchantée et mûrit.
+
 
 Après assez de temps, la coquille dorée
 se brise et un jeune Dragon Doré éclot.

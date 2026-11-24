@@ -61,7 +61,8 @@ public class ItemScaleArmor extends ArmorItem implements IProtectAgainstDragonIt
                 if (itemStack.getItem() instanceof ItemScaleArmor) {
                     DragonType dragonType = ((ItemScaleArmor) itemStack.getItem()).armor_type.eggType.dragonType;
 
-                    if (DragonType.FIRE == dragonType)
+                    // gold scale armor has no model of its own yet, so it uses the fire dragon's shape
+                    if (DragonType.FIRE == dragonType || DragonType.GOLD == dragonType)
                         return new ModelFireDragonScaleArmor(inner);
                     if (DragonType.ICE == dragonType)
                         return new ModelIceDragonScaleArmor(inner);

@@ -43,7 +43,15 @@ public class BlockDragonforgeCore extends BaseEntityBlock implements IDragonProo
 
     private static boolean keepInventory;
 
+    // null for the shared (global mode) block; the dragon type for an individual-mode block
+    @Nullable
+    private final DragonForgeType fixedType;
+
     public BlockDragonforgeCore() {
+        this(null);
+    }
+
+    public BlockDragonforgeCore(@Nullable DragonForgeType fixedType) {
         super(
             Properties
                 .of()
@@ -53,9 +61,16 @@ public class BlockDragonforgeCore extends BaseEntityBlock implements IDragonProo
                 .sound(SoundType.METAL)
                 .lightLevel(state -> state.getValue(ACTIVE) ? 15 : 0)
         );
+        this.fixedType = fixedType;
         this.registerDefaultState(this.getStateDefinition().any()
             .setValue(ACTIVE, Boolean.FALSE)
-            .setValue(TYPE, DragonForgeType.NONE));
+            .setValue(TYPE, fixedType != null ? fixedType : DragonForgeType.NONE));
+    }
+
+    /** The dragon type this block is made for, or null for the shared block. */
+    @Nullable
+    public DragonForgeType getFixedType() {
+        return fixedType;
     }
 
     /**
@@ -65,9 +80,13 @@ public class BlockDragonforgeCore extends BaseEntityBlock implements IDragonProo
         BlockEntity tileentity = worldIn.getBlockEntity(pos);
         keepInventory = true;
 
-        BlockState newState = IafBlockRegistry.DRAGONFORGE_CORE.get().defaultBlockState()
+        // keep the core block that is there (shared or per-type); a per-type core never changes its type
+        BlockState current = worldIn.getBlockState(pos);
+        BlockDragonforgeCore coreBlock = current.getBlock() instanceof BlockDragonforgeCore core ? core : (BlockDragonforgeCore) IafBlockRegistry.DRAGONFORGE_CORE.get();
+        DragonForgeType newType = coreBlock.fixedType != null ? coreBlock.fixedType : (type != null ? type : DragonForgeType.NONE);
+        BlockState newState = coreBlock.defaultBlockState()
             .setValue(ACTIVE, active)
-            .setValue(TYPE, type != null ? type : DragonForgeType.NONE);
+            .setValue(TYPE, newType);
 
         worldIn.setBlock(pos, newState, 3);
 
@@ -101,7 +120,7 @@ public class BlockDragonforgeCore extends BaseEntityBlock implements IDragonProo
     }
 
     public ItemStack getItem(Level worldIn, BlockPos pos, BlockState state) {
-        return new ItemStack(IafBlockRegistry.DRAGONFORGE_CORE.get().asItem());
+        return new ItemStack(this.asItem());
     }
 
     @Override

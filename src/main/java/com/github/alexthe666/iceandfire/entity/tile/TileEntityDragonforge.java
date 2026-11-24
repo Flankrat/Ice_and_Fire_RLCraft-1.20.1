@@ -1,5 +1,6 @@
 package com.github.alexthe666.iceandfire.entity.tile;
 
+import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.IceAndFire;
 import com.github.alexthe666.iceandfire.block.BlockDragonforgeBricks;
 import com.github.alexthe666.iceandfire.block.BlockDragonforgeCore;
@@ -73,6 +74,17 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
     /**
      * 获取当前龙锻炉类型枚举
      */
+    /** The dragon type of a per-type (individual mode) core, or null for the shared core. */
+    @Nullable
+    public DragonForgeType getFixedType() {
+        return this.getBlockState().getBlock() instanceof BlockDragonforgeCore core ? core.getFixedType() : null;
+    }
+
+    // a vent of the same kind as this core (shared vent for the shared core, fire vent for the fire core, ...)
+    private boolean isMatchingVent(BlockState state) {
+        return state.getBlock() instanceof BlockDragonforgeBricks vent && vent.getFixedType() == getFixedType();
+    }
+
     public DragonForgeType getDragonForgeType() {
         BlockState state = this.getBlockState();
         if (state.hasProperty(BlockDragonforgeCore.TYPE)) {
@@ -167,8 +179,9 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
         for (Direction facing : HORIZONTALS) {
             BlockPos grillPos = this.getBlockPos().relative(facing);
             BlockState grillState = level.getBlockState(grillPos);
-            if (grillState.getBlock() == IafBlockRegistry.DRAGONFORGE_BRICK.get()) {
-                DragonForgeType grillType = grill ? currentType : DragonForgeType.NONE;
+            if (isMatchingVent(grillState)) {
+                DragonForgeType fixed = getFixedType();
+                DragonForgeType grillType = fixed != null ? fixed : (grill ? currentType : DragonForgeType.NONE);
                 BlockState newState = grillState
                         .setValue(BlockDragonforgeBricks.GRILL, grill)
                         .setValue(BlockDragonforgeBricks.TYPE, grillType);
@@ -273,8 +286,41 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
         if (cookStack.isEmpty())
             return false;
 
-        ItemStack forgeRecipeOutput = getCurrentResult();
+        if (!IafConfig.dragonforgeInvalidRecipesMakeAsh && getCurrentRecipe().isEmpty())
+            return false;
 
+        return outputFits(getCurrentResult());
+    }
+
+    public Optional<DragonForgeRecipe> getRecipeFor(DragonForgeType type) {
+        ItemStack input = this.forgeItemStacks.get(0);
+        ItemStack blood = this.forgeItemStacks.get(1);
+        return getRecipes().stream()
+                .filter(recipe -> recipe.getDragonType().equals(type.getTypeId()) && recipe.isValidInput(input) && recipe.isValidBlood(blood))
+                .findFirst();
+    }
+
+    public boolean acceptsBreathFrom(DragonForgeType type) {
+        // a per-type forge only takes its own dragon's breath
+        DragonForgeType fixed = getFixedType();
+        if (fixed != null && type != fixed)
+            return false;
+        return IafConfig.dragonforgeInvalidRecipesMakeAsh || getRecipeFor(type).isPresent();
+    }
+
+    public boolean canSmeltForAnyDragon() {
+        if (IafConfig.dragonforgeInvalidRecipesMakeAsh)
+            return canSmelt();
+        if (this.forgeItemStacks.get(0).isEmpty())
+            return false;
+        for (DragonForgeType type : DragonForgeType.values()) {
+            if (type.isActive() && acceptsBreathFrom(type) && getRecipeFor(type).map(recipe -> outputFits(recipe.assemble(this, level.registryAccess()))).orElse(false))
+                return true;
+        }
+        return false;
+    }
+
+    private boolean outputFits(ItemStack forgeRecipeOutput) {
         if (forgeRecipeOutput.isEmpty())
             return false;
 
@@ -379,6 +425,9 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
      */
     public void transferPower(int i, DragonForgeType type) {
         if (!level.isClientSide) {
+            if (type != null && type.isActive() && !acceptsBreathFrom(type)) {
+                return;
+            }
             if (type != null && type.isActive()) {
                 BlockDragonforgeCore.setState(type, true, level, worldPosition);
                 this.fireType = type.getLegacyId();
@@ -446,10 +495,9 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
      * 检查中层四边，至少3个为通风口（第4个可以是焰孔或通风口）
      */
     private boolean checkVents(BlockPos pos) {
-        Block vent = IafBlockRegistry.DRAGONFORGE_BRICK.get();
         int count = 0;
         for (Direction facing : HORIZONTALS) {
-            if (level.getBlockState(pos.relative(facing)).getBlock() == vent) {
+            if (isMatchingVent(level.getBlockState(pos.relative(facing)))) {
                 count++;
             }
         }
@@ -478,7 +526,9 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
      * 顶层：4龙骨角 + 4悚怖石砖边 + 悚怖石砖中心
      */
     public boolean assembled() {
-        return checkBoneCorners(worldPosition.below()) && checkDreadSlots(worldPosition.below()) && isDreadBrick(worldPosition.below())
+        // Dragonforge Mode: only the shared forge works in global mode, only the per-type forges in individual mode
+        return DragonForgeType.worksInCurrentMode(getFixedType())
+                && checkBoneCorners(worldPosition.below()) && checkDreadSlots(worldPosition.below()) && isDreadBrick(worldPosition.below())
                 && checkDreadCorners(worldPosition) && checkVents(worldPosition)
                 && checkBoneCorners(worldPosition.above()) && checkDreadSlots(worldPosition.above()) && isDreadBrick(worldPosition.above());
     }

@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "spartanfire_rlc:ice_dragon_damage_bonus_1",
+      "required": false
+    },
+    {
+      "id": "spartanfire_rlc:fire_dragon_damage_bonus_1",
+      "required": false
+    },
+    {
+      "id": "iceandfire:arcane",
+      "required": false
+    }
+  ]
+}

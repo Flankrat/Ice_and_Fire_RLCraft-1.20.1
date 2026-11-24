@@ -279,31 +279,9 @@ public class IafRecipes extends RecipeProvider {
                 .unlockedBy("has_item", has(IafItemRegistry.DRAGON_BONE.get()))
                 .save(consumer);
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, IafBlockRegistry.DRAGONFORGE_BRICK.get(), 4)
-                .pattern("DDD")
-                .pattern("III")
-                .pattern("DDD")
-                .define('D', IafBlockRegistry.DREAD_STONE.get())
-                .define('I', Tags.Items.INGOTS_IRON)
-                .unlockedBy("has_item", has(IafBlockRegistry.DREAD_STONE.get()))
-                .save(consumer, new ResourceLocation(IceAndFire.MODID, "dragonforge_vent"));
-        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, IafBlockRegistry.DRAGONFORGE_INPUT.get())
-                .pattern("DID")
-                .pattern("I I")
-                .pattern("DID")
-                .define('D', IafBlockRegistry.DREAD_STONE.get())
-                .define('I', Tags.Items.INGOTS_IRON)
-                .unlockedBy("has_item", has(IafBlockRegistry.DREAD_STONE.get()))
-                .save(consumer, new ResourceLocation(IceAndFire.MODID, "dragonforge_input"));
-        forgeCore(consumer, IafBlockRegistry.DRAGONFORGE_BRICK.get(),
-                IafItemRegistry.FIRE_DRAGON_HEART.get(),
-                IafBlockRegistry.DRAGONFORGE_CORE.get(), "dragonforge_core_fire");
-        forgeCore(consumer, IafBlockRegistry.DRAGONFORGE_BRICK.get(),
-                IafItemRegistry.ICE_DRAGON_HEART.get(),
-                IafBlockRegistry.DRAGONFORGE_CORE.get(), "dragonforge_core_ice");
-        forgeCore(consumer, IafBlockRegistry.DRAGONFORGE_BRICK.get(),
-                IafItemRegistry.LIGHTNING_DRAGON_HEART.get(),
-                IafBlockRegistry.DRAGONFORGE_CORE.get(), "dragonforge_core_lightning");
+        // The dragon forge block recipes (shared and per-type) are hand-written in src/main/resources with
+        // iceandfire:dragonforge_mode conditions, which these builders can't add.
+
 
         podium(consumer, Blocks.OAK_PLANKS, Blocks.OAK_SLAB, IafBlockRegistry.PODIUM_OAK.get());
         podium(consumer, Blocks.BIRCH_PLANKS, Blocks.BIRCH_SLAB, IafBlockRegistry.PODIUM_BIRCH.get());
@@ -347,6 +325,9 @@ public class IafRecipes extends RecipeProvider {
         compact(consumer, IafItemRegistry.DRAGONSCALES_BLACK.get(), IafBlockRegistry.DRAGON_SCALE_BLACK.get());
 
         for (EnumDragonArmor type : EnumDragonArmor.values()) {
+            // the gold set's recipes are hand-written in src/main/resources, without the recipe-book unlock
+            if (type == EnumDragonArmor.armor_gold)
+                continue;
             armorSet(consumer, type.armorMaterial.getRepairIngredient(),
                     type.helmet.get(),
                     type.chestplate.get(),

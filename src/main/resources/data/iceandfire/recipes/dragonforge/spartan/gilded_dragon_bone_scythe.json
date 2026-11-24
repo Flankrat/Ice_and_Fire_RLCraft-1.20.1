@@ -1,0 +1,27 @@
+{
+  "type": "iceandfire:dragonforge",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "spartanfire_rlc"
+    },
+    {
+      "type": "spartanweaponry:type_disabled",
+      "disabled": [
+        "scythe"
+      ]
+    }
+  ],
+  "dragon_type": "gold",
+  "cook_time": 1000,
+  "input": {
+    "item": "spartanfire_rlc:dragon_bone_scythe"
+  },
+  "blood": {
+    "item": "iceandfire:gold_dragon_blood"
+  },
+  "result": {
+    "item": "iceandfire:gilded_dragon_bone_scythe",
+    "nbt": "{Damage:0}"
+  }
+}

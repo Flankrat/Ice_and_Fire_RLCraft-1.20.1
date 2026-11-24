@@ -22,7 +22,8 @@ public enum EnumDragonArmor {
     armor_electric(12, EnumDragonEgg.ELECTRIC),
     armor_amethyst(13, EnumDragonEgg.AMYTHEST),
     armor_copper(14, EnumDragonEgg.COPPER),
-    armor_black(15, EnumDragonEgg.BLACK);
+    armor_black(15, EnumDragonEgg.BLACK),
+    armor_gold(12, EnumDragonEgg.GOLD);
 
     public CustomArmorMaterial material;
     public int armorId;
@@ -44,14 +45,16 @@ public enum EnumDragonArmor {
             String sub = EnumDragonArmor.values()[i].name();
 
             int finalI = i;
+            // the gold set is a hidden extra: no creative tab entry (JEI hiding is in IceAndFireJEIPlugin)
+            boolean inTab = EnumDragonArmor.values()[i] != armor_gold;
             EnumDragonArmor.values()[finalI].helmet = IafItemRegistry.registerItem(sub + "_helmet", () ->
-                new ItemScaleArmor(EnumDragonArmor.values()[finalI].eggType, EnumDragonArmor.values()[finalI], EnumDragonArmor.values()[finalI].armorMaterial, ArmorItem.Type.HELMET));
+                new ItemScaleArmor(EnumDragonArmor.values()[finalI].eggType, EnumDragonArmor.values()[finalI], EnumDragonArmor.values()[finalI].armorMaterial, ArmorItem.Type.HELMET), inTab);
             EnumDragonArmor.values()[finalI].chestplate = IafItemRegistry.registerItem(sub + "_chestplate", () ->
-                new ItemScaleArmor(EnumDragonArmor.values()[finalI].eggType, EnumDragonArmor.values()[finalI], EnumDragonArmor.values()[finalI].armorMaterial, ArmorItem.Type.CHESTPLATE));
+                new ItemScaleArmor(EnumDragonArmor.values()[finalI].eggType, EnumDragonArmor.values()[finalI], EnumDragonArmor.values()[finalI].armorMaterial, ArmorItem.Type.CHESTPLATE), inTab);
             EnumDragonArmor.values()[finalI].leggings = IafItemRegistry.registerItem(sub + "_leggings", () ->
-                new ItemScaleArmor(EnumDragonArmor.values()[finalI].eggType, EnumDragonArmor.values()[finalI], EnumDragonArmor.values()[finalI].armorMaterial, ArmorItem.Type.LEGGINGS));
+                new ItemScaleArmor(EnumDragonArmor.values()[finalI].eggType, EnumDragonArmor.values()[finalI], EnumDragonArmor.values()[finalI].armorMaterial, ArmorItem.Type.LEGGINGS), inTab);
             EnumDragonArmor.values()[finalI].boots = IafItemRegistry.registerItem(sub + "_boots", () ->
-                new ItemScaleArmor(EnumDragonArmor.values()[finalI].eggType, EnumDragonArmor.values()[finalI], EnumDragonArmor.values()[finalI].armorMaterial, ArmorItem.Type.BOOTS));
+                new ItemScaleArmor(EnumDragonArmor.values()[finalI].eggType, EnumDragonArmor.values()[finalI], EnumDragonArmor.values()[finalI].armorMaterial, ArmorItem.Type.BOOTS), inTab);
         }
     }
 
@@ -69,6 +72,7 @@ public enum EnumDragonArmor {
             case armor_amethyst -> IafItemRegistry.DRAGONSCALES_AMYTHEST.get();
             case armor_copper -> IafItemRegistry.DRAGONSCALES_COPPER.get();
             case armor_black -> IafItemRegistry.DRAGONSCALES_BLACK.get();
+            case armor_gold -> IafItemRegistry.DRAGONSCALES_GOLD.get();
             default -> IafItemRegistry.DRAGONSCALES_RED.get();
         };
     }

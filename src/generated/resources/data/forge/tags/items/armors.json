@@ -82,6 +82,10 @@
     "iceandfire:armor_black_chestplate",
     "iceandfire:armor_black_leggings",
     "iceandfire:armor_black_boots",
+    "iceandfire:armor_gold_helmet",
+    "iceandfire:armor_gold_chestplate",
+    "iceandfire:armor_gold_leggings",
+    "iceandfire:armor_gold_boots",
     "iceandfire:tide_blue_helmet",
     "iceandfire:tide_blue_chestplate",
     "iceandfire:tide_blue_leggings",
@@ -169,6 +173,10 @@
     "iceandfire:blooded_lightning_black_helmet",
     "iceandfire:blooded_lightning_black_chestplate",
     "iceandfire:blooded_lightning_black_leggings",
-    "iceandfire:blooded_lightning_black_boots"
+    "iceandfire:blooded_lightning_black_boots",
+    "iceandfire:blooded_gold_gold_helmet",
+    "iceandfire:blooded_gold_gold_chestplate",
+    "iceandfire:blooded_gold_gold_leggings",
+    "iceandfire:blooded_gold_gold_boots"
   ]
 }

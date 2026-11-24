@@ -1,0 +1,30 @@
+{
+  "conditions": [
+    {
+      "type": "iceandfire:dragonforge_mode",
+      "mode": "individual"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "D": {
+      "item": "iceandfire:dread_stone"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "B": {
+      "item": "iceandfire:dragonforge_ice_brick"
+    }
+  },
+  "pattern": [
+    "DID",
+    "IBI",
+    "DID"
+  ],
+  "result": {
+    "item": "iceandfire:dragonforge_ice_input"
+  },
+  "show_notification": true
+}

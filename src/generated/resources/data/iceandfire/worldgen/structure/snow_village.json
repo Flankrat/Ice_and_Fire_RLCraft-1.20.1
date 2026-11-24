@@ -2,6 +2,5 @@
   "type": "iceandfire:snow_village",
   "biomes": "#iceandfire:has_structure/snow_village",
   "spawn_overrides": {},
-  "step": "surface_structures",
-  "terrain_adaptation": "none"
+  "step": "surface_structures"
 }

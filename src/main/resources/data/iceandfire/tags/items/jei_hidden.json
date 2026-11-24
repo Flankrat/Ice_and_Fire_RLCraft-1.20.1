@@ -1,0 +1,101 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "iceandfire:gilded_dragon_bone_battle_hammer",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_battleaxe",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_boomerang",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_dagger",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_flanged_mace",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_glaive",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_greatsword",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_halberd",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_heavy_crossbow",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_javelin",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_katana",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_lance",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_longbow",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_longsword",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_parrying_dagger",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_pike",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_quarterstaff",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_rapier",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_saber",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_scythe",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_spear",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_throwing_knife",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_tomahawk",
+      "required": false
+    },
+    {
+      "id": "iceandfire:gilded_dragon_bone_warhammer",
+      "required": false
+    }
+  ]
+}

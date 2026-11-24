@@ -31,10 +31,20 @@ public class IafTabRegistry {
             .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
             // Add default items to tab
             .displayItems((params, output) -> {
-                TAB_BLOCKS_LIST.forEach(block -> output.accept(block.get()));
+                // forge blocks of the Dragonforge Mode that isn't in use are left out
+                TAB_BLOCKS_LIST.stream().map(Supplier::get).filter(IafTabRegistry::forgeBlockInUse).forEach(output::accept);
             })
             .build()
     );
+
+    private static boolean forgeBlockInUse(Block block) {
+        com.github.alexthe666.iceandfire.block.DragonForgeType fixed;
+        if (block instanceof com.github.alexthe666.iceandfire.block.BlockDragonforgeBricks b) fixed = b.getFixedType();
+        else if (block instanceof com.github.alexthe666.iceandfire.block.BlockDragonforgeInput i) fixed = i.getFixedType();
+        else if (block instanceof com.github.alexthe666.iceandfire.block.BlockDragonforgeCore c) fixed = c.getFixedType();
+        else return true;
+        return com.github.alexthe666.iceandfire.block.DragonForgeType.worksInCurrentMode(fixed);
+    }
 
     public static final RegistryObject<CreativeModeTab> TAB_ITEMS = TAB_REGISTER.register("items", () -> CreativeModeTab.builder()
             // Set name of tab to display

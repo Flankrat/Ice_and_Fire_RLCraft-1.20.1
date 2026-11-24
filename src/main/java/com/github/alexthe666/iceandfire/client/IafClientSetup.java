@@ -313,7 +313,8 @@ public class IafClientSetup {
                     (ItemDragonBow) IafItemRegistry.DRAGON_BOW.get(),
                     (ItemDragonBow) IafItemRegistry.DRAGON_BOW_FIRE.get(),
                     (ItemDragonBow) IafItemRegistry.DRAGON_BOW_ICE.get(),
-                    (ItemDragonBow) IafItemRegistry.DRAGON_BOW_LIGHTNING.get()}) {
+                    (ItemDragonBow) IafItemRegistry.DRAGON_BOW_LIGHTNING.get(),
+                    (ItemDragonBow) IafItemRegistry.DRAGON_BOW_GOLD.get()}) {
                 ItemProperties.register(bow, new ResourceLocation("pulling"), pulling);
                 ItemProperties.register(bow, new ResourceLocation("pull"), pull);
             }
