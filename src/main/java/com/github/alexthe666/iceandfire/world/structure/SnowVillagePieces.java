@@ -1,6 +1,7 @@
 package com.github.alexthe666.iceandfire.world.structure;
 
 import com.github.alexthe666.iceandfire.block.IafBlockRegistry;
+import com.github.alexthe666.iceandfire.entity.EntitySnowVillager;
 import com.github.alexthe666.iceandfire.entity.IafEntityRegistry;
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
@@ -267,8 +268,9 @@ public class SnowVillagePieces {
             }
         }
 
-        // Snow villagers (or zombie villagers in an abandoned village) standing in a row from x, y, z
-        protected void spawnVillagers(WorldGenLevel level, BoundingBox box, int x, int y, int z, int count) {
+        // Snow villagers (or zombie villagers in an abandoned village) standing in a row from x, y, z.
+        // Snow villagers get the given profession and job site; zombie villagers ignore them.
+        protected void spawnVillagers(WorldGenLevel level, BoundingBox box, int x, int y, int z, int count, int profession, @Nullable BlockPos jobSite) {
             for (int i = this.villagersSpawned; i < count; ++i) {
                 BlockPos pos = this.getWorldPos(x + i, y, z);
                 if (!box.isInside(pos)) {
@@ -281,6 +283,10 @@ public class SnowVillagePieces {
                 }
                 mob.moveTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, 0.0F, 0.0F);
                 mob.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.STRUCTURE, null, null);
+                if (mob instanceof EntitySnowVillager villager) {
+                    villager.setProfession(profession);
+                    villager.setJobSite(jobSite);
+                }
                 mob.setPersistenceRequired();
                 level.addFreshEntityWithPassengers(mob);
             }
@@ -527,17 +533,22 @@ public class SnowVillagePieces {
     public static class WoodHut extends Village {
         private final boolean isTallHouse;
         private final int tablePosition;
+        // The profession of this hut's villager, picked with the hut so its job site block matches;
+        // -1 for huts saved before job sites existed (picked when the hut is built)
+        private int profession;
 
         public WoodHut(int depth, RandomSource random, BoundingBox box, Direction facing, boolean zombie) {
             super(IafStructurePieceTypes.SNOW_VILLAGE_HUT.get(), depth, box, facing, zombie);
             this.isTallHouse = random.nextBoolean();
             this.tablePosition = random.nextInt(3);
+            this.profession = random.nextInt(EntitySnowVillager.PROFESSION_COUNT);
         }
 
         public WoodHut(StructurePieceSerializationContext context, CompoundTag tag) {
             super(IafStructurePieceTypes.SNOW_VILLAGE_HUT.get(), tag);
             this.tablePosition = tag.getInt("T");
             this.isTallHouse = tag.getBoolean("C");
+            this.profession = tag.contains("P") ? tag.getInt("P") : -1;
         }
 
         @Override
@@ -545,6 +556,7 @@ public class SnowVillagePieces {
             super.addAdditionalSaveData(context, tag);
             tag.putInt("T", this.tablePosition);
             tag.putBoolean("C", this.isTallHouse);
+            tag.putInt("P", this.profession);
         }
 
         @Nullable
@@ -611,7 +623,14 @@ public class SnowVillagePieces {
                     this.fillColumnDown(level, floor, j, -1, i, box);
                 }
             }
-            this.spawnVillagers(level, box, 1, 1, 2, 1);
+            if (this.profession < 0) {
+                this.profession = random.nextInt(EntitySnowVillager.PROFESSION_COUNT);
+            }
+            // The villager's job site block, in the corner just inside the door (clear of the table and the
+            // villager's spot). Abandoned huts keep theirs too, like vanilla abandoned villages.
+            this.placeBlock(level, EntitySnowVillager.getJobSiteBlock(this.profession), 2, 1, 1, box);
+            BlockPos jobSite = this.getWorldPos(2, 1, 1);
+            this.spawnVillagers(level, box, 1, 1, 2, 1, this.profession, box.isInside(jobSite) ? jobSite : null);
         }
     }
 }
