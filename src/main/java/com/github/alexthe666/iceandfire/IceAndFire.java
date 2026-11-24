@@ -233,14 +233,15 @@ public class IceAndFire {
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageChainLightningFX.class,
                                 MessageChainLightningFX::write, MessageChainLightningFX::read,
                                 MessageHandler.handle(MessageChainLightningFX.Handler::handle));
-                // server to client only: a client can't send it to the server
-                NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageSyncDragonforgeMode.class,
-                                MessageSyncDragonforgeMode::write, MessageSyncDragonforgeMode::read,
-                                MessageSyncDragonforgeMode::handle, java.util.Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 event.enqueueWork(() -> {
                         PROXY.setup();
                         IafLootRegistry.init();
                 });
+                // Dragonforge Mode sync, server to client only (a client can't send it to the server). Registered after
+                // the other messages, so it takes the next packet id.
+                NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageSyncDragonforgeMode.class,
+                                MessageSyncDragonforgeMode::write, MessageSyncDragonforgeMode::read,
+                                MessageSyncDragonforgeMode::handle, java.util.Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 ModCompatList.isEVon = ModList.get().isLoaded("enhancedvisuals");
                 if (ModList.get().isLoaded("firstaid")) {
                         FirstAidCompat.init();
