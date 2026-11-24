@@ -149,11 +149,9 @@ public class ContainerLectern extends AbstractContainerMenu {
         ItemStack manuscriptStack = this.tileFurnace.getItem(1);
         int i = 3;
 
-        if (!playerIn.level().isClientSide && !playerIn.isCreative()) {
-            manuscriptStack.shrink(i);
-            if (manuscriptStack.isEmpty()) {
-                this.tileFurnace.setItem(1, ItemStack.EMPTY);
-            }
+        // On the server the page and its manuscripts are handled together when the client's MessageUpdateLectern
+        // arrives (MessageUpdateLectern.addPageFromClient checks and charges both)
+        if (!playerIn.level().isClientSide) {
             return false;
         }
 

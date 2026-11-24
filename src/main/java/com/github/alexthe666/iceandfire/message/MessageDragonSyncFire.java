@@ -41,6 +41,22 @@ public class MessageDragonSyncFire {
         buf.writeInt(message.syncType);
     }
 
+    // Farther than any breath or fire charge a ridden dragon aims (rayTraceRider reaches 10 blocks per stage)
+    private static final double MAX_TARGET_DISTANCE_SQ = 128 * 128;
+
+    /** A client only sends this while its player rides and owns the dragon and makes it breathe (syncType 0 = breath,
+     *  5 = fire charge). Anything else, or a target that isn't a real nearby position, is ignored. */
+    private static boolean isAllowedFromRider(Player player, EntityDragonBase dragon, MessageDragonSyncFire message) {
+        if (dragon.getControllingPassenger() != player || !dragon.isOwnedBy(player)) {
+            return false;
+        }
+        if (message.syncType != 0 && message.syncType != 5) {
+            return false;
+        }
+        return Double.isFinite(message.posX) && Double.isFinite(message.posY) && Double.isFinite(message.posZ)
+                && dragon.distanceToSqr(message.posX, message.posY, message.posZ) <= MAX_TARGET_DISTANCE_SQ;
+    }
+
     public static class Handler {
         public Handler() {
         }
@@ -59,7 +75,10 @@ public class MessageDragonSyncFire {
                     Entity entity = player.level().getEntity(message.dragonId);
 
                     if (entity instanceof EntityDragonBase dragon) {
-                        dragon.stimulateFire(message.posX, message.posY, message.posZ, message.syncType);
+                        boolean fromClient = context.getDirection().getReceptionSide() == LogicalSide.SERVER;
+                        if (!fromClient || isAllowedFromRider(player, dragon, message)) {
+                            dragon.stimulateFire(message.posX, message.posY, message.posZ, message.syncType);
+                        }
                     }
                 }
             });

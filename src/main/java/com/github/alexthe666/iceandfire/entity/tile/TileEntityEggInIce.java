@@ -72,7 +72,10 @@ public class TileEntityEggInIce extends BlockEntity {
     @Override
     public void load(@NotNull CompoundTag tag) {
         super.load(tag);
-        type = EnumDragonEgg.values()[tag.getByte("Color")];
+        // Out-of-range colors (edited or broken saves) used to throw while the chunk loaded: fall back to an ice egg
+        // (eggs only freeze into ice when they're ice dragon eggs)
+        int color = tag.getByte("Color");
+        type = color >= 0 && color < EnumDragonEgg.values().length ? EnumDragonEgg.values()[color] : EnumDragonEgg.BLUE;
         age = tag.getInt("Age");
         UUID s = null;
 

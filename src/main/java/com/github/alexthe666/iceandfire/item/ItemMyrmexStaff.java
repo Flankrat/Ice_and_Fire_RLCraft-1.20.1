@@ -6,6 +6,7 @@ import com.github.alexthe666.iceandfire.message.MessageGetMyrmexHive;
 import com.github.alexthe666.iceandfire.message.MessageSetMyrmexHiveNull;
 import com.github.alexthe666.iceandfire.world.MyrmexWorldData;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -47,12 +48,14 @@ public class ItemMyrmexStaff extends Item {
         if (itemStackIn.getTag() != null && itemStackIn.getTag().hasUUID("HiveUUID")) {
             UUID id = itemStackIn.getTag().getUUID("HiveUUID");
             if (!worldIn.isClientSide) {
+                // (This used to save a new empty hive on every right-click, and send the hive to every player online)
                 MyrmexHive hive = MyrmexWorldData.get(worldIn).getHiveFromUUID(id);
-                MyrmexWorldData.addHive(worldIn, new MyrmexHive());
-                if (hive != null) {
-                    IceAndFire.sendMSGToAll(new MessageGetMyrmexHive(hive.toNBT()));
-                } else {
-                    IceAndFire.sendMSGToAll(new MessageSetMyrmexHiveNull());
+                if (playerIn instanceof ServerPlayer serverPlayer) {
+                    if (hive != null) {
+                        IceAndFire.sendMSGToPlayer(new MessageGetMyrmexHive(hive.toNBT()), serverPlayer);
+                    } else {
+                        IceAndFire.sendMSGToPlayer(new MessageSetMyrmexHiveNull(), serverPlayer);
+                    }
                 }
             } else if (id != null && !id.equals(new UUID(0, 0))) {
                 IceAndFire.PROXY.openMyrmexStaffGui(itemStackIn);
@@ -72,10 +75,13 @@ public class ItemMyrmexStaff extends Item {
                 UUID id = tag.getUUID("HiveUUID");
                 if (!context.getLevel().isClientSide) {
                     MyrmexHive hive = MyrmexWorldData.get(context.getLevel()).getHiveFromUUID(id);
-                    if (hive != null) {
-                        IceAndFire.sendMSGToAll(new MessageGetMyrmexHive(hive.toNBT()));
-                    } else {
-                        IceAndFire.sendMSGToAll(new MessageSetMyrmexHiveNull());
+                    // Only the player using the staff needs the hive (this was sent to everyone)
+                    if (context.getPlayer() instanceof ServerPlayer serverPlayer) {
+                        if (hive != null) {
+                            IceAndFire.sendMSGToPlayer(new MessageGetMyrmexHive(hive.toNBT()), serverPlayer);
+                        } else {
+                            IceAndFire.sendMSGToPlayer(new MessageSetMyrmexHiveNull(), serverPlayer);
+                        }
                     }
                 } else if (id != null && !id.equals(new UUID(0, 0))) {
                     IceAndFire.PROXY.openMyrmexAddRoomGui(context.getPlayer().getItemInHand(context.getHand()), context.getClickedPos(), context.getPlayer().getDirection());

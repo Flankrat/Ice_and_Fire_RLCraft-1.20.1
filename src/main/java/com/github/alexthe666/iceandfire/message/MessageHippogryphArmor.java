@@ -45,24 +45,14 @@ public class MessageHippogryphArmor {
                 Player player = context.getSender();
 
                 if (player != null) {
+                    // The client only tells the server that the mount's inventory changed. Never trust the slot values it
+                    // sends (anyone could send "saddled" for any mount): re-read the saddle, chest and armor from the
+                    // server's own copy of the inventory instead.
                     Entity entity = player.level().getEntity(message.dragonId);
-
                     if (entity instanceof EntityHippogryph hippogryph) {
-                        if (message.slot_index == 0) {
-                            hippogryph.setSaddled(message.armor_type == 1);
-                        } else if (message.slot_index == 1) {
-                            hippogryph.setChested(message.armor_type == 1);
-                        } else if (message.slot_index == 2) {
-                            hippogryph.setArmor(message.armor_type);
-                        }
+                        hippogryph.refreshInventory();
                     } else if (entity instanceof EntityHippocampus hippo) {
-                        if (message.slot_index == 0) {
-                            hippo.setSaddled(message.armor_type == 1);
-                        } else if (message.slot_index == 1) {
-                            hippo.setChested(message.armor_type == 1);
-                        } else if (message.slot_index == 2) {
-                            hippo.setArmor(message.armor_type);
-                        }
+                        hippo.refreshInventory();
                     }
                 }
             });

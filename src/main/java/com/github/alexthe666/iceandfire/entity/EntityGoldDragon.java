@@ -314,8 +314,10 @@ public class EntityGoldDragon extends EntityDragonBase {
         double d4 = burnZ - headPos.z;
         double distance = Math.max(2.5F * Math.sqrt(this.distanceToSqr(burnX, burnY, burnZ)), 0);
         double conqueredDistance = burnProgress / 40D * distance;
-        int increment = (int) Math.ceil(conqueredDistance / 100);
-        for (int i = 0; i < conqueredDistance; i += increment) {
+        // A double, so far-off targets can't wrap the counter around: as an int, increment reached Integer.MAX_VALUE
+        // and i += increment went negative, so the loop never ended (server hang). At most ~100 steps either way.
+        double increment = Math.max(1, Math.ceil(conqueredDistance / 100));
+        for (double i = 0; i < conqueredDistance; i += increment) {
             double progressX = headPos.x + d2 * (i / (float) distance);
             double progressY = headPos.y + d3 * (i / (float) distance);
             double progressZ = headPos.z + d4 * (i / (float) distance);
