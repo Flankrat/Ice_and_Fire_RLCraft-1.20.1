@@ -94,6 +94,8 @@ public class ServerConfig {
     public final ForgeConfigSpec.BooleanValue copperInVanillaChests;
     public final ForgeConfigSpec.DoubleValue tideTridentBaseDamage;
     public final ForgeConfigSpec.DoubleValue tideTridentUnderwaterDamageMultiplier;
+    public final ForgeConfigSpec.DoubleValue fishingSpearThrownDamage;
+    public final ForgeConfigSpec.BooleanValue fishingSpearCatchesFish;
     public final ForgeConfigSpec.ConfigValue<String> bloodedArmorSetEffectMode;
     public final ForgeConfigSpec.IntValue bloodedDragonArmorSetEffectCooldown;
     public final ForgeConfigSpec.DoubleValue dragonAttackDamageFire;
@@ -462,6 +464,8 @@ public class ServerConfig {
         this.copperInVanillaChests = buildBoolean(builder, "Copper In Vanilla Chests", "all", false, "If true, the manuscript chests plus igloo, woodland mansion and village weaponsmith chests can have copper ingots");
         this.tideTridentBaseDamage = buildDouble(builder, "Tide Trident Base Damage", "all", 12, 1, 1000, "Damage of a thrown tide trident, before enchantments");
         this.tideTridentUnderwaterDamageMultiplier = buildDouble(builder, "Tide Trident Underwater Damage Multiplier", "all", 1, 1, 100, "Damage multiplier for a thrown tide trident while it is in water");
+        this.fishingSpearThrownDamage = buildDouble(builder, "Fishing Spear Thrown Damage", "all", 5, 1, 1000, "Damage of a thrown fishing spear, before enchantments (a trident does 8)");
+        this.fishingSpearCatchesFish = buildBoolean(builder, "Fishing Spear Catches Fish", "all", true, "If true, letting go of a fishing spear while looking at water up to 5 blocks away spears a random fish instead of throwing it");
         this.bloodedArmorSetEffectMode = builder.comment("How blooded dragon armor's element effect triggers. attack: a full set of one element adds its effect to the wearer's hits. defend (the 1.12 version): when a mob hits the wearer in melee, the blooded piece on the hit body part (with First Aid) or a random piece (needs all four pieces) strikes back, with bonus damage against the opposite dragon type").translation("Blooded Dragon Armor Set Effect Mode").define("Blooded Dragon Armor Set Effect Mode", "attack", o -> o instanceof String str && (str.equalsIgnoreCase("attack") || str.equalsIgnoreCase("defend")));
         this.bloodedDragonArmorSetEffectCooldown = buildInt(builder, "Blooded Dragon Armor Set Effect Cooldown", "all", 0, 0, 100000, "Ticks between blooded armor element effects (0 = no cooldown). The cooldown shows on the worn chestplate");
         this.dragonWeaponFireAbility = buildBoolean(builder, "Dragon Bone Fire Abilities", "all", true, "True if the dragon bone fire sword ignites attackers.");

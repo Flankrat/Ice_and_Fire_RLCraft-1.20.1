@@ -228,6 +228,8 @@ public class IafConfig {
     public static boolean copperInVanillaChests = false;
     public static double tideTridentBaseDamage = 12;
     public static double tideTridentUnderwaterDamageMultiplier = 1;
+    public static double fishingSpearThrownDamage = 5;
+    public static boolean fishingSpearCatchesFish = true;
     public static String bloodedArmorSetEffectMode = "attack";
     public static int bloodedDragonArmorSetEffectCooldown = 0;
 
@@ -454,6 +456,8 @@ public class IafConfig {
             copperInVanillaChests = ConfigHolder.SERVER.copperInVanillaChests.get();
             tideTridentBaseDamage = ConfigHolder.SERVER.tideTridentBaseDamage.get();
             tideTridentUnderwaterDamageMultiplier = ConfigHolder.SERVER.tideTridentUnderwaterDamageMultiplier.get();
+            fishingSpearThrownDamage = ConfigHolder.SERVER.fishingSpearThrownDamage.get();
+            fishingSpearCatchesFish = ConfigHolder.SERVER.fishingSpearCatchesFish.get();
             bloodedArmorSetEffectMode = ConfigHolder.SERVER.bloodedArmorSetEffectMode.get();
             bloodedDragonArmorSetEffectCooldown = ConfigHolder.SERVER.bloodedDragonArmorSetEffectCooldown.get();
         } catch (Exception e) {
