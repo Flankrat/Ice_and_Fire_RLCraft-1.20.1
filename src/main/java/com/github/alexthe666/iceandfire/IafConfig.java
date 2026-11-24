@@ -122,11 +122,10 @@ public class IafConfig {
     public static boolean weezerTinkers = true;
     public static double dragonBlockBreakingDropChance = 0.1D;
     public static boolean dragonAuto3rdPerson = true;
-    // Client: model set name per mob ("classic" is the only one so far) and the male dragon spots overlay
-    public static String fireDragonModel = "classic";
-    public static String iceDragonModel = "classic";
-    public static String lightningDragonModel = "classic";
-    public static String seaSerpentModel = "classic";
+    // Client: texture set name per dragon type ("classic" or "skeleton") and the male dragon spots overlay
+    public static String fireDragonTexture = "classic";
+    public static String iceDragonTexture = "classic";
+    public static String lightningDragonTexture = "classic";
     public static boolean showMaleDragonSpots = false;
     public static double dreadQueenMaxHealth = 750;
     public static boolean generateMausoleums = true;
@@ -237,10 +236,9 @@ public class IafConfig {
             customMainMenu = ConfigHolder.CLIENT.customMainMenu.get();
             useVanillaFont = ConfigHolder.CLIENT.useVanillaFont.get();
             dragonAuto3rdPerson = ConfigHolder.CLIENT.dragonAuto3rdPerson.get();
-            fireDragonModel = ConfigHolder.CLIENT.fireDragonModel.get();
-            iceDragonModel = ConfigHolder.CLIENT.iceDragonModel.get();
-            lightningDragonModel = ConfigHolder.CLIENT.lightningDragonModel.get();
-            seaSerpentModel = ConfigHolder.CLIENT.seaSerpentModel.get();
+            fireDragonTexture = ConfigHolder.CLIENT.fireDragonTexture.get();
+            iceDragonTexture = ConfigHolder.CLIENT.iceDragonTexture.get();
+            lightningDragonTexture = ConfigHolder.CLIENT.lightningDragonTexture.get();
             showMaleDragonSpots = ConfigHolder.CLIENT.showMaleDragonSpots.get();
         } catch (Exception e) {
             IceAndFire.LOGGER.warn("An exception was caused trying to load the client config for Ice and Fire.");

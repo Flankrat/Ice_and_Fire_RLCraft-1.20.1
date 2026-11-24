@@ -63,7 +63,7 @@ public class RenderDragonBase extends MobRenderer<EntityDragonBase, AdvancedEnti
         String baseTexture = (entity instanceof EntityShivaxiDragon ? "shivaxi_" : "")
                 + entity.getVariantName(entity.getVariant()) + entity.getDragonStage() + entity.isModelDead()
                 + entity.isMale() + entity.isSkeletal() + entity.isSleeping() + entity.isBlinking() + EnumDragonTextures.isSpookySeason()
-                + IafConfig.showMaleDragonSpots;
+                + IafConfig.showMaleDragonSpots + EnumDragonTextures.hasSkeletonTextureSet(entity);
         ResourceLocation resourcelocation = LAYERED_TEXTURE_CACHE.get(baseTexture);
         if (resourcelocation == null) {
             resourcelocation = new ResourceLocation("iceandfire:" + "dragon_texture_" + baseTexture);
@@ -75,7 +75,9 @@ public class RenderDragonBase extends MobRenderer<EntityDragonBase, AdvancedEnti
             }
             // The male overlay (darker spots on the wings and body) is the client option Show Male Dragon Spots;
             // it's off by default so dragons keep the plain 1.12 patterns
-            if (IafConfig.showMaleDragonSpots && entity.isMale() && !entity.isSkeletal() && !(entity instanceof EntityShivaxiDragon)) {
+            // No spots on bones: skipped for the "skeleton" texture set
+            if (IafConfig.showMaleDragonSpots && entity.isMale() && !entity.isSkeletal() && !(entity instanceof EntityShivaxiDragon)
+                    && !EnumDragonTextures.hasSkeletonTextureSet(entity)) {
                 if (dragonType == 0) {
                     tex.add(EnumDragonTextures.getDragonEnum(entity).FIRE_MALE_OVERLAY.toString());
                 } else if (dragonType == 1) {

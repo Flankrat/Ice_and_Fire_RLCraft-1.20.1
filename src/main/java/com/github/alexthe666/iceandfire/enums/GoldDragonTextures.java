@@ -34,6 +34,10 @@ public final class GoldDragonTextures {
 
     public static ResourceLocation getTexture(EntityDragonBase dragon) {
         int stage = clampStage(dragon.getDragonStage());
+        // The "skeleton" fire texture set gives gold dragons their own bone texture too
+        if (EnumDragonTextures.hasSkeletonTextureSet(dragon)) {
+            return SKELETON[stage];
+        }
         if (dragon.isModelDead()) {
             if (dragon.getDeathStage() >= (dragon.getAgeInDays() / 5) / 2) {
                 return SKELETON[stage];

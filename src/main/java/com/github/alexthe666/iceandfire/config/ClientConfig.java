@@ -7,10 +7,9 @@ public class ClientConfig {
     public final ForgeConfigSpec.BooleanValue customMainMenu;
     public final ForgeConfigSpec.BooleanValue useVanillaFont;
     public final ForgeConfigSpec.BooleanValue dragonAuto3rdPerson;
-    public final ForgeConfigSpec.ConfigValue<String> fireDragonModel;
-    public final ForgeConfigSpec.ConfigValue<String> iceDragonModel;
-    public final ForgeConfigSpec.ConfigValue<String> lightningDragonModel;
-    public final ForgeConfigSpec.ConfigValue<String> seaSerpentModel;
+    public final ForgeConfigSpec.ConfigValue<String> fireDragonTexture;
+    public final ForgeConfigSpec.ConfigValue<String> iceDragonTexture;
+    public final ForgeConfigSpec.ConfigValue<String> lightningDragonTexture;
     public final ForgeConfigSpec.BooleanValue showMaleDragonSpots;
 
     public ClientConfig(final ForgeConfigSpec.Builder builder) {
@@ -19,19 +18,19 @@ public class ClientConfig {
         this.dragonAuto3rdPerson = buildBoolean(builder, "Auto 3rd person when riding dragon", "all", true, "True if riding dragons should make the player take a 3rd person view automatically.");
         this.useVanillaFont = buildBoolean(builder, "Use Vanilla Font", "all", false, "Whether to use the vanilla font in the bestiary or not");
         builder.pop();
-        // Which model set each mob is drawn with. Client only; can be changed while playing.
-        builder.push("models");
-        this.fireDragonModel = buildModel(builder, "Fire Dragon Model", "fire dragons (gold dragons follow this too)");
-        this.iceDragonModel = buildModel(builder, "Ice Dragon Model", "ice dragons");
-        this.lightningDragonModel = buildModel(builder, "Lightning Dragon Model", "lightning dragons (Shivaxi follows this too)");
-        this.seaSerpentModel = buildModel(builder, "Sea Serpent Model", "sea serpents");
+        // Which texture set each dragon type is drawn with. Client only; can be changed while playing.
+        builder.push("textures");
+        this.fireDragonTexture = buildTexture(builder, "Fire Dragon Texture", "fire dragons (gold dragons follow this too)");
+        this.iceDragonTexture = buildTexture(builder, "Ice Dragon Texture", "ice dragons");
+        this.lightningDragonTexture = buildTexture(builder, "Lightning Dragon Texture", "lightning dragons");
         this.showMaleDragonSpots = buildBoolean(builder, "Show Male Dragon Spots", "all", false, "Whether male dragons get the darker spots on their wings and body that newer Ice and Fire versions draw over their texture");
         builder.pop();
     }
 
-    // Any name is accepted so a config written for a later model set doesn't get reset; unknown names use classic
-    private static ForgeConfigSpec.ConfigValue<String> buildModel(ForgeConfigSpec.Builder builder, String name, String mobs) {
-        return builder.comment("Model set for " + mobs + ". Only \"classic\" (Ice and Fire's own models) exists right now; other names fall back to classic")
+    // Any name is accepted so a config written for a later texture set doesn't get reset; unknown names use classic
+    private static ForgeConfigSpec.ConfigValue<String> buildTexture(ForgeConfigSpec.Builder builder, String name, String mobs) {
+        return builder.comment("Texture set for " + mobs + ": \"classic\" (the normal dragon textures) or \"skeleton\" (always the bone look"
+                + " from the Spooky Season Dragons Halloween event, eyes still glow). Other names fall back to classic")
             .translation(name).define(name, "classic", o -> o instanceof String);
     }
 
