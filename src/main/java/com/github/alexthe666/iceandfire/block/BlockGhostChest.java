@@ -8,7 +8,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -36,6 +38,15 @@ public class BlockGhostChest extends ChestBlock {
     @Override
     public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
         return new TileEntityGhostChest(pos, state);
+    }
+
+    @Override
+    public void playerWillDestroy(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull Player player) {
+        // Like 1.12: breaking a ghost chest that never rolled its ghost releases it, so it can't be dodged by mining it
+        if (level.getBlockEntity(pos) instanceof TileEntityGhostChest ghostChest) {
+            ghostChest.checkSpawn(player);
+        }
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
