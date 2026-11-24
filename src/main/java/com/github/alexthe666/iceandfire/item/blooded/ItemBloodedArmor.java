@@ -68,6 +68,10 @@ public class ItemBloodedArmor extends ArmorItem implements IProtectAgainstDragon
                 .withStyle(dragonType.getColor()));
         tooltip.add(Component.translatable("item.blooded_armor.desc")
                 .withStyle(elementColor));
+        if (dragonType.getElement() == BloodedDragonType.DragonElement.GOLD) {
+            int cut = (int) Math.round((1.0D - com.github.alexthe666.iceandfire.IafConfig.bloodedGoldElementalBreathMultiplier) * 100.0D);
+            tooltip.add(Component.translatable("item.blooded_armor.gold_desc", cut).withStyle(elementColor));
+        }
         tooltip.add(Component.empty());
 
         int wornCount = countWornPiecesClient(level);

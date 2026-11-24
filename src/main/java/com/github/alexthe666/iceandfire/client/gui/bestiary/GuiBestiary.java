@@ -78,7 +78,54 @@ public class GuiBestiary extends Screen {
     }
 
     private static Item getItemByRegistryName(String registryName) {
-        return ForgeRegistries.ITEMS.getValue(new ResourceLocation(registryName));
+        return forgeBlockForMode(ForgeRegistries.ITEMS.getValue(new ResourceLocation(registryName)));
+    }
+
+    /**
+     * Pictures follow Dragonforge Mode: in individual mode the shared forge vent, aperture and core drawn in the book
+     * become the per-type ones, cycling fire, ice and lightning every two seconds (the gold forge stays a secret).
+     */
+    private static Item forgeBlockForMode(Item item) {
+        if (item == null || !com.github.alexthe666.iceandfire.block.DragonForgeType.individualForges()) {
+            return item;
+        }
+        java.util.List<net.minecraftforge.registries.RegistryObject<net.minecraft.world.level.block.Block>> shared =
+                com.github.alexthe666.iceandfire.block.IafBlockRegistry.typedForgeBlocks(com.github.alexthe666.iceandfire.block.DragonForgeType.NONE);
+        for (int i = 0; i < shared.size(); i++) {
+            if (item == shared.get(i).get().asItem()) {
+                com.github.alexthe666.iceandfire.block.DragonForgeType[] shown = {
+                        com.github.alexthe666.iceandfire.block.DragonForgeType.FIRE,
+                        com.github.alexthe666.iceandfire.block.DragonForgeType.ICE,
+                        com.github.alexthe666.iceandfire.block.DragonForgeType.LIGHTNING};
+                int cycle = (int) ((net.minecraft.Util.getMillis() / 2000L) % shown.length);
+                return com.github.alexthe666.iceandfire.block.IafBlockRegistry.typedForgeBlocks(shown[cycle]).get(i).get().asItem();
+            }
+        }
+        return item;
+    }
+
+    /**
+     * The page's text file: the player's language, then English. A file named "<page>_<n>_individual.txt" replaces the
+     * page in Dragonforge Mode individual, where there is one.
+     */
+    private Optional<Resource> pageResource() {
+        String base = this.pageType.toString().toLowerCase(Locale.ROOT) + "_" + this.bookPages;
+        String languageName = Minecraft.getInstance().options.languageCode.toLowerCase(Locale.ROOT);
+        List<String> candidates = new ArrayList<>();
+        boolean individual = com.github.alexthe666.iceandfire.block.DragonForgeType.individualForges();
+        for (String lang : new String[]{languageName, "en_us"}) {
+            if (individual) {
+                candidates.add("iceandfire:lang/bestiary/" + lang + "_0/" + base + "_individual.txt");
+            }
+            candidates.add("iceandfire:lang/bestiary/" + lang + "_0/" + base + ".txt");
+        }
+        for (String candidate : candidates) {
+            Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(candidate));
+            if (resource.isPresent()) {
+                return resource;
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -783,16 +830,7 @@ public class GuiBestiary extends Screen {
     }
 
     public void imageFromTxt(GuiGraphics ms) {
-        String fileName = this.pageType.toString().toLowerCase(Locale.ROOT) + "_" + this.bookPages + ".txt";
-        String languageName = Minecraft.getInstance().options.languageCode.toLowerCase(Locale.ROOT);
-        ResourceLocation fileLoc = new ResourceLocation("iceandfire:lang/bestiary/" + languageName + "_0/" + fileName);
-        ResourceLocation backupLoc = new ResourceLocation("iceandfire:lang/bestiary/en_us_0/" + fileName);
-        Optional<Resource> resource;
-
-        resource = Minecraft.getInstance().getResourceManager().getResource(fileLoc);
-        if (resource.isEmpty()) {
-            resource = Minecraft.getInstance().getResourceManager().getResource(backupLoc);
-        }
+        Optional<Resource> resource = pageResource();
         try {
             if (resource.isPresent()) {
                 final List<String> lines = IOUtils.readLines(resource.get().open(), StandardCharsets.UTF_8);
@@ -887,16 +925,7 @@ public class GuiBestiary extends Screen {
     }
 
     public void writeFromTxt(GuiGraphics ms) {
-        String fileName = this.pageType.toString().toLowerCase(Locale.ROOT) + "_" + this.bookPages + ".txt";
-        String languageName = Minecraft.getInstance().options.languageCode.toLowerCase(Locale.ROOT);
-        ResourceLocation fileLoc = new ResourceLocation("iceandfire:lang/bestiary/" + languageName + "_0/" + fileName);
-        ResourceLocation backupLoc = new ResourceLocation("iceandfire:lang/bestiary/en_us_0/" + fileName);
-        Optional<Resource> resource;
-
-        resource = Minecraft.getInstance().getResourceManager().getResource(fileLoc);
-        if (resource.isEmpty()) {
-            resource = Minecraft.getInstance().getResourceManager().getResource(backupLoc);
-        }
+        Optional<Resource> resource = pageResource();
         try {
             final List<String> lines = IOUtils.readLines(resource.get().open(), "UTF-8");
             int linenumber = 0;

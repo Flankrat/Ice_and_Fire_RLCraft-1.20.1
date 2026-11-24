@@ -1354,6 +1354,7 @@
   "item.iceandfire.blooded_leggings": "Dragon Blood Leggings",
   "item.iceandfire.blooded_boots": "Dragon Blood Boots",
   "item.blooded_armor.desc": "Grants immunity to corresponding dragon breath and its negative effects",
+  "item.blooded_armor.gold_desc": "Full set: %s%% less damage from fire, ice and lightning dragon breath",
   "item.iceandfire.blooded_set.title": "Set Effect",
   "item.iceandfire.blooded_set.fire": "Attacks ignite and knock back targets",
   "item.iceandfire.blooded_set.ice": "Attacks freeze, slow, and knock back targets",

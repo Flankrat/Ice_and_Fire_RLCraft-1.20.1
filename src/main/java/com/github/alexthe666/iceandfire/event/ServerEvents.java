@@ -312,6 +312,11 @@ public class ServerEvents {
             if (event.getEntity().getItemBySlot(EquipmentSlot.FEET).getItem() instanceof IProtectAgainstDragonItem) {
                 multi -= 0.1f;
             }
+            // the blooded gold set (made only by gold dragons, which players can't find in the wild) also cuts the
+            // other three dragons' breath, without making the wearer immune to it
+            if (!goldBreath && ItemBloodedArmor.hasFullArmorSet(event.getEntity(), BloodedDragonType.DragonElement.GOLD)) {
+                multi *= (float) IafConfig.bloodedGoldElementalBreathMultiplier;
+            }
             event.setAmount(event.getAmount() * multi);
         }
     }

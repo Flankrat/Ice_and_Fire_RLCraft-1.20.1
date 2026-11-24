@@ -139,6 +139,7 @@ public class IafConfig {
     public static boolean chunkLoadSummonCrystal = true;
     public static boolean dragonforgeInvalidRecipesMakeAsh = true;
     public static String dragonforgeMode = "global";
+    public static double bloodedGoldElementalBreathMultiplier = 0.5D;
     public static double dangerousWorldGenDistanceLimit = 200;
     public static double dangerousWorldGenSeparationLimit = 300;
     public static double dragonFlightSpeedMod = 1F;
@@ -371,6 +372,7 @@ public class IafConfig {
             chunkLoadSummonCrystal = ConfigHolder.SERVER.chunkLoadSummonCrystal.get();
             dragonforgeInvalidRecipesMakeAsh = ConfigHolder.SERVER.dragonforgeInvalidRecipesMakeAsh.get();
             dragonforgeMode = ConfigHolder.SERVER.dragonforgeMode.get();
+            bloodedGoldElementalBreathMultiplier = ConfigHolder.SERVER.bloodedGoldElementalBreathMultiplier.get();
             dangerousWorldGenDistanceLimit = ConfigHolder.SERVER.dangerousWorldGenDistanceLimit.get();
             dangerousWorldGenSeparationLimit = ConfigHolder.SERVER.dangerousWorldGenSeparationLimit.get();
             dragonFlightSpeedMod = ConfigHolder.SERVER.dragonFlightSpeedMod.get();
