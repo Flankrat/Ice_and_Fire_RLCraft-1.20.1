@@ -117,6 +117,8 @@ public class IceAndFire {
                 IafStructurePieceTypes.PIECE_TYPES.register(modBus);
                 IafContainerRegistry.CONTAINERS.register(modBus);
                 IafRecipeSerializers.SERIALIZERS.register(modBus);
+                // gilded dragon bone weapons for Spartan Weaponry, only when the Spartan mods are installed
+                com.github.alexthe666.iceandfire.compat.spartan.SpartanCompat.init(modBus);
                 // recipe condition that loads only the current Dragonforge Mode's forge block recipes
                 modBus.addListener((net.minecraftforge.registries.RegisterEvent event) -> {
                         if (event.getRegistryKey().equals(ForgeRegistries.Keys.RECIPE_SERIALIZERS)) {

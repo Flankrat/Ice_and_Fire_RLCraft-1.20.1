@@ -36,6 +36,8 @@ import java.util.stream.Collectors;
 public class IceAndFireJEIPlugin implements IModPlugin {
 
     public static final ResourceLocation MOD = new ResourceLocation("iceandfire:iceandfire");
+    /** Items in this tag are hidden from JEI, with their crafting recipes (for the hidden gold dragon content). */
+    public static final net.minecraft.tags.TagKey<Item> JEI_HIDDEN = net.minecraft.tags.ItemTags.create(new ResourceLocation("iceandfire", "jei_hidden"));
     public static final mezz.jei.api.recipe.RecipeType<DragonForgeRecipe> FIRE_DRAGON_FORGE_RECIPE_TYPE = mezz.jei.api.recipe.RecipeType.create(ModIds.MINECRAFT_ID, "firedragonforge", DragonForgeRecipe.class);
     public static final mezz.jei.api.recipe.RecipeType<DragonForgeRecipe> ICE_DRAGON_FORGE_RECIPE_TYPE = mezz.jei.api.recipe.RecipeType.create(ModIds.MINECRAFT_ID, "icedragonforge", DragonForgeRecipe.class);
     public static final mezz.jei.api.recipe.RecipeType<DragonForgeRecipe> LIGHTNING_DRAGON_FORGE_RECIPE_TYPE = mezz.jei.api.recipe.RecipeType.create(ModIds.MINECRAFT_ID, "lightningdragonforge", DragonForgeRecipe.class);
@@ -145,6 +147,10 @@ public class IceAndFireJEIPlugin implements IModPlugin {
         IafItemRegistry.BloodedArmorSet blooded = IafItemRegistry.BLOODED_ARMOR_SETS.get(BloodedDragonType.GOLD_GOLD);
         hidden.addAll(List.of(blooded.helmet().get(), blooded.chestplate().get(), blooded.leggings().get(), blooded.boots().get()));
         hidden.addAll(List.of(IafItemRegistry.DRAGONBONE_SWORD_GOLD.get(), IafItemRegistry.DRAGON_BOW_GOLD.get(), IafItemRegistry.DRAGONBONE_ARROW_GOLD.get()));
+        // other mods' gold dragon items (e.g. gold dragon bone weapons) hide themselves by joining the iceandfire:jei_hidden tag
+        net.minecraftforge.registries.ForgeRegistries.ITEMS.tags().getTag(JEI_HIDDEN).forEach(item -> {
+            if (!hidden.contains(item)) hidden.add(item);
+        });
         // the gold forge blocks are part of the secret, and the forge blocks of the other Dragonforge Mode aren't used
         for (com.github.alexthe666.iceandfire.block.DragonForgeType type : com.github.alexthe666.iceandfire.block.DragonForgeType.values()) {
             if (type == com.github.alexthe666.iceandfire.block.DragonForgeType.GOLD
