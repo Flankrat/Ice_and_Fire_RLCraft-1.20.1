@@ -33,9 +33,15 @@ public class DreadAIMountDragon extends Goal {
         return this.dragon != null;
     }
 
+    // A little past the 32 blocks canUse searches, so a dragon at the edge doesn't make her start and stop over and over
+    private static final double GIVE_UP_DISTANCE_SQ = 40 * 40;
+
     @Override
     public boolean canContinueToUse() {
-        return !this.queen.isPassenger() && this.dragon != null && this.dragon.isAlive() && !this.dragon.isVehicle();
+        // Give up once the dragon is out of range (with no limit she chased it forever, and as a priority 0 MOVE goal
+        // nothing else could move her, so she never fought)
+        return !this.queen.isPassenger() && this.dragon != null && this.dragon.isAlive() && !this.dragon.isVehicle()
+                && this.queen.distanceToSqr(this.dragon) <= GIVE_UP_DISTANCE_SQ;
     }
 
     @Override

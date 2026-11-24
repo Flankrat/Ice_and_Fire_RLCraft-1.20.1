@@ -41,6 +41,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+
+import java.util.Optional;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -141,18 +143,21 @@ public class IceAndFire {
         }
 
         private static void setup(final FMLCommonSetupEvent event) {
+                // Packets that only one side ever sends are registered with that direction, so Forge drops (and
+                // disconnects) a client that sends a server-to-client packet, before it's even decoded. The ones
+                // registered without a direction are sent both ways and check the sender in their handlers.
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageDaytime.class, MessageDaytime::write,
-                                MessageDaytime::read, MessageHandler.handle(MessageDaytime.Handler::handle));
+                                MessageDaytime::read, MessageHandler.handle(MessageDaytime.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageDeathWormHitbox.class,
                                 MessageDeathWormHitbox::write, MessageDeathWormHitbox::read,
-                                MessageHandler.handle(MessageDeathWormHitbox.Handler::handle));
+                                MessageHandler.handle(MessageDeathWormHitbox.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageDragonControl.class,
                                 MessageDragonControl::write,
                                 MessageDragonControl::read,
-                                MessageHandler.handle(MessageDragonControl.Handler::handle));
+                                MessageHandler.handle(MessageDragonControl.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_SERVER));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageDragonSetBurnBlock.class,
                                 MessageDragonSetBurnBlock::write, MessageDragonSetBurnBlock::read,
-                                MessageHandler.handle(MessageDragonSetBurnBlock.Handler::handle));
+                                MessageHandler.handle(MessageDragonSetBurnBlock.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageDragonSyncFire.class,
                                 MessageDragonSyncFire::write,
                                 MessageDragonSyncFire::read,
@@ -164,60 +169,60 @@ public class IceAndFire {
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageMyrmexSettings.class,
                                 MessageMyrmexSettings::write,
                                 MessageMyrmexSettings::read,
-                                MessageHandler.handle(MessageMyrmexSettings.Handler::handle));
+                                MessageHandler.handle(MessageMyrmexSettings.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageHippogryphArmor.class,
                                 MessageHippogryphArmor::write, MessageHippogryphArmor::read,
-                                MessageHandler.handle(MessageHippogryphArmor.Handler::handle));
+                                MessageHandler.handle(MessageHippogryphArmor.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_SERVER));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageMultipartInteract.class,
                                 MessageMultipartInteract::write, MessageMultipartInteract::read,
-                                MessageHandler.handle(MessageMultipartInteract.Handler::handle));
+                                MessageHandler.handle(MessageMultipartInteract.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_SERVER));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessagePlayerHitMultipart.class,
                                 MessagePlayerHitMultipart::write, MessagePlayerHitMultipart::read,
-                                MessageHandler.handle(MessagePlayerHitMultipart.Handler::handle));
+                                MessageHandler.handle(MessagePlayerHitMultipart.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_SERVER));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageSetMyrmexHiveNull.class,
                                 MessageSetMyrmexHiveNull::write, MessageSetMyrmexHiveNull::read,
-                                MessageHandler.handle(MessageSetMyrmexHiveNull.Handler::handle));
+                                MessageHandler.handle(MessageSetMyrmexHiveNull.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageSirenSong.class, MessageSirenSong::write,
-                                MessageSirenSong::read, MessageHandler.handle(MessageSirenSong.Handler::handle));
+                                MessageSirenSong::read, MessageHandler.handle(MessageSirenSong.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageSpawnParticleAt.class,
                                 MessageSpawnParticleAt::write, MessageSpawnParticleAt::read,
-                                MessageHandler.handle(MessageSpawnParticleAt.Handler::handle));
+                                MessageHandler.handle(MessageSpawnParticleAt.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageStartRidingMob.class,
                                 MessageStartRidingMob::write,
                                 MessageStartRidingMob::read,
                                 MessageHandler.handle(MessageStartRidingMob.Handler::handle));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageUpdatePixieHouse.class,
                                 MessageUpdatePixieHouse::write, MessageUpdatePixieHouse::read,
-                                MessageHandler.handle(MessageUpdatePixieHouse.Handler::handle));
+                                MessageHandler.handle(MessageUpdatePixieHouse.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageUpdatePixieHouseModel.class,
                                 MessageUpdatePixieHouseModel::write, MessageUpdatePixieHouseModel::read,
-                                MessageHandler.handle(MessageUpdatePixieHouseModel.Handler::handle));
+                                MessageHandler.handle(MessageUpdatePixieHouseModel.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageUpdatePixieJar.class,
                                 MessageUpdatePixieJar::write,
                                 MessageUpdatePixieJar::read,
-                                MessageHandler.handle(MessageUpdatePixieJar.Handler::handle));
+                                MessageHandler.handle(MessageUpdatePixieJar.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageUpdatePodium.class,
                                 MessageUpdatePodium::write,
-                                MessageUpdatePodium::read, MessageHandler.handle(MessageUpdatePodium.Handler::handle));
+                                MessageUpdatePodium::read, MessageHandler.handle(MessageUpdatePodium.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageUpdateDragonforge.class,
                                 MessageUpdateDragonforge::write, MessageUpdateDragonforge::read,
-                                MessageHandler.handle(MessageUpdateDragonforge.Handler::handle));
+                                MessageHandler.handle(MessageUpdateDragonforge.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageUpdateLectern.class,
                                 MessageUpdateLectern::write,
                                 MessageUpdateLectern::read,
                                 MessageHandler.handle(MessageUpdateLectern.Handler::handle));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageSyncPath.class, MessageSyncPath::write,
-                                MessageSyncPath::read, MessageHandler.handle(MessageSyncPath::handle));
+                                MessageSyncPath::read, MessageHandler.handle(MessageSyncPath::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageSyncPathReached.class,
                                 MessageSyncPathReached::write, MessageSyncPathReached::read,
-                                MessageHandler.handle(MessageSyncPathReached::handle));
+                                MessageHandler.handle(MessageSyncPathReached::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageSwingArm.class, MessageSwingArm::write,
-                                MessageSwingArm::read, MessageHandler.handle(MessageSwingArm.Handler::handle));
+                                MessageSwingArm::read, MessageHandler.handle(MessageSwingArm.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_SERVER));
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, SyncEntityData.class, SyncEntityData::encode,
                                 SyncEntityData::decode, SyncEntityData::handle);
                 NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageChainLightningFX.class,
                                 MessageChainLightningFX::write, MessageChainLightningFX::read,
-                                MessageHandler.handle(MessageChainLightningFX.Handler::handle));
+                                MessageHandler.handle(MessageChainLightningFX.Handler::handle), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 event.enqueueWork(() -> {
                         PROXY.setup();
                         IafLootRegistry.init();

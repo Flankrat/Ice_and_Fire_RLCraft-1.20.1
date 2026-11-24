@@ -26,16 +26,19 @@ public class IafWorldData extends SavedData {
     }
 
     private static final String IDENTIFIER = IceAndFire.MODID + "_general";
-    private static final EnumMap<FeatureType, ArrayList<Map.Entry<String, BlockPos>>> LAST_GENERATED = new EnumMap<>(FeatureType.class);
-    static {
-        LAST_GENERATED.put(FeatureType.SURFACE, new ArrayList<>());
-        LAST_GENERATED.put(FeatureType.UNDERGROUND, new ArrayList<>());
-        LAST_GENERATED.put(FeatureType.OCEAN, new ArrayList<>());
+    // Per dimension (each dimension has its own saved data). This used to be static: one list for every dimension,
+    // which also carried over into the next world opened in single player.
+    // Worldgen threads add to it while autosave reads it, so every access holds the lock on this object.
+    private final EnumMap<FeatureType, ArrayList<Map.Entry<String, BlockPos>>> lastGenerated = new EnumMap<>(FeatureType.class);
+
+    public IafWorldData() {
+        for (FeatureType type : FeatureType.values()) {
+            lastGenerated.put(type, new ArrayList<>());
+        }
     }
 
-    public IafWorldData() { /* Nothing to do */ }
-
     public IafWorldData(final CompoundTag tag) {
+        this();
         this.load(tag);
     }
 
@@ -43,10 +46,10 @@ public class IafWorldData extends SavedData {
         if (world instanceof ServerLevel) {
             ServerLevel overworld = world.getServer().getLevel(world.dimension());
             DimensionDataStorage storage = overworld.getDataStorage();
-            IafWorldData data = storage.computeIfAbsent(IafWorldData::new, IafWorldData::new, IDENTIFIER);
-            data.setDirty();
-
-            return data;
+            // Worldgen threads call this at the same time as each other (the storage keeps a plain HashMap)
+            synchronized (storage) {
+                return storage.computeIfAbsent(IafWorldData::new, IafWorldData::new, IDENTIFIER);
+            }
         }
 
         return null;
@@ -56,24 +59,22 @@ public class IafWorldData extends SavedData {
         return check(feature.getFeatureType(), position, id);
     }
 
-    public boolean check(final FeatureType type, final BlockPos position, final String id) {
-        ArrayList<Map.Entry<String, BlockPos>> entries = LAST_GENERATED.get(type);
+    /**
+     * Whether a dangerous structure can generate here: it has to be far enough from every structure recorded for this
+     * feature type. Only positions that are allowed get recorded (each feature id keeps its latest position).
+     */
+    public synchronized boolean check(final FeatureType type, final BlockPos position, final String id) {
+        ArrayList<Map.Entry<String, BlockPos>> entries = lastGenerated.get(type);
+        double limitSq = (double) IafConfig.dangerousWorldGenSeparationLimit * IafConfig.dangerousWorldGenSeparationLimit;
 
-        boolean canGenerate = true;
-        List<Map.Entry<String, BlockPos>> toRemove = null;
-
+        // Every entry has to be far enough (this was overwritten each time round the loop, so only the last one counted)
         for (Map.Entry<String, BlockPos> entry : entries) {
-            if (entry.getKey().equals(id)) {
-                if (toRemove == null) toRemove = new ArrayList<>();
-                toRemove.add(entry);
+            if (position.distSqr(entry.getValue()) <= limitSq) {
+                return false;
             }
-
-            canGenerate = position.distSqr(entry.getValue()) > IafConfig.dangerousWorldGenSeparationLimit * IafConfig.dangerousWorldGenSeparationLimit;
         }
 
-        if (toRemove != null) {
-            entries.removeAll(toRemove);
-        }
+        entries.removeIf(entry -> entry.getKey().equals(id));
 
         if (entries.size() > 5_000) {
             IceAndFire.LOGGER.debug("Too many BlockPos entries for feature type {} tracked, removing oldest ones", type);
@@ -82,11 +83,12 @@ public class IafWorldData extends SavedData {
         }
 
         entries.add(Map.entry(id, position));
+        this.setDirty();
 
-        return canGenerate;
+        return true;
     }
 
-    public IafWorldData load(final CompoundTag tag) {
+    public synchronized IafWorldData load(final CompoundTag tag) {
         FeatureType[] types = FeatureType.values();
 
         for (FeatureType type : types) {
@@ -96,7 +98,7 @@ public class IafWorldData extends SavedData {
                 CompoundTag entry = list.getCompound(i);
                 String id = entry.getString("id");
                 BlockPos position = NbtUtils.readBlockPos(entry.getCompound("position"));
-                LAST_GENERATED.get(type).add(Map.entry(id, position));
+                lastGenerated.get(type).add(Map.entry(id, position));
             }
         }
 
@@ -104,15 +106,14 @@ public class IafWorldData extends SavedData {
     }
 
     @Override
-    public @NotNull CompoundTag save(@NotNull final CompoundTag tag) {
-        for (var e : LAST_GENERATED.entrySet()) {
+    public synchronized @NotNull CompoundTag save(@NotNull final CompoundTag tag) {
+        for (var e : lastGenerated.entrySet()) {
             ListTag listTag = new ListTag();
 
             for (Map.Entry<String, BlockPos> entry : e.getValue()) {
                 CompoundTag subTag = new CompoundTag();
                 subTag.putString("id", entry.getKey());
                 subTag.put("position", NbtUtils.writeBlockPos(entry.getValue()));
-
                 listTag.add(subTag);
             }
 

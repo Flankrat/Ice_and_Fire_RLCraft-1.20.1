@@ -357,8 +357,9 @@ public class EntityHydra extends Monster implements IAnimatedEntity, IMultipartE
 
     @Override
     public boolean hurt(@NotNull DamageSource source, float amount) {
-        if (lastHitHead > this.getHeadCount()) {
-            lastHitHead = this.getHeadCount() - 1;
+        // Keep the index inside headDamageTracker (heads can be lost after it was set)
+        if (lastHitHead >= this.getHeadCount() || lastHitHead < 0) {
+            lastHitHead = Math.max(0, this.getHeadCount() - 1);
         }
         int headIndex = lastHitHead;
         headDamageTracker[headIndex] += amount;
@@ -473,7 +474,10 @@ public class EntityHydra extends Monster implements IAnimatedEntity, IMultipartE
     }
 
     public void triggerHeadFlags(int index) {
-        lastHitHead = index;
+        // The index can come from a client packet (MessagePlayerHitMultipart): ignore heads the hydra doesn't have
+        if (index >= 0 && index < this.getHeadCount()) {
+            lastHitHead = index;
+        }
     }
 
     @Override

@@ -441,6 +441,11 @@ public class EntityHippocampus extends TamableAnimal implements ISyncMount, IAni
         this.itemHandler = LazyOptional.of(() -> new InvWrapper(this.inventory));
     }
 
+    /** Re-reads saddle, chest and armor from the server's inventory (same name as EntityHippogryph's). */
+    public void refreshInventory() {
+        this.updateContainerEquipment();
+    }
+
     protected void updateContainerEquipment() {
         if (!this.level().isClientSide) {
             this.setSaddled(!this.inventory.getItem(INV_SLOT_SADDLE).isEmpty());

@@ -55,6 +55,17 @@ public class MessageDragonControl {
         return posZ;
     }
 
+    // How far one control packet may move a ridden mount (a mount moves a few blocks per tick at most)
+    private static final double MAX_STEP_SQ = 10 * 10;
+
+    /** Moves the ridden mount to the client's position, unless that's a jump no mount can make in one tick. */
+    private static void setRiddenPos(Entity mount, MessageDragonControl message) {
+        double x = message.getPosX(), y = message.getPosY(), z = message.getPosZ();
+        if (Double.isFinite(x) && Double.isFinite(y) && Double.isFinite(z) && mount.distanceToSqr(x, y, z) <= MAX_STEP_SQ) {
+            mount.setPos(x, y, z);
+        }
+    }
+
     public static class Handler {
         public Handler() {
         }
@@ -88,19 +99,19 @@ public class MessageDragonControl {
                         } else if (entity instanceof EntityHippocampus hippo) {
                             if (hippo.isOwnedBy(player)) {
                                 hippo.setControlState(message.controlState);
+                                setRiddenPos(hippo, message);
                             }
-
-                            hippo.setPos(message.getPosX(), message.getPosY(), message.getPosZ());
                         } else if (entity instanceof EntityDeathWorm deathWorm) {
-                            deathWorm.setControlState(message.controlState);
-                            deathWorm.setPos(message.getPosX(), message.getPosY(), message.getPosZ());
+                            if (deathWorm.isOwnedBy(player)) {
+                                deathWorm.setControlState(message.controlState);
+                                setRiddenPos(deathWorm, message);
+                            }
                         } else if (entity instanceof EntityAmphithere amphithere) {
                             if (amphithere.isOwnedBy(player)) {
                                 amphithere.setControlState(message.controlState);
+                                // TODO :: Is this handled by Entity#move due to recent changes?
+                                setRiddenPos(amphithere, message);
                             }
-
-                            // TODO :: Is this handled by Entity#move due to recent changes?
-                            amphithere.setPos(message.getPosX(), message.getPosY(), message.getPosZ());
                         }
                     }
                 }

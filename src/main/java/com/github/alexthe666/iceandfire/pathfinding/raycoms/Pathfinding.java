@@ -12,6 +12,7 @@ import net.minecraftforge.fml.LogicalSide;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -34,9 +35,14 @@ public final class Pathfinding {
      *
      * @return the threadpool executor.
      */
-    public static ThreadPoolExecutor getExecutor() {
+    public static synchronized ThreadPoolExecutor getExecutor() {
         if (executor == null) {
-            executor = new ThreadPoolExecutor(1, IafConfig.dragonPathfindingThreads, 10, TimeUnit.SECONDS, jobQueue, new IafThreadFactory());
+            // A pool with an unbounded queue only ever starts threads up to its core size (extra threads are started only
+            // when the queue is full, which never happens), so the core size has to be the configured thread count; idle
+            // threads still stop after 10 seconds. (The core size was 1, so jobs ran one at a time whatever the config said.)
+            int threads = Math.max(1, IafConfig.dragonPathfindingThreads);
+            executor = new ThreadPoolExecutor(threads, threads, 10, TimeUnit.SECONDS, jobQueue, new IafThreadFactory());
+            executor.allowCoreThreadTimeOut(true);
         }
         return executor;
     }
@@ -48,7 +54,7 @@ public final class Pathfinding {
         /**
          * Ongoing thread IDs.
          */
-        public static int id;
+        public static final AtomicInteger id = new AtomicInteger();
 
         @Override
         public Thread newThread(final @NotNull Runnable runnable) throws RuntimeException {
@@ -63,7 +69,7 @@ public final class Pathfinding {
                     throw new RuntimeException(String.format("Couldn't join threads within timeout range. Tried joining '%s' on '%s'", Thread.currentThread().getName(), workqueue.name()));
                 }).join();
             }
-            final Thread thread = new Thread(runnable, "Ice and Fire Pathfinding Worker #" + (id++));
+            final Thread thread = new Thread(runnable, "Ice and Fire Pathfinding Worker #" + id.getAndIncrement());
             thread.setDaemon(true);
             thread.setPriority(Thread.MAX_PRIORITY);
             if (thread.getContextClassLoader() != classLoader) {

@@ -75,7 +75,11 @@ public class EntityDragonEgg extends LivingEntity implements IBlacklistedFromSta
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        this.setEggType(EnumDragonEgg.values()[tag.getInt("Color")]);
+        // Out-of-range colors (edited or broken saves) used to throw and delete the egg on load: keep the default instead
+        int color = tag.getInt("Color");
+        if (color >= 0 && color < EnumDragonEgg.values().length) {
+            this.setEggType(EnumDragonEgg.values()[color]);
+        }
         this.setDragonAge(tag.getInt("DragonAge"));
         String s;
 

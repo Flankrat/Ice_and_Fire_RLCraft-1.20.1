@@ -36,6 +36,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
@@ -66,6 +68,8 @@ public class EntitySnowVillager extends AbstractVillager {
     private static final int MAX_TIER = 3;
     private static final EntityDataAccessor<Integer> PROFESSION = SynchedEntityData.defineId(EntitySnowVillager.class, EntityDataSerializers.INT);
     private int tier = 0;
+    // Ticks until sold-out trades restock (0 = none pending), as in the 1.12 version
+    private int restockTimer = 0;
     // The job site block this villager works at (placed in its hut), or null until it finds one
     @Nullable
     private BlockPos jobSite;
@@ -172,6 +176,35 @@ public class EntitySnowVillager extends AbstractVillager {
     protected void updateTrades() {
         if (this.tier == 0) {
             this.unlockNextTier();
+        }
+    }
+
+    // 1.12 villagers restocked: after a trade (always the first use of a deal, otherwise 1 in 5) they reset 40 ticks
+    // later, giving every sold-out deal 2-12 more uses and themselves Regeneration. AbstractVillager has no
+    // restocking at all, so without this the trades ran out for good.
+    @Override
+    public void notifyTrade(@NotNull MerchantOffer offer) {
+        super.notifyTrade(offer);
+        if (offer.getUses() == 1 || this.random.nextInt(5) == 0) {
+            this.restockTimer = 40;
+        }
+    }
+
+    @Override
+    protected void customServerAiStep() {
+        super.customServerAiStep();
+        if (this.restockTimer > 0 && !this.isTrading() && --this.restockTimer == 0) {
+            for (MerchantOffer offer : this.getOffers()) {
+                if (offer.isOutOfStock()) {
+                    // A deal's max uses can't change on 1.20, so leave 2-12 uses free instead
+                    int free = Math.min(offer.getMaxUses(), this.random.nextInt(6) + this.random.nextInt(6) + 2);
+                    offer.resetUses();
+                    for (int i = 0; i < offer.getMaxUses() - free; i++) {
+                        offer.increaseUses();
+                    }
+                }
+            }
+            this.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 200, 0));
         }
     }
 

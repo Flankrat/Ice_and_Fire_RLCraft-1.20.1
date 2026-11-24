@@ -102,7 +102,8 @@ public class MiscData {
                 ids[i] = targetedByScepter.get(i).getId();
             }
 
-            tag.putIntArray("targetedByScepterIds", ids);
+            // In the miscData sub-tag, where deserialize reads it (it was written to the outer tag, so it never arrived)
+            miscData.putIntArray("targetedByScepterIds", ids);
         }
 
         tag.put("miscData", miscData);

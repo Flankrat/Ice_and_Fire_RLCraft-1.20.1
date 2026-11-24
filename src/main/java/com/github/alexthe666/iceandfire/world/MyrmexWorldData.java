@@ -12,15 +12,17 @@ import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class MyrmexWorldData extends SavedData {
 
     private static final String IDENTIFIER = "iceandfire_myrmex";
     private final List<BlockPos> villagerPositionsList = Lists.newArrayList();
-    private final List<MyrmexHive> hiveList = Lists.newArrayList();
+    // Worldgen threads add hives (WorldGenMyrmexHive) while the server thread loops over the list every tick: a
+    // copy-on-write list lets each loop run on a snapshot, so adding never breaks one (writes are rare)
+    private final List<MyrmexHive> hiveList = new CopyOnWriteArrayList<>();
     private Level world;
     private int tickCounter;
 
@@ -73,15 +75,9 @@ public class MyrmexWorldData extends SavedData {
     }
 
     private void removeAnnihilatedHives() {
-        Iterator<MyrmexHive> iterator = this.hiveList.iterator();
-
-        while (iterator.hasNext()) {
-            MyrmexHive village = iterator.next();
-
-            if (village.isAnnihilated()) {
-                iterator.remove();
-                this.setDirty();
-            }
+        // removeIf, because a copy-on-write list's iterator can't remove
+        if (this.hiveList.removeIf(MyrmexHive::isAnnihilated)) {
+            this.setDirty();
         }
     }
 
