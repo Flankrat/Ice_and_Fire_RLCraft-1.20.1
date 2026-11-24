@@ -5,7 +5,10 @@ import com.github.alexthe666.iceandfire.block.IafBlockRegistry;
 import com.github.alexthe666.iceandfire.enums.EnumBestiaryPages;
 import com.github.alexthe666.iceandfire.enums.EnumTroll;
 import com.github.alexthe666.iceandfire.item.IafItemRegistry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -37,12 +40,16 @@ import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.item.trading.MerchantOffers;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -55,9 +62,13 @@ public class EntitySnowVillager extends AbstractVillager {
     public static final int CRAFTSMAN = 1;
     public static final int SHAMAN = 2;
     private static final String[] PROFESSION_NAMES = {"fisherman", "craftsman", "shaman"};
+    public static final int PROFESSION_COUNT = PROFESSION_NAMES.length;
     private static final int MAX_TIER = 3;
     private static final EntityDataAccessor<Integer> PROFESSION = SynchedEntityData.defineId(EntitySnowVillager.class, EntityDataSerializers.INT);
     private int tier = 0;
+    // The job site block this villager works at (placed in its hut), or null until it finds one
+    @Nullable
+    private BlockPos jobSite;
 
     public EntitySnowVillager(EntityType<? extends AbstractVillager> type, Level level) {
         super(type, level);
@@ -81,6 +92,8 @@ public class EntitySnowVillager extends AbstractVillager {
         this.goalSelector.addGoal(1, new PanicGoal(this, 0.5D));
         this.goalSelector.addGoal(1, new LookAtTradingPlayerGoal(this));
         this.goalSelector.addGoal(4, new MoveTowardsRestrictionGoal(this, 0.35D));
+        // During the day, go back to work at the job site now and then
+        this.goalSelector.addGoal(6, new WorkAtJobSiteGoal(this));
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, 0.35D));
         this.goalSelector.addGoal(9, new InteractGoal(this, Player.class, 3.0F, 1.0F));
         this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Mob.class, 8.0F));
@@ -99,6 +112,33 @@ public class EntitySnowVillager extends AbstractVillager {
 
     public String getProfessionName() {
         return PROFESSION_NAMES[this.getProfession()];
+    }
+
+    /**
+     * The job site block for a profession, the same blocks vanilla villagers use for similar jobs: a barrel for the
+     * fisherman, a crafting table for the craftsman, a brewing stand for the shaman (who trades in blaze powder,
+     * ghast tears and dragon blood).
+     */
+    public static BlockState getJobSiteBlock(int profession) {
+        return switch (Math.floorMod(profession, PROFESSION_COUNT)) {
+            case CRAFTSMAN -> Blocks.CRAFTING_TABLE.defaultBlockState();
+            case SHAMAN -> Blocks.BREWING_STAND.defaultBlockState();
+            default -> Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP);
+        };
+    }
+
+    // True if the block at pos is this villager's kind of job site
+    private boolean isJobSiteBlock(BlockPos pos) {
+        return this.level().getBlockState(pos).is(getJobSiteBlock(this.getProfession()).getBlock());
+    }
+
+    @Nullable
+    public BlockPos getJobSite() {
+        return this.jobSite;
+    }
+
+    public void setJobSite(@Nullable BlockPos jobSite) {
+        this.jobSite = jobSite == null ? null : jobSite.immutable();
     }
 
     @Override
@@ -160,6 +200,9 @@ public class EntitySnowVillager extends AbstractVillager {
         super.addAdditionalSaveData(tag);
         tag.putInt("Profession", this.getProfession());
         tag.putInt("Tier", this.tier);
+        if (this.jobSite != null) {
+            tag.put("JobSite", NbtUtils.writeBlockPos(this.jobSite));
+        }
     }
 
     @Override
@@ -167,6 +210,7 @@ public class EntitySnowVillager extends AbstractVillager {
         super.readAdditionalSaveData(tag);
         this.setProfession(tag.getInt("Profession"));
         this.tier = tag.getInt("Tier");
+        this.jobSite = tag.contains("JobSite") ? NbtUtils.readBlockPos(tag.getCompound("JobSite")) : null;
     }
 
     @Override
@@ -273,5 +317,92 @@ public class EntitySnowVillager extends AbstractVillager {
     // The player gives min-max sapphires for one of the item
     private static VillagerTrades.ItemListing itemForSapphires(Supplier<ItemStack> item, int min, int max) {
         return (trader, random) -> new MerchantOffer(new ItemStack(IafItemRegistry.SAPPHIRE_GEM.get(), price(random, min, max)), item.get(), 7, 0, 0.05F);
+    }
+
+    /**
+     * During the day, now and then walk back to the job site and stand at it for a while. A villager without a job
+     * site (spawn egg, or its hut's block was in a chunk built later) claims the nearest matching block close by,
+     * and one whose block was broken forgets it.
+     */
+    static class WorkAtJobSiteGoal extends Goal {
+        private static final int SEARCH_HORIZONTAL = 8;
+        private static final int SEARCH_VERTICAL = 4;
+        // Job sites farther than this (e.g. the villager was led away) are given up
+        private static final double MAX_DISTANCE_SQ = 32 * 32;
+        private final EntitySnowVillager villager;
+        private int searchCooldown;
+        private int workTicks;
+
+        WorkAtJobSiteGoal(EntitySnowVillager villager) {
+            this.villager = villager;
+            this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            // Only in daylight, not while trading, and only now and then so it still wanders
+            if (!this.villager.level().isDay() || this.villager.isTrading() || this.villager.getRandom().nextInt(60) != 0) {
+                return false;
+            }
+            BlockPos site = this.villager.getJobSite();
+            if (site != null && (!this.villager.isJobSiteBlock(site) || site.distSqr(this.villager.blockPosition()) > MAX_DISTANCE_SQ)) {
+                this.villager.setJobSite(null);
+                site = null;
+            }
+            if (site == null) {
+                site = this.findJobSite();
+                this.villager.setJobSite(site);
+            }
+            return site != null && site.distToCenterSqr(this.villager.position()) > 4.0D;
+        }
+
+        // The nearest block for this villager's profession; searched every 5th try (about every 15 seconds)
+        @Nullable
+        private BlockPos findJobSite() {
+            if (this.searchCooldown > 0) {
+                this.searchCooldown--;
+                return null;
+            }
+            this.searchCooldown = 5;
+            Optional<BlockPos> found = BlockPos.findClosestMatch(this.villager.blockPosition(), SEARCH_HORIZONTAL, SEARCH_VERTICAL, this.villager::isJobSiteBlock);
+            return found.orElse(null);
+        }
+
+        @Override
+        public void start() {
+            this.workTicks = 0;
+            BlockPos site = this.villager.getJobSite();
+            if (site != null) {
+                this.villager.getNavigation().moveTo(site.getX() + 0.5D, site.getY(), site.getZ() + 0.5D, 0.35D);
+            }
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            // Walk there, then stay working for about 10 seconds
+            return this.villager.getJobSite() != null && this.villager.level().isDay() && !this.villager.isTrading()
+                    && this.workTicks < 200;
+        }
+
+        @Override
+        public void tick() {
+            BlockPos site = this.villager.getJobSite();
+            if (site == null) {
+                return;
+            }
+            this.villager.getLookControl().setLookAt(site.getX() + 0.5D, site.getY() + 0.5D, site.getZ() + 0.5D);
+            if (site.distToCenterSqr(this.villager.position()) <= 4.0D) {
+                this.villager.getNavigation().stop();
+                this.workTicks++;
+            } else if (this.villager.getNavigation().isDone()) {
+                // Couldn't get there (blocked); give up this time
+                this.workTicks = 200;
+            }
+        }
+
+        @Override
+        public void stop() {
+            this.villager.getNavigation().stop();
+        }
     }
 }
