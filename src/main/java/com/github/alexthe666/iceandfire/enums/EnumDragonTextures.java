@@ -180,6 +180,24 @@ public enum EnumDragonTextures {
 
     private static Boolean spookyCache = null;
 
+    /** True when the client's texture set for this dragon's type is "skeleton". Gold dragons follow the fire setting. */
+    public static boolean hasSkeletonTextureSet(EntityDragonBase dragon) {
+        String set;
+        if (dragon instanceof EntityIceDragon) {
+            set = IafConfig.iceDragonTexture;
+        } else if (dragon instanceof EntityLightningDragon) {
+            set = IafConfig.lightningDragonTexture;
+        } else {
+            set = IafConfig.fireDragonTexture;
+        }
+        return "skeleton".equalsIgnoreCase(set);
+    }
+
+    // Living dragons get the bone look during Spooky Season or when their texture set is "skeleton"
+    private static boolean useSkeletonTexture(EntityDragonBase dragon) {
+        return isSpookySeason() || hasSkeletonTextureSet(dragon);
+    }
+
     // The skeleton texture for the dragon's element and stage
     private static ResourceLocation getSkeletonTexture(EntityDragonBase dragon, EnumDragonTextures t) {
         ResourceLocation[] stages;
@@ -263,7 +281,7 @@ public enum EnumDragonTextures {
 
     private static ResourceLocation getFireDragonTextures(EntityDragonBase dragon) {
         EnumDragonTextures textures = getDragonEnum(dragon);
-        if (isSpookySeason()) {
+        if (useSkeletonTexture(dragon)) {
             return getSkeletonTexture(dragon, textures);
         }
         if (dragon.isModelDead()) {
@@ -334,7 +352,7 @@ public enum EnumDragonTextures {
 
     private static ResourceLocation getIceDragonTextures(EntityDragonBase dragon) {
         EnumDragonTextures textures = getDragonEnum(dragon);
-        if (isSpookySeason()) {
+        if (useSkeletonTexture(dragon)) {
             return getSkeletonTexture(dragon, textures);
         }
         if (dragon.isModelDead()) {
@@ -428,7 +446,7 @@ public enum EnumDragonTextures {
 
     private static ResourceLocation getLightningDragonTextures(EntityDragonBase dragon) {
         EnumDragonTextures textures = getDragonEnum(dragon);
-        if (isSpookySeason()) {
+        if (useSkeletonTexture(dragon)) {
             return getSkeletonTexture(dragon, textures);
         }
         if (dragon.isModelDead()) {
