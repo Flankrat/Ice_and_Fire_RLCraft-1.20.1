@@ -36,40 +36,31 @@ public class LayerDragonArmor extends RenderLayer<EntityDragonBase, AdvancedEnti
         LAYERED_ARMOR_CACHE.remove(str);
     }
 
-    /** The dragon's armor pieces layered into one texture, or null if it wears none. Also used by the GeckoLib renderer. */
-    public static ResourceLocation getArmorTexture(EntityDragonBase dragon) {
+    @Override
+    public void render(@NotNull PoseStack matrixStackIn, @NotNull MultiBufferSource bufferIn, int packedLightIn, EntityDragonBase dragon, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
         int armorHead = dragon.getArmorOrdinal(dragon.getItemBySlot(EquipmentSlot.HEAD));
         int armorNeck = dragon.getArmorOrdinal(dragon.getItemBySlot(EquipmentSlot.CHEST));
         int armorLegs = dragon.getArmorOrdinal(dragon.getItemBySlot(EquipmentSlot.LEGS));
         int armorFeet = dragon.getArmorOrdinal(dragon.getItemBySlot(EquipmentSlot.FEET));
         String armorTexture = dragon.dragonType.getName() + "_" + armorHead + "_" + armorNeck + "_" + armorLegs + "_" + armorFeet;
-        if (armorTexture.equals(dragon.dragonType.getName() + "_0_0_0_0")) {
-            return null;
-        }
-        ResourceLocation resourcelocation = LAYERED_ARMOR_CACHE.get(armorTexture);
-        if (resourcelocation == null) {
-            resourcelocation = new ResourceLocation("iceandfire" + "dragon_armor_" + armorTexture);
-            List<String> tex = new ArrayList<String>();
-            for (EquipmentSlot slot : ARMOR_SLOTS) {
-                if (dragon.dragonType == DragonType.FIRE) {
-                    tex.add(EnumDragonTextures.Armor.getArmorForDragon(dragon, slot).FIRETEXTURE.toString());
-                } else if (dragon.dragonType == DragonType.ICE) {
-                    tex.add(EnumDragonTextures.Armor.getArmorForDragon(dragon, slot).ICETEXTURE.toString());
-                } else {
-                    tex.add(EnumDragonTextures.Armor.getArmorForDragon(dragon, slot).LIGHTNINGTEXTURE.toString());
+        if (!armorTexture.equals(dragon.dragonType.getName() + "_0_0_0_0")) {
+            ResourceLocation resourcelocation = LAYERED_ARMOR_CACHE.get(armorTexture);
+            if (resourcelocation == null) {
+                resourcelocation = new ResourceLocation("iceandfire" + "dragon_armor_" + armorTexture);
+                List<String> tex = new ArrayList<String>();
+                for (EquipmentSlot slot : ARMOR_SLOTS) {
+                    if (dragon.dragonType == DragonType.FIRE) {
+                        tex.add(EnumDragonTextures.Armor.getArmorForDragon(dragon, slot).FIRETEXTURE.toString());
+                    } else if (dragon.dragonType == DragonType.ICE) {
+                        tex.add(EnumDragonTextures.Armor.getArmorForDragon(dragon, slot).ICETEXTURE.toString());
+                    } else {
+                        tex.add(EnumDragonTextures.Armor.getArmorForDragon(dragon, slot).LIGHTNINGTEXTURE.toString());
+                    }
                 }
+                ArrayLayeredTexture layeredBase = new ArrayLayeredTexture(tex);
+                Minecraft.getInstance().getTextureManager().register(resourcelocation, layeredBase);
+                LAYERED_ARMOR_CACHE.put(armorTexture, resourcelocation);
             }
-            ArrayLayeredTexture layeredBase = new ArrayLayeredTexture(tex);
-            Minecraft.getInstance().getTextureManager().register(resourcelocation, layeredBase);
-            LAYERED_ARMOR_CACHE.put(armorTexture, resourcelocation);
-        }
-        return resourcelocation;
-    }
-
-    @Override
-    public void render(@NotNull PoseStack matrixStackIn, @NotNull MultiBufferSource bufferIn, int packedLightIn, EntityDragonBase dragon, float limbSwing, float limbSwingAmount, float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        ResourceLocation resourcelocation = getArmorTexture(dragon);
-        if (resourcelocation != null) {
             VertexConsumer ivertexbuilder = bufferIn.getBuffer(RenderType.entityCutoutNoCull(resourcelocation));
             this.getParentModel().renderToBuffer(matrixStackIn, ivertexbuilder, packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
         }

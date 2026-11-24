@@ -1,7 +1,6 @@
 package com.github.alexthe666.iceandfire.client;
 
 import com.github.alexthe666.citadel.client.model.TabulaModel;
-import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.IceAndFire;
 import com.github.alexthe666.iceandfire.block.IafBlockRegistry;
 import com.github.alexthe666.iceandfire.client.gui.IafGuiRegistry;
@@ -12,13 +11,8 @@ import com.github.alexthe666.iceandfire.client.model.animator.LightningTabulaDra
 import com.github.alexthe666.iceandfire.client.model.animator.SeaSerpentTabulaModelAnimator;
 import com.github.alexthe666.iceandfire.client.model.util.*;
 import com.github.alexthe666.iceandfire.client.render.entity.*;
-import com.github.alexthe666.iceandfire.client.render.entity.geo.RenderDragonGeo;
-import com.github.alexthe666.iceandfire.client.render.entity.geo.RenderModelSwitch;
-import com.github.alexthe666.iceandfire.client.render.entity.geo.RenderSeaSerpentGeo;
 import com.github.alexthe666.iceandfire.client.render.entity.layer.LayerBloodedArmorOverlay;
 import com.github.alexthe666.iceandfire.client.render.tile.*;
-import com.github.alexthe666.iceandfire.entity.EntityDragonBase;
-import com.github.alexthe666.iceandfire.entity.EntitySeaSerpent;
 import com.github.alexthe666.iceandfire.entity.IafEntityRegistry;
 import com.github.alexthe666.iceandfire.entity.tile.IafTileEntityRegistry;
 import com.github.alexthe666.iceandfire.item.IafItemRegistry;
@@ -26,15 +20,12 @@ import com.github.alexthe666.iceandfire.item.ItemDragonBow;
 import com.github.alexthe666.iceandfire.item.ItemDragonHorn;
 import com.github.alexthe666.iceandfire.item.ItemSummoningCrystal;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.ThrownItemRenderer;
@@ -53,12 +44,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD, modid = IceAndFire.MODID)
 public class IafClientSetup {
@@ -75,38 +64,19 @@ public class IafClientSetup {
     public static final ResourceLocation GHOST_CHEST_RIGHT_LOCATION = new ResourceLocation(IceAndFire.MODID,
             "models/ghost/ghost_chest_right");
 
-    // Classic Tabula renderer or Community Edition GeckoLib renderer for a dragon, picked each frame by a client option
-    private static EntityRenderer<EntityDragonBase> dragonRenderer(EntityRendererProvider.Context manager, RenderDragonBase classic, BooleanSupplier useCommunity) {
-        return new RenderModelSwitch<>(manager, classic, new RenderDragonGeo(manager, classic), useCommunity, dragon -> dragon.getRenderSize() / 3);
-    }
-
-    // Lightning dragons also draw their breath bolt after the GeckoLib model
-    private static EntityRenderer<EntityDragonBase> lightningDragonRenderer(EntityRendererProvider.Context manager) {
-        RenderLightningDragon classic = new RenderLightningDragon(manager, LIGHTNING_DRAGON_BASE_MODEL, 2);
-        RenderDragonGeo community = new RenderDragonGeo(manager, classic) {
-            @Override
-            public void render(@NotNull EntityDragonBase dragon, float entityYaw, float partialTicks, @NotNull PoseStack poseStack, @NotNull MultiBufferSource buffer, int packedLight) {
-                super.render(dragon, entityYaw, partialTicks, poseStack, buffer, packedLight);
-                classic.renderLightningBreath(dragon, partialTicks, poseStack, buffer);
-            }
-        };
-        return new RenderModelSwitch<>(manager, classic, community, () -> IafConfig.communityLightningDragonModel, dragon -> dragon.getRenderSize() / 3);
-    }
-
     public static void clientInit() {
-        // Dragons and sea serpents can be drawn with the classic model or Community Edition's GeckoLib one (client option)
         EntityRenderers.register(IafEntityRegistry.FIRE_DRAGON.get(),
-                manager -> dragonRenderer(manager, new RenderDragonBase(manager, FIRE_DRAGON_BASE_MODEL, 0), () -> IafConfig.communityFireDragonModel));
+                manager -> new RenderDragonBase(manager, FIRE_DRAGON_BASE_MODEL, 0));
         EntityRenderers.register(IafEntityRegistry.ICE_DRAGON.get(),
-                manager -> dragonRenderer(manager, new RenderDragonBase(manager, ICE_DRAGON_BASE_MODEL, 1), () -> IafConfig.communityIceDragonModel));
+                manager -> new RenderDragonBase(manager, ICE_DRAGON_BASE_MODEL, 1));
         EntityRenderers.register(IafEntityRegistry.BLACK_FROST_DRAGON.get(),
                 manager -> new RenderBlackFrostDragon(manager, ICE_DRAGON_BASE_MODEL));
         EntityRenderers.register(IafEntityRegistry.LIGHTNING_DRAGON.get(),
-                manager -> lightningDragonRenderer(manager));
+                manager -> new RenderLightningDragon(manager, LIGHTNING_DRAGON_BASE_MODEL, 2));
         EntityRenderers.register(IafEntityRegistry.SHIVAXI_DRAGON.get(),
-                manager -> lightningDragonRenderer(manager));
+                manager -> new RenderLightningDragon(manager, LIGHTNING_DRAGON_BASE_MODEL, 2));
         EntityRenderers.register(IafEntityRegistry.GOLD_DRAGON.get(),
-                manager -> dragonRenderer(manager, new RenderDragonBase(manager, FIRE_DRAGON_BASE_MODEL, 3), () -> IafConfig.communityFireDragonModel));
+                manager -> new RenderDragonBase(manager, FIRE_DRAGON_BASE_MODEL, 3));
         EntityRenderers.register(IafEntityRegistry.DRAGON_EGG.get(), RenderDragonEgg::new);
         EntityRenderers.register(IafEntityRegistry.DRAGON_ARROW.get(), RenderDragonArrow::new);
         EntityRenderers.register(IafEntityRegistry.DRAGON_BREATH.get(), ThrownItemRenderer::new);
@@ -153,10 +123,8 @@ public class IafClientSetup {
                 manager -> new RenderMyrmexBase(manager, new ModelMyrmexRoyal(), 0.25F));
         EntityRenderers.register(IafEntityRegistry.AMPHITHERE.get(), RenderAmphithere::new);
         EntityRenderers.register(IafEntityRegistry.AMPHITHERE_ARROW.get(), RenderAmphithereArrow::new);
-        EntityRenderers.register(IafEntityRegistry.SEA_SERPENT.get(), manager -> {
-            RenderSeaSerpent classic = new RenderSeaSerpent(manager, SEA_SERPENT_BASE_MODEL);
-            return new RenderModelSwitch<>(manager, classic, new RenderSeaSerpentGeo(manager, classic), () -> IafConfig.communitySeaSerpentModel, EntitySeaSerpent::getSeaSerpentScale);
-        });
+        EntityRenderers.register(IafEntityRegistry.SEA_SERPENT.get(),
+                manager -> new RenderSeaSerpent(manager, SEA_SERPENT_BASE_MODEL));
         EntityRenderers.register(IafEntityRegistry.SEA_SERPENT_BUBBLES.get(), RenderNothing::new);
         EntityRenderers.register(IafEntityRegistry.SEA_SERPENT_ARROW.get(), RenderSeaSerpentArrow::new);
         EntityRenderers.register(IafEntityRegistry.CHAIN_TIE.get(), RenderChainTie::new);

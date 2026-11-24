@@ -1,7 +1,6 @@
 package com.github.alexthe666.iceandfire.client.render.entity;
 
 import com.github.alexthe666.citadel.client.model.AdvancedEntityModel;
-import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.client.render.entity.layer.LayerDragonArmor;
 import com.github.alexthe666.iceandfire.client.render.entity.layer.LayerDragonBanner;
 import com.github.alexthe666.iceandfire.client.render.entity.layer.LayerDragonEyes;
@@ -27,6 +26,7 @@ import java.util.Map;
 
 public class RenderDragonBase extends MobRenderer<EntityDragonBase, AdvancedEntityModel<EntityDragonBase>> {
 
+    private static final boolean SHOW_MALE_OVERLAY = false;
     private final Map<String, ResourceLocation> LAYERED_TEXTURE_CACHE = Maps.newHashMap();
     private final int dragonType;
 
@@ -62,8 +62,7 @@ public class RenderDragonBase extends MobRenderer<EntityDragonBase, AdvancedEnti
         // Give it a distinct cache namespace so it can never reuse an ordinary electric dragon's layered texture.
         String baseTexture = (entity instanceof EntityShivaxiDragon ? "shivaxi_" : "")
                 + entity.getVariantName(entity.getVariant()) + entity.getDragonStage() + entity.isModelDead()
-                + entity.isMale() + entity.isSkeletal() + entity.isSleeping() + entity.isBlinking() + EnumDragonTextures.isSpookySeason()
-                + IafConfig.showMaleDragonSpots;
+                + entity.isMale() + entity.isSkeletal() + entity.isSleeping() + entity.isBlinking() + EnumDragonTextures.isSpookySeason();
         ResourceLocation resourcelocation = LAYERED_TEXTURE_CACHE.get(baseTexture);
         if (resourcelocation == null) {
             resourcelocation = new ResourceLocation("iceandfire:" + "dragon_texture_" + baseTexture);
@@ -73,9 +72,9 @@ public class RenderDragonBase extends MobRenderer<EntityDragonBase, AdvancedEnti
             } else {
                 tex.add(EnumDragonTextures.getTextureFromDragon(entity).toString());
             }
-            // The male overlay (darker spots on the wings and body) is the client option Show Male Dragon Spots;
-            // it's off by default so dragons keep the plain 1.12 patterns
-            if (IafConfig.showMaleDragonSpots && entity.isMale() && !entity.isSkeletal() && !(entity instanceof EntityShivaxiDragon)) {
+            // RLCraft: dragons use the plain 1.12 patterns. The modern male overlay adds dark spots to the
+            // wings and body that RLCraft dragons never had, so it stays off.
+            if (SHOW_MALE_OVERLAY && entity.isMale() && !entity.isSkeletal() && !(entity instanceof EntityShivaxiDragon)) {
                 if (dragonType == 0) {
                     tex.add(EnumDragonTextures.getDragonEnum(entity).FIRE_MALE_OVERLAY.toString());
                 } else if (dragonType == 1) {

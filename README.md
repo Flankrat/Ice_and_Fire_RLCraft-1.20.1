@@ -6,11 +6,6 @@
 
 Ice and Fire is a minecraft mod created by Raptorfarian and Alexthe666 which adds various mythical creatures like dragons, hypogriffs, faries and many more to the game!
 
-## Credits
-- **Alexthe666, Raptorfarian and the Ice and Fire contributors** made the original mod this fork is built on.
-- **kotlin-programmer, max and keletu (S-Leader)** made the 1.12.2 fork whose features were ported here.
-- **The Ice and Fire: Community Edition team ([IAFEnvoy](https://github.com/IAFEnvoy/IceAndFire-CE))** made the GeckoLib dragon and sea serpent models and animations. They're off by default and can be turned on per mob in the client config (`models` section). Used under LGPL-3.0.
-
 ## Reporting issues
 If you encounter any bugs or problems with the mod you can open an issue [here](https://github.com/Alex-the-666/Ice_and_Fire/issues).
 **Please make sure that the issue you are encountering hasn't been reported yet.**

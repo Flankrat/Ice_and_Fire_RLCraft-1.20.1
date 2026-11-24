@@ -122,12 +122,6 @@ public class IafConfig {
     public static boolean weezerTinkers = true;
     public static double dragonBlockBreakingDropChance = 0.1D;
     public static boolean dragonAuto3rdPerson = true;
-    // Client: draw these with Ice and Fire Community Edition's GeckoLib models instead of the classic ones
-    public static boolean communityFireDragonModel = false;
-    public static boolean communityIceDragonModel = false;
-    public static boolean communityLightningDragonModel = false;
-    public static boolean communitySeaSerpentModel = false;
-    public static boolean showMaleDragonSpots = false;
     public static double dreadQueenMaxHealth = 750;
     public static boolean generateMausoleums = true;
     public static boolean spawnLiches = true;
@@ -237,11 +231,6 @@ public class IafConfig {
             customMainMenu = ConfigHolder.CLIENT.customMainMenu.get();
             useVanillaFont = ConfigHolder.CLIENT.useVanillaFont.get();
             dragonAuto3rdPerson = ConfigHolder.CLIENT.dragonAuto3rdPerson.get();
-            communityFireDragonModel = "community".equalsIgnoreCase(ConfigHolder.CLIENT.fireDragonModel.get());
-            communityIceDragonModel = "community".equalsIgnoreCase(ConfigHolder.CLIENT.iceDragonModel.get());
-            communityLightningDragonModel = "community".equalsIgnoreCase(ConfigHolder.CLIENT.lightningDragonModel.get());
-            communitySeaSerpentModel = "community".equalsIgnoreCase(ConfigHolder.CLIENT.seaSerpentModel.get());
-            showMaleDragonSpots = ConfigHolder.CLIENT.showMaleDragonSpots.get();
         } catch (Exception e) {
             IceAndFire.LOGGER.warn("An exception was caused trying to load the client config for Ice and Fire.");
             e.printStackTrace();

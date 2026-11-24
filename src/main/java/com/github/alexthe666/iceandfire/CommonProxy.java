@@ -18,6 +18,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
+
 @Mod.EventBusSubscriber(modid = IceAndFire.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class CommonProxy {
 
@@ -31,14 +32,6 @@ public class CommonProxy {
             // We only need to initialize the biome config on the server
             BiomeConfig.init();
             IafConfig.bakeServer(config);
-        }
-    }
-
-    // The client options (like the model choices) apply as soon as the file is edited
-    @SubscribeEvent
-    public static void onModConfigReload(final ModConfigEvent.Reloading event) {
-        if (event.getConfig().getSpec() == ConfigHolder.CLIENT_SPEC) {
-            IafConfig.bakeClient(event.getConfig());
         }
     }
 

@@ -46,9 +46,3 @@ side = "BOTH"
     versionRange = "[3.0,)"
     ordering = "NONE"
     side = "BOTH"
-[[dependencies.iceandfire]]
-    modId = "geckolib"
-    mandatory = true
-    versionRange = "[4.4,)"
-    ordering = "NONE"
-    side = "BOTH"

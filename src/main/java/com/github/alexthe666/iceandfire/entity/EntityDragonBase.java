@@ -99,14 +99,6 @@ import net.minecraftforge.items.wrapper.InvWrapper;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.AnimationState;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.core.object.PlayState;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -114,7 +106,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public abstract class EntityDragonBase extends TamableAnimal implements IPassabilityNavigator, ISyncMount, IFlyingMount, IMultipartEntity, IAnimatedEntity, IDragonFlute, IDeadMob, IVillagerFear, IAnimalFear, IDropArmor, IHasCustomizableAttributes, ICustomSizeNavigator, ICustomMoveController, ContainerListener, GeoEntity {
+public abstract class EntityDragonBase extends TamableAnimal implements IPassabilityNavigator, ISyncMount, IFlyingMount, IMultipartEntity, IAnimatedEntity, IDragonFlute, IDeadMob, IVillagerFear, IAnimalFear, IDropArmor, IHasCustomizableAttributes, ICustomSizeNavigator, ICustomMoveController, ContainerListener {
 
     public static final int FLIGHT_CHANCE_PER_TICK = 1500;
     protected static final EntityDataAccessor<Boolean> SWIMMING = SynchedEntityData.defineId(EntityDragonBase.class, EntityDataSerializers.BOOLEAN);
@@ -185,8 +177,6 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     public int ticksSwiming;
     public int swimCycle;
     public float[] prevAnimationProgresses = new float[10];
-    // Animation state for the optional Community Edition (GeckoLib) model; unused with the classic model
-    private final AnimatableInstanceCache geckoLibCache = GeckoLibUtil.createInstanceCache(this);
     public boolean isDaytime;
     public int flightCycle;
     public HomePosition homePos;
@@ -482,6 +472,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     protected @NotNull PathNavigation createNavigation(@NotNull Level worldIn) {
         return createNavigator(worldIn, AdvancedPathNavigate.MovementType.WALKING);
     }
+
 
     protected PathNavigation createNavigator(Level worldIn, AdvancedPathNavigate.MovementType type) {
         return createNavigator(worldIn, type, createStuckHandler());
@@ -1384,6 +1375,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
         // FIXME :: ?
     }
 
+
     @Override
     public boolean requiresCustomPersistence() {
         return true;
@@ -1818,6 +1810,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
         return super.hurt(dmg, i);
 
     }
+
 
     @Override
     public void refreshDimensions() {
@@ -3418,119 +3411,5 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     	} else {
     		return;
     	}
-    }
-
-    // ---- Community Edition (GeckoLib) model animations, ported from Ice and Fire Community Edition ----
-    // Only drive the optional GeckoLib renderer (client "Dragon Model" options); the classic model ignores them.
-
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(
-            new AnimationController<>(this, "main", 0, this::selectBaseGeckoAnimation),
-            new AnimationController<>(this, "action", 0, this::selectActionGeckoAnimation),
-            new AnimationController<>(this, "breath", 0, this::selectBreathGeckoAnimation));
-    }
-
-    // Base pose: dead, swimming, flying, or on the ground (sleeping, sitting, walking, standing)
-    private PlayState selectBaseGeckoAnimation(AnimationState<EntityDragonBase> state) {
-        return switch (this.getGeckoAnimationPool()) {
-            case DEAD -> this.playLoopingGeckoAnimation(state, "dead", 1.0F, 2);
-            case SWIMMING -> this.playLoopingGeckoAnimation(state, "swim", 1.0F, 2);
-            case AIRBORNE -> this.playLoopingGeckoAnimation(state, "flight", 0.4F, 2);
-            case GROUND -> {
-                // DragonGeoModel blends the sleeping pose in with sleepProgress
-                if (this.isSleeping() || this.sleepProgress > 0.0F) {
-                    yield this.playLoopingGeckoAnimation(state, "sleeping", 1.0F, 0);
-                }
-                if (this.isOrderedToSit()) {
-                    yield this.playLoopingGeckoAnimation(state, "sitting", 1.0F, 2);
-                }
-                yield state.isMoving() ? this.playLoopingGeckoAnimation(state, "walk", 0.4F, 2) : this.playLoopingGeckoAnimation(state, "ground", 1.0F, 2);
-            }
-        };
-    }
-
-    // One-off actions: bite, roar, tail whack, wing blast, shaking prey, charging a blast
-    private PlayState selectActionGeckoAnimation(AnimationState<EntityDragonBase> state) {
-        Animation current = this.getAnimation();
-        String action = switch (this.getGeckoAnimationPool()) {
-            case AIRBORNE -> current == ANIMATION_FIRECHARGE ? "attack_blast_charge" : null;
-            case GROUND -> this.isSleeping() || this.sleepProgress > 0.0F ? null : this.getGeckoAction(current);
-            case DEAD, SWIMMING -> null;
-        };
-        if (action != null && this.isOrderedToSit()) {
-            action = switch (action) {
-                case "bite" -> "sitting_bite";
-                case "roar" -> "sitting_roar";
-                case "epic_roar" -> "sitting_epic_roar";
-                default -> null;
-            };
-        }
-        if (action == null) {
-            state.getController().stop();
-            return PlayState.STOP;
-        }
-        state.getController().transitionLength(0);
-        state.getController().setAnimationSpeed(1.0D);
-        return state.setAndContinue(RawAnimation.begin().thenPlay(this.geckoAnimationId(action)));
-    }
-
-    private PlayState selectBreathGeckoAnimation(AnimationState<EntityDragonBase> state) {
-        if (this.getGeckoAnimationPool() == GeckoAnimationPool.AIRBORNE && this.isBreathingFire()) {
-            return this.playLoopingGeckoAnimation(state, "attack_blast_breath", 1.0F, 2);
-        }
-        state.getController().stop();
-        return PlayState.STOP;
-    }
-
-    private PlayState playLoopingGeckoAnimation(AnimationState<EntityDragonBase> state, String animation, float speed, int transitionLength) {
-        state.getController().transitionLength(transitionLength);
-        state.getController().setAnimationSpeed(speed);
-        return state.setAndContinue(RawAnimation.begin().thenLoop(this.geckoAnimationId(animation)));
-    }
-
-    private GeckoAnimationPool getGeckoAnimationPool() {
-        if (this.isModelDead()) {
-            return GeckoAnimationPool.DEAD;
-        }
-        if (this.isSwimming || this.isInWater() && this.swimProgress > 0.0F) {
-            return GeckoAnimationPool.SWIMMING;
-        }
-        if (this.isFlying() || this.isHovering() || this.flyProgress > 0.0F || this.hoverProgress > 0.0F) {
-            return GeckoAnimationPool.AIRBORNE;
-        }
-        return GeckoAnimationPool.GROUND;
-    }
-
-    @Nullable
-    private String getGeckoAction(Animation animation) {
-        if (animation == ANIMATION_FIRECHARGE) return "attack_blast_charge";
-        if (animation == ANIMATION_BITE || animation == ANIMATION_EAT || animation == ANIMATION_SPEAK) return "bite";
-        if (animation == ANIMATION_SHAKEPREY) return "grab_shake";
-        if (animation == ANIMATION_WINGBLAST) return "wing_blast";
-        if (animation == ANIMATION_ROAR) return "roar";
-        if (animation == ANIMATION_EPIC_ROAR) return "epic_roar";
-        if (animation == ANIMATION_TAILWHACK) return "tail";
-        return null;
-    }
-
-    // Animation names in the Community Edition files differ in prefix per dragon type
-    private String geckoAnimationId(String animation) {
-        String prefix = this.dragonType == DragonType.FIRE || this.dragonType == DragonType.GOLD ? "animation.firedragon.firedragon_" : this.dragonType == DragonType.ICE ? "animation.icedragon." : "animation.lightningdragon.";
-        return prefix + animation;
-    }
-
-    private enum GeckoAnimationPool {
-        DEAD, SWIMMING, AIRBORNE, GROUND
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.geckoLibCache;
-    }
-
-    @Override
-    public double getBoneResetTime() {
-        return 20;
     }
 }

@@ -43,11 +43,6 @@ public class RenderLightningDragon extends RenderDragonBase {
     @Override
     public void render(@NotNull EntityDragonBase entityIn, float entityYaw, float partialTicks, @NotNull PoseStack matrixStackIn, @NotNull MultiBufferSource bufferIn, int packedLightIn) {
         super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
-        this.renderLightningBreath(entityIn, partialTicks, matrixStackIn, bufferIn);
-    }
-
-    /** The lightning breath bolt; also drawn after the GeckoLib model when that one is used. */
-    public void renderLightningBreath(@NotNull EntityDragonBase entityIn, float partialTicks, @NotNull PoseStack matrixStackIn, @NotNull MultiBufferSource bufferIn) {
         EntityLightningDragon lightningDragon = (EntityLightningDragon) entityIn;
         matrixStackIn.pushPose();
         if (lightningDragon.hasLightningTarget()) {

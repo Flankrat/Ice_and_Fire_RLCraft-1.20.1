@@ -54,25 +54,15 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IPlantable;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.core.animation.AnimatableManager;
-import software.bernie.geckolib.core.animation.AnimationController;
-import software.bernie.geckolib.core.animation.AnimationState;
-import software.bernie.geckolib.core.animation.RawAnimation;
-import software.bernie.geckolib.core.object.PlayState;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class EntitySeaSerpent extends Animal implements IAnimatedEntity, IMultipartEntity, IVillagerFear, IAnimalFear, IHasCustomizableAttributes, GeoEntity {
+public class EntitySeaSerpent extends Animal implements IAnimatedEntity, IMultipartEntity, IVillagerFear, IAnimalFear, IHasCustomizableAttributes {
 
     public static final Animation ANIMATION_BITE = Animation.create(15);
     public static final Animation ANIMATION_SPEAK = Animation.create(15);
     public static final Animation ANIMATION_ROAR = Animation.create(40);
-    // Animation state for the optional Community Edition (GeckoLib) model; unused with the classic model
-    private final AnimatableInstanceCache geckoLibCache = GeckoLibUtil.createInstanceCache(this);
     public static final int TIME_BETWEEN_ROARS = 300;
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(EntitySeaSerpent.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> SCALE = SynchedEntityData.defineId(EntitySeaSerpent.class, EntityDataSerializers.FLOAT);
@@ -211,6 +201,7 @@ public class EntitySeaSerpent extends Animal implements IAnimatedEntity, IMultip
             .add(Attributes.ARMOR, 3.0D);
     }
 
+
     @Override
     public void setConfigurableAttributes() {
         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(IafConfig.seaSerpentBaseHealth);
@@ -273,6 +264,7 @@ public class EntitySeaSerpent extends Animal implements IAnimatedEntity, IMultip
         lastScale = scale;
     }
 
+
     @Override
     public boolean doHurtTarget(@NotNull Entity entityIn) {
         if (this.getAnimation() != ANIMATION_BITE) {
@@ -330,6 +322,7 @@ public class EntitySeaSerpent extends Animal implements IAnimatedEntity, IMultip
         }
         return 0;
     }
+
 
     private void spawnParticlesAroundEntity(ParticleOptions type, Entity entity, int count) {
         for (int i = 0; i < count; i++) {
@@ -931,37 +924,5 @@ public class EntitySeaSerpent extends Animal implements IAnimatedEntity, IMultip
                 this.dolphin.setZza(0.0F);
             }
         }
-    }
-
-    // ---- Community Edition (GeckoLib) model animations, ported from Ice and Fire Community Edition ----
-
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "main", 0, this::selectGeckoAnimation));
-    }
-
-    private PlayState selectGeckoAnimation(AnimationState<EntitySeaSerpent> state) {
-        if (this.getAnimation() == ANIMATION_BITE || this.getAnimation() == ANIMATION_SPEAK) {
-            return this.playGeckoAnimation(state, RawAnimation.begin().thenPlay("animation.seaserpent.bite"), 0.8F, 0);
-        }
-        if (this.getAnimation() == ANIMATION_ROAR) {
-            return this.playGeckoAnimation(state, RawAnimation.begin().thenPlay("animation.seaserpent.roar"), 0.2F, 0);
-        }
-        if (this.isJumpingOutOfWater() || this.jumpProgress > 0.0F || this.jumpRot > 0.0F) {
-            return this.playGeckoAnimation(state, RawAnimation.begin().thenPlayAndHold("animation.seaserpent.jumping"), 0.2F, 2);
-        }
-        // The files have no land cycle; a slow swim cycle keeps the crawl instead of a T-pose
-        return this.playGeckoAnimation(state, RawAnimation.begin().thenLoop("animation.seaserpent.swim"), this.isInWater() ? 0.6F : 0.25F, 2);
-    }
-
-    private PlayState playGeckoAnimation(AnimationState<EntitySeaSerpent> state, RawAnimation animation, float speed, int transitionLength) {
-        state.getController().transitionLength(transitionLength);
-        state.getController().setAnimationSpeed(speed);
-        return state.setAndContinue(animation);
-    }
-
-    @Override
-    public AnimatableInstanceCache getAnimatableInstanceCache() {
-        return this.geckoLibCache;
     }
 }
