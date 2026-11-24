@@ -74,6 +74,9 @@ public class IafItemRegistry {
     public static CustomToolMaterial LIGHTNING_DRAGONBONE_TOOL_MATERIAL = new CustomToolMaterial(
             "LightningDragonbone",
             3, 2000, 5.5F, 10F, 22);
+    public static CustomToolMaterial GOLD_DRAGONBONE_TOOL_MATERIAL = new CustomToolMaterial(
+            "GoldDragonbone",
+            3, 2000, 5.5F, 10F, 22);
     public static CustomToolMaterial TROLL_WEAPON_TOOL_MATERIAL = new CustomToolMaterial("trollWeapon", 2, 300, 1F,
             10F,
             1);
@@ -232,6 +235,9 @@ public class IafItemRegistry {
             () -> new ItemAlchemySword(ICE_DRAGONBONE_TOOL_MATERIAL));
     public static final RegistryObject<Item> DRAGONBONE_SWORD_LIGHTNING = registerItem("dragonbone_sword_lightning",
             () -> new ItemAlchemySword(LIGHTNING_DRAGONBONE_TOOL_MATERIAL));
+    // gold dragon bone weapons: forged by a gold dragon, hidden from the creative tab (and JEI) like the gold armor
+    public static final RegistryObject<Item> DRAGONBONE_SWORD_GOLD = registerItem("dragonbone_sword_gold",
+            () -> new ItemAlchemySword(GOLD_DRAGONBONE_TOOL_MATERIAL), false);
     public static final RegistryObject<Item> DRAGONBONE_ARROW = registerItem("dragonbone_arrow",
             () -> new ItemDragonArrow(EntityDragonArrow.ArrowType.DEFAULT));
     public static final RegistryObject<Item> DRAGONBONE_ARROW_FIRE = registerItem("dragonbone_arrow_fire",
@@ -240,6 +246,8 @@ public class IafItemRegistry {
             () -> new ItemDragonArrow(EntityDragonArrow.ArrowType.ICE));
     public static final RegistryObject<Item> DRAGONBONE_ARROW_LIGHTNING = registerItem("dragonbone_arrow_lightning",
             () -> new ItemDragonArrow(EntityDragonArrow.ArrowType.LIGHTNING));
+    public static final RegistryObject<Item> DRAGONBONE_ARROW_GOLD = registerItem("dragonbone_arrow_gold",
+            () -> new ItemDragonArrow(EntityDragonArrow.ArrowType.GOLD), false);
     public static final RegistryObject<Item> DRAGON_BOW = registerItem("dragonbone_bow",
             () -> new ItemDragonBow(EntityDragonArrow.ArrowType.DEFAULT));
     public static final RegistryObject<Item> DRAGON_BOW_FIRE = registerItem("dragonbone_bow_fire",
@@ -248,6 +256,8 @@ public class IafItemRegistry {
             () -> new ItemDragonBow(EntityDragonArrow.ArrowType.ICE));
     public static final RegistryObject<Item> DRAGON_BOW_LIGHTNING = registerItem("dragonbone_bow_lightning",
             () -> new ItemDragonBow(EntityDragonArrow.ArrowType.LIGHTNING));
+    public static final RegistryObject<Item> DRAGON_BOW_GOLD = registerItem("dragonbone_bow_gold",
+            () -> new ItemDragonBow(EntityDragonArrow.ArrowType.GOLD), false);
     public static final RegistryObject<Item> DRAGON_SKULL_FIRE = registerItem(ItemDragonSkull.getName(0),
             () -> new ItemDragonSkull(0));
     public static final RegistryObject<Item> DRAGON_SKULL_ICE = registerItem(ItemDragonSkull.getName(1),
@@ -713,6 +723,7 @@ public class IafItemRegistry {
         IafItemRegistry.FIRE_DRAGONBONE_TOOL_MATERIAL.setRepairMaterial(Ingredient.of(IafItemRegistry.DRAGON_BONE.get()));
         IafItemRegistry.ICE_DRAGONBONE_TOOL_MATERIAL.setRepairMaterial(Ingredient.of(IafItemRegistry.DRAGON_BONE.get()));
         IafItemRegistry.LIGHTNING_DRAGONBONE_TOOL_MATERIAL.setRepairMaterial(Ingredient.of(IafItemRegistry.DRAGON_BONE.get()));
+        IafItemRegistry.GOLD_DRAGONBONE_TOOL_MATERIAL.setRepairMaterial(Ingredient.of(IafItemRegistry.DRAGON_BONE.get()));
         for (EnumDragonArmor armor : EnumDragonArmor.values()) {
             armor.armorMaterial.setRepairMaterial(Ingredient.of(EnumDragonArmor.getScaleItem(armor)));
         }

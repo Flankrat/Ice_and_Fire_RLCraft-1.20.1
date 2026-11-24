@@ -53,6 +53,15 @@ public class ItemAlchemySword extends SwordItem {
             }
             target.knockback(1.0F, attacker.getX() - target.getX(), attacker.getZ() - target.getZ());
         }
+        if (this == IafItemRegistry.DRAGONBONE_SWORD_GOLD.get() && IafConfig.dragonWeaponGoldAbility) {
+            // like the lightning sword: the dragon bonus on every hit, the burst on its cooldown
+            if (target instanceof EntityFireDragon || target instanceof EntityIceDragon || target instanceof com.github.alexthe666.iceandfire.entity.EntityLightningDragon) {
+                target.hurt(attacker.level().damageSources().magic(), 9.5F);
+            }
+            if (!attacker.level().isClientSide) {
+                com.github.alexthe666.iceandfire.api.ArcaneBurstUtils.createArcaneBurst(attacker.level(), target, attacker);
+            }
+        }
         return super.hurtEnemy(stack, target, attacker);
     }
 
@@ -69,6 +78,11 @@ public class ItemAlchemySword extends SwordItem {
             tooltip.add(Component.translatable("dragon_sword_ice.hurt1").withStyle(ChatFormatting.GREEN));
             if (IafConfig.dragonWeaponIceAbility)
                 tooltip.add(Component.translatable("dragon_sword_ice.hurt2").withStyle(ChatFormatting.AQUA));
+        }
+        if (this == IafItemRegistry.DRAGONBONE_SWORD_GOLD.get()) {
+            tooltip.add(Component.translatable("dragon_sword_gold.hurt1").withStyle(ChatFormatting.GREEN));
+            if (IafConfig.dragonWeaponGoldAbility)
+                tooltip.add(Component.translatable("dragon_sword_gold.hurt2").withStyle(ChatFormatting.GOLD));
         }
         if (this == IafItemRegistry.DRAGONBONE_SWORD_LIGHTNING.get()) {
             tooltip.add(Component.translatable("dragon_sword_lightning.hurt1").withStyle(ChatFormatting.GREEN));

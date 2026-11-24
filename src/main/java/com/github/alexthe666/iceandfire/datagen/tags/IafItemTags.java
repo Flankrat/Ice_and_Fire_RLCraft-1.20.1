@@ -96,7 +96,8 @@ public class IafItemTags extends ItemTagsProvider {
                 .add(IafItemRegistry.DRAGONBONE_ARROW.get())
                 .add(IafItemRegistry.DRAGONBONE_ARROW_FIRE.get())
                 .add(IafItemRegistry.DRAGONBONE_ARROW_ICE.get())
-                .add(IafItemRegistry.DRAGONBONE_ARROW_LIGHTNING.get());
+                .add(IafItemRegistry.DRAGONBONE_ARROW_LIGHTNING.get())
+                .add(IafItemRegistry.DRAGONBONE_ARROW_GOLD.get());
 
         tag(DRAGON_BLOODS).add(IafItemRegistry.FIRE_DRAGON_BLOOD.get()).add(IafItemRegistry.ICE_DRAGON_BLOOD.get()).add(IafItemRegistry.LIGHTNING_DRAGON_BLOOD.get()).add(IafItemRegistry.GOLD_DRAGON_BLOOD.get());
 

@@ -82,6 +82,10 @@ public class ServerConfig {
     public final ForgeConfigSpec.ConfigValue<List<? extends Double>> chainLightningDamagePerHop;
     public final ForgeConfigSpec.BooleanValue chainLightningBypassesArmor;
     public final ForgeConfigSpec.IntValue chainLightningCooldown;
+    public final ForgeConfigSpec.DoubleValue arcaneBurstDamage;
+    public final ForgeConfigSpec.DoubleValue arcaneBurstRadius;
+    public final ForgeConfigSpec.IntValue arcaneBurstCooldown;
+    public final ForgeConfigSpec.BooleanValue dragonWeaponGoldAbility;
     public final ForgeConfigSpec.ConfigValue<List<? extends String>> chainLightningEntityBlacklist;
     public final ForgeConfigSpec.BooleanValue chainLightningParalysis;
     public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> chainLightningParalysisTicksPerHop;
@@ -475,11 +479,15 @@ public class ServerConfig {
         this.dragonWeaponFireAbility = buildBoolean(builder, "Dragon Bone Fire Abilities", "all", true, "True if the dragon bone fire sword ignites attackers.");
         this.dragonWeaponIceAbility = buildBoolean(builder, "Dragon Bone Ice Abilities", "all", true, "True if the dragon bone ice sword freezes attackers.");
         this.dragonWeaponLightningAbility = buildBoolean(builder, "Dragon Bone Lightning Abilities", "all", true, "True if the dragon bone lightning sword strikes attackers.");
+        this.dragonWeaponGoldAbility = buildBoolean(builder, "Dragon Bone Gold Abilities", "all", true, "True if the gold dragon bone weapons make arcane bursts.");
         builder.pop();
         builder.push("Chain Lightning");
         this.chainLightningDamagePerHop = builder.comment("Damage of each hop of chain lightning (lightning dragon bone weapons, blooded armor), first hop first. The number of entries is the number of hops").translation("Chain Lightning Base Damage").defineList("Chain Lightning Base Damage", List.of(5.0D, 4.0D, 3.0D, 2.0D, 1.0D), o -> o instanceof Number);
         this.chainLightningBypassesArmor = buildBoolean(builder, "Chain Lightning Bypasses Armor", "all", true, "If true, chain lightning damage ignores armor");
         this.chainLightningCooldown = buildInt(builder, "Chain Lightning Cooldown", "all", 10, 0, 10000, "Ticks the weapon is on cooldown after it makes chain lightning");
+        this.arcaneBurstDamage = buildDouble(builder, "Arcane Burst Damage", "all", 4.0D, 0.0D, 1000.0D, "Magic damage (ignores armor) an arcane burst (gold dragon bone weapons) does to the target and to each hostile mob around it");
+        this.arcaneBurstRadius = buildDouble(builder, "Arcane Burst Radius", "all", 3.0D, 0.0D, 32.0D, "Blocks around the target that an arcane burst reaches");
+        this.arcaneBurstCooldown = buildInt(builder, "Arcane Burst Cooldown", "all", 10, 0, 10000, "Ticks the weapon is on cooldown after it makes an arcane burst (gold arrows don't put the bow on cooldown)");
         this.chainLightningEntityBlacklist = buildStringList(builder, "Chain Lightning Entity Blacklist", List.of(), "Entities (like minecraft:villager) that chain lightning won't jump to");
         this.chainLightningParalysis = buildBoolean(builder, "Chain Lightning Paralysis", "all", false, "If true, every hop applies Lycanites Mobs paralysis (needs Lycanites Mobs)");
         this.chainLightningParalysisTicksPerHop = builder.comment("Paralysis length in ticks for each hop, first hop first").translation("Chain Lightning Paralysis Ticks").defineList("Chain Lightning Paralysis Ticks", List.of(10, 8, 6, 4, 2), o -> o instanceof Integer);

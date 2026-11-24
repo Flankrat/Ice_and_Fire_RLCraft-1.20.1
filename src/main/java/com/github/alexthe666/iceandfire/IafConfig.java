@@ -156,6 +156,7 @@ public class IafConfig {
     public static boolean dragonWeaponFireAbility = true;
     public static boolean dragonWeaponIceAbility = true;
     public static boolean dragonWeaponLightningAbility = true;
+    public static boolean dragonWeaponGoldAbility = true;
     public static int villagerHouseWeight = 5;
     public static int villageAnimalFarmWeight = 5;
     public static boolean allowAttributeOverriding = true;
@@ -219,6 +220,9 @@ public class IafConfig {
     public static float[] chainLightningDamagePerHop = {5.0F, 4.0F, 3.0F, 2.0F, 1.0F};
     public static boolean chainLightningBypassesArmor = true;
     public static int chainLightningCooldown = 10;
+    public static double arcaneBurstDamage = 4.0D;
+    public static double arcaneBurstRadius = 3.0D;
+    public static int arcaneBurstCooldown = 10;
     public static Set<ResourceLocation> chainLightningEntityBlacklist = Set.of();
     public static boolean chainLightningParalysis = false;
     public static int[] chainLightningParalysisTicksPerHop = {10, 8, 6, 4, 2};
@@ -386,6 +390,7 @@ public class IafConfig {
             dragonWeaponFireAbility = ConfigHolder.SERVER.dragonWeaponFireAbility.get();
             dragonWeaponIceAbility = ConfigHolder.SERVER.dragonWeaponIceAbility.get();
             dragonWeaponLightningAbility = ConfigHolder.SERVER.dragonWeaponLightningAbility.get();
+            dragonWeaponGoldAbility = ConfigHolder.SERVER.dragonWeaponGoldAbility.get();
             villagerHouseWeight = ConfigHolder.SERVER.villagerHouseWeight.get();
             villageAnimalFarmWeight = ConfigHolder.SERVER.villageAnimalFarmWeight.get();
             allowAttributeOverriding = ConfigHolder.SERVER.allowAttributeOverriding.get();
@@ -449,6 +454,9 @@ public class IafConfig {
             chainLightningDamagePerHop = toFloatArray(ConfigHolder.SERVER.chainLightningDamagePerHop.get());
             chainLightningBypassesArmor = ConfigHolder.SERVER.chainLightningBypassesArmor.get();
             chainLightningCooldown = ConfigHolder.SERVER.chainLightningCooldown.get();
+            arcaneBurstDamage = ConfigHolder.SERVER.arcaneBurstDamage.get();
+            arcaneBurstRadius = ConfigHolder.SERVER.arcaneBurstRadius.get();
+            arcaneBurstCooldown = ConfigHolder.SERVER.arcaneBurstCooldown.get();
             chainLightningEntityBlacklist = parseIds(ConfigHolder.SERVER.chainLightningEntityBlacklist.get(), "Chain Lightning Entity Blacklist");
             chainLightningParalysis = ConfigHolder.SERVER.chainLightningParalysis.get();
             chainLightningParalysisTicksPerHop = ConfigHolder.SERVER.chainLightningParalysisTicksPerHop.get().stream().mapToInt(Integer::intValue).toArray();

@@ -144,6 +144,7 @@ public class IceAndFireJEIPlugin implements IModPlugin {
                 EnumDragonArmor.armor_gold.leggings.get(), EnumDragonArmor.armor_gold.boots.get()));
         IafItemRegistry.BloodedArmorSet blooded = IafItemRegistry.BLOODED_ARMOR_SETS.get(BloodedDragonType.GOLD_GOLD);
         hidden.addAll(List.of(blooded.helmet().get(), blooded.chestplate().get(), blooded.leggings().get(), blooded.boots().get()));
+        hidden.addAll(List.of(IafItemRegistry.DRAGONBONE_SWORD_GOLD.get(), IafItemRegistry.DRAGON_BOW_GOLD.get(), IafItemRegistry.DRAGONBONE_ARROW_GOLD.get()));
         // the gold forge blocks are part of the secret, and the forge blocks of the other Dragonforge Mode aren't used
         for (com.github.alexthe666.iceandfire.block.DragonForgeType type : com.github.alexthe666.iceandfire.block.DragonForgeType.values()) {
             if (type == com.github.alexthe666.iceandfire.block.DragonForgeType.GOLD
