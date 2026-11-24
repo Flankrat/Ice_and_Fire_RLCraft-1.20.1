@@ -22,6 +22,7 @@
     "iceandfire:armor_amethyst_helmet",
     "iceandfire:armor_copper_helmet",
     "iceandfire:armor_black_helmet",
+    "iceandfire:armor_gold_helmet",
     "iceandfire:tide_blue_helmet",
     "iceandfire:tide_bronze_helmet",
     "iceandfire:tide_deepblue_helmet",
@@ -43,6 +44,7 @@
     "iceandfire:blooded_lightning_electric_helmet",
     "iceandfire:blooded_lightning_amethyst_helmet",
     "iceandfire:blooded_lightning_copper_helmet",
-    "iceandfire:blooded_lightning_black_helmet"
+    "iceandfire:blooded_lightning_black_helmet",
+    "iceandfire:blooded_gold_gold_helmet"
   ]
 }

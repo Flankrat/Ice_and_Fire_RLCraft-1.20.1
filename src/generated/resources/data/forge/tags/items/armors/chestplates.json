@@ -20,6 +20,7 @@
     "iceandfire:armor_amethyst_chestplate",
     "iceandfire:armor_copper_chestplate",
     "iceandfire:armor_black_chestplate",
+    "iceandfire:armor_gold_chestplate",
     "iceandfire:tide_blue_chestplate",
     "iceandfire:tide_bronze_chestplate",
     "iceandfire:tide_deepblue_chestplate",
@@ -41,6 +42,7 @@
     "iceandfire:blooded_lightning_electric_chestplate",
     "iceandfire:blooded_lightning_amethyst_chestplate",
     "iceandfire:blooded_lightning_copper_chestplate",
-    "iceandfire:blooded_lightning_black_chestplate"
+    "iceandfire:blooded_lightning_black_chestplate",
+    "iceandfire:blooded_gold_gold_chestplate"
   ]
 }
