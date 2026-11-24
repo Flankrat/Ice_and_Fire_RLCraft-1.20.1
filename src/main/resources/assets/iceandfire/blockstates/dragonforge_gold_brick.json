@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "grill=false": {
+      "model": "iceandfire:block/dragonforge_vent"
+    },
+    "grill=true": {
+      "model": "iceandfire:block/dragonforge_vent_gold"
+    }
+  }
+}

@@ -1,4 +1,10 @@
 {
+  "conditions": [
+    {
+      "type": "iceandfire:dragonforge_mode",
+      "mode": "global"
+    }
+  ],
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
@@ -6,7 +12,7 @@
       "item": "iceandfire:dragonforge_brick"
     },
     "H": {
-      "item": "iceandfire:ice_dragon_heart"
+      "item": "iceandfire:lightning_dragon_heart"
     }
   },
   "pattern": [

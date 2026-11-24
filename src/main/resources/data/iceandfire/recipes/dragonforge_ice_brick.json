@@ -1,4 +1,10 @@
 {
+  "conditions": [
+    {
+      "type": "iceandfire:dragonforge_mode",
+      "mode": "individual"
+    }
+  ],
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
@@ -7,16 +13,19 @@
     },
     "I": {
       "tag": "forge:ingots/iron"
+    },
+    "S": {
+      "tag": "forge:storage_blocks/scales/dragon/ice"
     }
   },
   "pattern": [
     "DDD",
-    "III",
+    "ISI",
     "DDD"
   ],
   "result": {
     "count": 4,
-    "item": "iceandfire:dragonforge_brick"
+    "item": "iceandfire:dragonforge_ice_brick"
   },
   "show_notification": true
 }

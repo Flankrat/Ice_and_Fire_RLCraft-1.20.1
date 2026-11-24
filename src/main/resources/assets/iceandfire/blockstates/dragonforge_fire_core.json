@@ -1,6 +1,9 @@
 {
   "variants": {
-    "": {
+    "active=false": {
+      "model": "iceandfire:block/dragonforge_fire_core_disabled"
+    },
+    "active=true": {
       "model": "iceandfire:block/dragonforge_fire_core"
     }
   }

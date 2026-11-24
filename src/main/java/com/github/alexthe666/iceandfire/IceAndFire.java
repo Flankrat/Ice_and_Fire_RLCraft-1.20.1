@@ -108,6 +108,12 @@ public class IceAndFire {
                 IafStructurePieceTypes.PIECE_TYPES.register(modBus);
                 IafContainerRegistry.CONTAINERS.register(modBus);
                 IafRecipeSerializers.SERIALIZERS.register(modBus);
+                // recipe condition that loads only the current Dragonforge Mode's forge block recipes
+                modBus.addListener((net.minecraftforge.registries.RegisterEvent event) -> {
+                        if (event.getRegistryKey().equals(ForgeRegistries.Keys.RECIPE_SERIALIZERS)) {
+                                net.minecraftforge.common.crafting.CraftingHelper.register(com.github.alexthe666.iceandfire.recipe.DragonforgeModeCondition.Serializer.INSTANCE);
+                        }
+                });
                 IafProcessors.PROCESSORS.register(modBus);
 
                 IafVillagerRegistry.POI_TYPES.register(modBus);

@@ -1,4 +1,10 @@
 {
+  "conditions": [
+    {
+      "type": "iceandfire:dragonforge_mode",
+      "mode": "individual"
+    }
+  ],
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
@@ -7,15 +13,18 @@
     },
     "I": {
       "tag": "forge:ingots/iron"
+    },
+    "B": {
+      "item": "iceandfire:dragonforge_lightning_brick"
     }
   },
   "pattern": [
     "DID",
-    "I I",
+    "IBI",
     "DID"
   ],
   "result": {
-    "item": "iceandfire:dragonforge_input"
+    "item": "iceandfire:dragonforge_lightning_input"
   },
   "show_notification": true
 }

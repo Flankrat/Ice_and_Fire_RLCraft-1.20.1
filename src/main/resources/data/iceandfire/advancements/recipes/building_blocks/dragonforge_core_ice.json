@@ -1,4 +1,10 @@
 {
+  "conditions": [
+    {
+      "type": "iceandfire:dragonforge_mode",
+      "mode": "global"
+    }
+  ],
   "parent": "minecraft:recipes/root",
   "criteria": {
     "has_item": {
@@ -6,7 +12,7 @@
         "items": [
           {
             "items": [
-              "iceandfire:dread_stone"
+              "iceandfire:dragonforge_brick"
             ]
           }
         ]
@@ -15,7 +21,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "iceandfire:dragonforge_input"
+        "recipe": "iceandfire:dragonforge_core_ice"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -28,7 +34,7 @@
   ],
   "rewards": {
     "recipes": [
-      "iceandfire:dragonforge_input"
+      "iceandfire:dragonforge_core_ice"
     ]
   },
   "sends_telemetry_event": false

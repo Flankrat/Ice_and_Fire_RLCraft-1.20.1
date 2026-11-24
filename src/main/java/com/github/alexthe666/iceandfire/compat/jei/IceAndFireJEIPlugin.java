@@ -117,10 +117,17 @@ public class IceAndFireJEIPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registry) {
-        ItemStack forgeCore = new ItemStack(IafBlockRegistry.DRAGONFORGE_CORE.get());
-        registry.addRecipeCatalyst(forgeCore, FIRE_DRAGON_FORGE_RECIPE_TYPE);
-        registry.addRecipeCatalyst(forgeCore, ICE_DRAGON_FORGE_RECIPE_TYPE);
-        registry.addRecipeCatalyst(forgeCore, LIGHTNING_DRAGON_FORGE_RECIPE_TYPE);
+        // the core that makes these recipes in the current Dragonforge Mode
+        if (com.github.alexthe666.iceandfire.block.DragonForgeType.individualForges()) {
+            registry.addRecipeCatalyst(new ItemStack(IafBlockRegistry.DRAGONFORGE_FIRE_CORE.get()), FIRE_DRAGON_FORGE_RECIPE_TYPE);
+            registry.addRecipeCatalyst(new ItemStack(IafBlockRegistry.DRAGONFORGE_ICE_CORE.get()), ICE_DRAGON_FORGE_RECIPE_TYPE);
+            registry.addRecipeCatalyst(new ItemStack(IafBlockRegistry.DRAGONFORGE_LIGHTNING_CORE.get()), LIGHTNING_DRAGON_FORGE_RECIPE_TYPE);
+        } else {
+            ItemStack forgeCore = new ItemStack(IafBlockRegistry.DRAGONFORGE_CORE.get());
+            registry.addRecipeCatalyst(forgeCore, FIRE_DRAGON_FORGE_RECIPE_TYPE);
+            registry.addRecipeCatalyst(forgeCore, ICE_DRAGON_FORGE_RECIPE_TYPE);
+            registry.addRecipeCatalyst(forgeCore, LIGHTNING_DRAGON_FORGE_RECIPE_TYPE);
+        }
     }
 
     @Override
@@ -137,6 +144,13 @@ public class IceAndFireJEIPlugin implements IModPlugin {
                 EnumDragonArmor.armor_gold.leggings.get(), EnumDragonArmor.armor_gold.boots.get()));
         IafItemRegistry.BloodedArmorSet blooded = IafItemRegistry.BLOODED_ARMOR_SETS.get(BloodedDragonType.GOLD_GOLD);
         hidden.addAll(List.of(blooded.helmet().get(), blooded.chestplate().get(), blooded.leggings().get(), blooded.boots().get()));
+        // the gold forge blocks are part of the secret, and the forge blocks of the other Dragonforge Mode aren't used
+        for (com.github.alexthe666.iceandfire.block.DragonForgeType type : com.github.alexthe666.iceandfire.block.DragonForgeType.values()) {
+            if (type == com.github.alexthe666.iceandfire.block.DragonForgeType.GOLD
+                    || !com.github.alexthe666.iceandfire.block.DragonForgeType.worksInCurrentMode(type.isActive() ? type : null)) {
+                IafBlockRegistry.typedForgeBlocks(type).forEach(block -> hidden.add(block.get().asItem()));
+            }
+        }
 
         runtime.getIngredientManager().removeIngredientsAtRuntime(VanillaTypes.ITEM_STACK,
                 hidden.stream().map(ItemStack::new).collect(Collectors.toList()));

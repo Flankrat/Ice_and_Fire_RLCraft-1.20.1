@@ -41,7 +41,15 @@ public class BlockDragonforgeInput extends BaseEntityBlock implements IDragonPro
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
     public static final EnumProperty<DragonForgeType> TYPE = EnumProperty.create("type", DragonForgeType.class);
 
+    // null for the shared (global mode) block; the dragon type for an individual-mode block
+    @Nullable
+    private final DragonForgeType fixedType;
+
     public BlockDragonforgeInput() {
+        this(null);
+    }
+
+    public BlockDragonforgeInput(@Nullable DragonForgeType fixedType) {
         super(
             Properties
                 .of()
@@ -51,9 +59,16 @@ public class BlockDragonforgeInput extends BaseEntityBlock implements IDragonPro
                 .strength(40, 500)
                 .sound(SoundType.METAL)
         );
+        this.fixedType = fixedType;
         this.registerDefaultState(this.getStateDefinition().any()
             .setValue(ACTIVE, Boolean.FALSE)
-            .setValue(TYPE, DragonForgeType.NONE));
+            .setValue(TYPE, fixedType != null ? fixedType : DragonForgeType.NONE));
+    }
+
+    /** The dragon type this block is made for, or null for the shared block. */
+    @Nullable
+    public DragonForgeType getFixedType() {
+        return fixedType;
     }
 
     @Override
@@ -80,7 +95,7 @@ public class BlockDragonforgeInput extends BaseEntityBlock implements IDragonPro
 
     private TileEntityDragonforge getConnectedTileEntity(Level worldIn, BlockPos pos) {
         for (Direction facing : Direction.values()) {
-            if (worldIn.getBlockEntity(pos.relative(facing)) instanceof TileEntityDragonforge forge) {
+            if (worldIn.getBlockEntity(pos.relative(facing)) instanceof TileEntityDragonforge forge && forge.getFixedType() == fixedType) {
                 return forge;
             }
         }

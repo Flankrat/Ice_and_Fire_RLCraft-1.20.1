@@ -74,6 +74,17 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
     /**
      * 获取当前龙锻炉类型枚举
      */
+    /** The dragon type of a per-type (individual mode) core, or null for the shared core. */
+    @Nullable
+    public DragonForgeType getFixedType() {
+        return this.getBlockState().getBlock() instanceof BlockDragonforgeCore core ? core.getFixedType() : null;
+    }
+
+    // a vent of the same kind as this core (shared vent for the shared core, fire vent for the fire core, ...)
+    private boolean isMatchingVent(BlockState state) {
+        return state.getBlock() instanceof BlockDragonforgeBricks vent && vent.getFixedType() == getFixedType();
+    }
+
     public DragonForgeType getDragonForgeType() {
         BlockState state = this.getBlockState();
         if (state.hasProperty(BlockDragonforgeCore.TYPE)) {
@@ -168,8 +179,9 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
         for (Direction facing : HORIZONTALS) {
             BlockPos grillPos = this.getBlockPos().relative(facing);
             BlockState grillState = level.getBlockState(grillPos);
-            if (grillState.getBlock() == IafBlockRegistry.DRAGONFORGE_BRICK.get()) {
-                DragonForgeType grillType = grill ? currentType : DragonForgeType.NONE;
+            if (isMatchingVent(grillState)) {
+                DragonForgeType fixed = getFixedType();
+                DragonForgeType grillType = fixed != null ? fixed : (grill ? currentType : DragonForgeType.NONE);
                 BlockState newState = grillState
                         .setValue(BlockDragonforgeBricks.GRILL, grill)
                         .setValue(BlockDragonforgeBricks.TYPE, grillType);
@@ -289,6 +301,10 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
     }
 
     public boolean acceptsBreathFrom(DragonForgeType type) {
+        // a per-type forge only takes its own dragon's breath
+        DragonForgeType fixed = getFixedType();
+        if (fixed != null && type != fixed)
+            return false;
         return IafConfig.dragonforgeInvalidRecipesMakeAsh || getRecipeFor(type).isPresent();
     }
 
@@ -298,7 +314,7 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
         if (this.forgeItemStacks.get(0).isEmpty())
             return false;
         for (DragonForgeType type : DragonForgeType.values()) {
-            if (type.isActive() && getRecipeFor(type).map(recipe -> outputFits(recipe.assemble(this, level.registryAccess()))).orElse(false))
+            if (type.isActive() && acceptsBreathFrom(type) && getRecipeFor(type).map(recipe -> outputFits(recipe.assemble(this, level.registryAccess()))).orElse(false))
                 return true;
         }
         return false;
@@ -479,10 +495,9 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
      * 检查中层四边，至少3个为通风口（第4个可以是焰孔或通风口）
      */
     private boolean checkVents(BlockPos pos) {
-        Block vent = IafBlockRegistry.DRAGONFORGE_BRICK.get();
         int count = 0;
         for (Direction facing : HORIZONTALS) {
-            if (level.getBlockState(pos.relative(facing)).getBlock() == vent) {
+            if (isMatchingVent(level.getBlockState(pos.relative(facing)))) {
                 count++;
             }
         }
@@ -511,7 +526,9 @@ public class TileEntityDragonforge extends BaseContainerBlockEntity implements W
      * 顶层：4龙骨角 + 4悚怖石砖边 + 悚怖石砖中心
      */
     public boolean assembled() {
-        return checkBoneCorners(worldPosition.below()) && checkDreadSlots(worldPosition.below()) && isDreadBrick(worldPosition.below())
+        // Dragonforge Mode: only the shared forge works in global mode, only the per-type forges in individual mode
+        return DragonForgeType.worksInCurrentMode(getFixedType())
+                && checkBoneCorners(worldPosition.below()) && checkDreadSlots(worldPosition.below()) && isDreadBrick(worldPosition.below())
                 && checkDreadCorners(worldPosition) && checkVents(worldPosition)
                 && checkBoneCorners(worldPosition.above()) && checkDreadSlots(worldPosition.above()) && isDreadBrick(worldPosition.above());
     }

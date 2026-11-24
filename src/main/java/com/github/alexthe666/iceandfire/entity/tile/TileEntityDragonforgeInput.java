@@ -55,9 +55,10 @@ public class TileEntityDragonforgeInput extends BlockEntity {
     private void updateInputType(DragonForgeType type) {
         if (level == null) return;
         BlockState state = level.getBlockState(worldPosition);
-        if (state.getBlock() instanceof BlockDragonforgeInput && type != null) {
+        if (state.getBlock() instanceof BlockDragonforgeInput input && type != null) {
+            // a per-type aperture always shows its own type
             BlockState newState = state
-                .setValue(BlockDragonforgeInput.TYPE, type)
+                .setValue(BlockDragonforgeInput.TYPE, input.getFixedType() != null ? input.getFixedType() : type)
                 .setValue(BlockDragonforgeInput.ACTIVE, true);
             if (state != newState) {
                 level.setBlockAndUpdate(worldPosition, newState);
@@ -184,7 +185,9 @@ public class TileEntityDragonforgeInput extends BlockEntity {
 
     private TileEntityDragonforge getConnectedTileEntity(final BlockPos position) {
         for (Direction facing : HORIZONTALS) {
-            if (level.getBlockEntity(position.relative(facing)) instanceof TileEntityDragonforge forge) {
+            // only a core of the same kind as this aperture (shared with shared, fire with fire, ...)
+            if (level.getBlockEntity(position.relative(facing)) instanceof TileEntityDragonforge forge
+                    && level.getBlockState(position).getBlock() instanceof BlockDragonforgeInput input && forge.getFixedType() == input.getFixedType()) {
                 return forge;
             }
         }

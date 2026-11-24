@@ -1,9 +1,15 @@
 {
+  "conditions": [
+    {
+      "type": "iceandfire:dragonforge_mode",
+      "mode": "individual"
+    }
+  ],
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
     "B": {
-      "item": "iceandfire:dragonforge_brick"
+      "item": "iceandfire:dragonforge_fire_brick"
     },
     "H": {
       "item": "iceandfire:fire_dragon_heart"
@@ -15,7 +21,7 @@
     "BBB"
   ],
   "result": {
-    "item": "iceandfire:dragonforge_core"
+    "item": "iceandfire:dragonforge_fire_core"
   },
   "show_notification": true
 }

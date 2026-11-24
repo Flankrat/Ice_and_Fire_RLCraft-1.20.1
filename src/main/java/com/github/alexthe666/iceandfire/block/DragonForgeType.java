@@ -53,6 +53,19 @@ public enum DragonForgeType implements StringRepresentable {
         return FIRE;
     }
 
+    /** The dragon types that have their own forge blocks in individual mode. */
+    public static final DragonForgeType[] DRAGON_TYPES = {FIRE, ICE, LIGHTNING, GOLD};
+
+    /** True when Dragonforge Mode is "individual": per-type forge blocks work and the shared ones don't. */
+    public static boolean individualForges() {
+        return "individual".equalsIgnoreCase(com.github.alexthe666.iceandfire.IafConfig.dragonforgeMode);
+    }
+
+    /** Whether a forge block with this fixed type (null = the shared block) works in the current mode. */
+    public static boolean worksInCurrentMode(@javax.annotation.Nullable DragonForgeType fixedType) {
+        return (fixedType != null) == individualForges();
+    }
+
     public boolean isActive() {
         return this != NONE;
     }

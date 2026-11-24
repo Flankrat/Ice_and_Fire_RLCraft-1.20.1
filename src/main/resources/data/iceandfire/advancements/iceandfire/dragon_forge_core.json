@@ -18,7 +18,11 @@
         "items": [
           {
             "items": [
-              "iceandfire:dragonforge_core"
+              "iceandfire:dragonforge_core",
+              "iceandfire:dragonforge_fire_core",
+              "iceandfire:dragonforge_ice_core",
+              "iceandfire:dragonforge_lightning_core",
+              "iceandfire:dragonforge_gold_core"
             ]
           }
         ]

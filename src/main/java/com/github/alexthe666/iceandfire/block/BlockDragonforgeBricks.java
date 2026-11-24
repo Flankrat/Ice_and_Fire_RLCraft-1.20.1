@@ -37,7 +37,15 @@ public class BlockDragonforgeBricks extends BaseEntityBlock implements IDragonPr
     public static final BooleanProperty GRILL = BooleanProperty.create("grill");
     public static final EnumProperty<DragonForgeType> TYPE = EnumProperty.create("type", DragonForgeType.class);
 
+    // null for the shared (global mode) block; the dragon type for an individual-mode block
+    @Nullable
+    private final DragonForgeType fixedType;
+
     public BlockDragonforgeBricks() {
+        this(null);
+    }
+
+    public BlockDragonforgeBricks(@Nullable DragonForgeType fixedType) {
         super(
             Properties
                 .of()
@@ -47,9 +55,16 @@ public class BlockDragonforgeBricks extends BaseEntityBlock implements IDragonPr
                 .strength(40, 500)
                 .sound(SoundType.METAL)
         );
+        this.fixedType = fixedType;
         this.registerDefaultState(this.getStateDefinition().any()
             .setValue(GRILL, Boolean.FALSE)
-            .setValue(TYPE, DragonForgeType.NONE));
+            .setValue(TYPE, fixedType != null ? fixedType : DragonForgeType.NONE));
+    }
+
+    /** The dragon type this block is made for, or null for the shared block. */
+    @Nullable
+    public DragonForgeType getFixedType() {
+        return fixedType;
     }
 
     @Override
