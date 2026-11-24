@@ -116,6 +116,8 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     private static final EntityDataAccessor<Boolean> GENDER = SynchedEntityData.defineId(EntityDragonBase.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(EntityDragonBase.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> SLEEPING = SynchedEntityData.defineId(EntityDragonBase.class, EntityDataSerializers.BOOLEAN);
+    // Synced so the client knows too: it decides whether giving coffee uses the bottle up
+    private static final EntityDataAccessor<Boolean> CAFFEINATED = SynchedEntityData.defineId(EntityDragonBase.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> FIREBREATHING = SynchedEntityData.defineId(EntityDragonBase.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HOVERING = SynchedEntityData.defineId(EntityDragonBase.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(EntityDragonBase.class, EntityDataSerializers.BOOLEAN);
@@ -618,6 +620,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
+        this.entityData.define(CAFFEINATED, false);
         this.entityData.define(HUNGER, 0);
         this.entityData.define(AGE_TICKS, 0);
         this.entityData.define(GENDER, false);
@@ -776,7 +779,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         this.setHunger(compound.getInt("Hunger"));
-        this.caffeineTicks = compound.getInt("CaffeineTicks");
+        this.setCaffeineTicks(compound.getInt("CaffeineTicks"));
         this.setAgeInTicks(compound.getInt("AgeTicks"));
         this.setGender(compound.getBoolean("Gender"));
         this.setVariant(compound.getInt("Variant"));
@@ -791,8 +794,12 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
         this.modelDeadProgress = compound.getFloat("DeadProg");
         this.setCustomPose(compound.getString("CustomPose"));
         this.hasHomePosition = compound.getBoolean("HasHomePosition");
-        if (hasHomePosition && compound.getInt("HomeAreaX") != 0 && compound.getInt("HomeAreaY") != 0 && compound.getInt("HomeAreaZ") != 0) {
+        // 0 is a real coordinate: check the home was saved at all (homes with any coordinate at 0 were dropped while
+        // hasHomePosition stayed true, so the dragon thought it had a home it didn't have)
+        if (hasHomePosition && compound.contains("HomeAreaX") && compound.contains("HomeAreaY") && compound.contains("HomeAreaZ")) {
             homePos = new HomePosition(compound, this.level());
+        } else {
+            this.hasHomePosition = false; // no saved home: don't claim one
         }
         this.setTackling(compound.getBoolean("Tackle"));
         this.setAgingDisabled(compound.getBoolean("AgingDisabled"));
@@ -1278,7 +1285,7 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
                                 player.drop(bottle, false);
                             }
                         }
-                        this.caffeineTicks = IafConfig.dragonCoffeeTicks;
+                        this.setCaffeineTicks(IafConfig.dragonCoffeeTicks);
                         this.setInSittingPose(false);
                         return InteractionResult.SUCCESS;
                     } else if (stackItem == IafItemRegistry.SICKLY_DRAGON_MEAL.get() && !this.isAgingDisabled()) {
@@ -1429,8 +1436,17 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     // Ticks left before coffee wears off (server side; sleeping is decided on the server)
     public int caffeineTicks = 0;
 
+    public void setCaffeineTicks(int ticks) {
+        this.caffeineTicks = ticks;
+        if (!this.level().isClientSide) {
+            this.entityData.set(CAFFEINATED, ticks > 0);
+        }
+    }
+
+    // The server's timer, or on the client the synced flag (the timer only counts down on the server, so the client
+    // used to think a caffeinated dragon wasn't: it used the coffee up and the server refused it, a ghost item)
     public boolean isCaffeinated() {
-        return this.caffeineTicks > 0;
+        return this.level().isClientSide ? this.entityData.get(CAFFEINATED) : this.caffeineTicks > 0;
     }
 
     private static boolean isCoffee(ItemStack stack) {
@@ -3363,9 +3379,12 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     public void onAddedToWorld() {
         super.onAddedToWorld();
 
-        ItemSummoningCrystal itemSummoningCrystal = ItemSummoningCrystal.DELAYED_SUMMONS.get(this.getUUID());
-        if (itemSummoningCrystal != null) {
-            itemSummoningCrystal.delayedSummon();
+        // Server only: this also runs for the client's copy of the dragon, which must not touch the server's summons
+        if (!this.level().isClientSide) {
+            ItemSummoningCrystal.Summon summon = ItemSummoningCrystal.DELAYED_SUMMONS.get(this.getUUID());
+            if (summon != null) {
+                summon.delayedSummon();
+            }
         }
     }
 

@@ -537,7 +537,10 @@ public class EntityHippogryph extends TamableAnimal implements ISyncMount, IAnim
     }
 
     public EnumHippogryphTypes getEnumVariant() {
-        return EnumHippogryphTypes.values()[this.getVariant()];
+        // The variant comes from saves and the server: fall back to the first type instead of throwing on a bad number
+        int variant = this.getVariant();
+        EnumHippogryphTypes[] types = EnumHippogryphTypes.values();
+        return types[variant >= 0 && variant < types.length ? variant : 0];
     }
 
     public void setEnumVariant(EnumHippogryphTypes variant) {

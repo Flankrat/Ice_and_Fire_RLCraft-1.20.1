@@ -62,7 +62,7 @@ public class DragonServerTickManager {
             dragon.setTarget(null);
         }
         if (dragon.caffeineTicks > 0) {
-            dragon.caffeineTicks--;
+            dragon.setCaffeineTicks(dragon.caffeineTicks - 1);
         }
         if (IafConfig.doDragonsSleep
                 && !dragon.isCaffeinated()

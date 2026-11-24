@@ -26,15 +26,20 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.WeakHashMap;
 import java.util.function.Predicate;
 
 public class ItemCockatriceScepter extends Item {
 
     private final Random rand = new Random();
-    private int specialWeaponDmg;
+    // Durability damage owed by each caster, paid when they let go. This was a field on the item, which every player
+    // shares (and the client and server threads too, in single player), so another player's scepter could pay it.
+    private static final Map<LivingEntity, Integer> PENDING_DAMAGE = Collections.synchronizedMap(new WeakHashMap<>());
 
     public ItemCockatriceScepter() {
         super(new Item.Properties()/*.tab(IceAndFire.TAB_ITEMS)*/.durability(700));
@@ -49,9 +54,9 @@ public class ItemCockatriceScepter extends Item {
 
     @Override
     public void releaseUsing(@NotNull ItemStack stack, @NotNull Level worldIn, @NotNull LivingEntity livingEntity, int timeLeft) {
-        if (specialWeaponDmg > 0) {
-            stack.hurtAndBreak(specialWeaponDmg, livingEntity, player -> player.broadcastBreakEvent(livingEntity.getUsedItemHand()));
-            specialWeaponDmg = 0;
+        Integer owed = PENDING_DAMAGE.remove(livingEntity);
+        if (owed != null && owed > 0) {
+            stack.hurtAndBreak(owed, livingEntity, player -> player.broadcastBreakEvent(livingEntity.getUsedItemHand()));
         }
 
         EntityDataProvider.getCapability(livingEntity).ifPresent(data -> data.miscData.getTargetedByScepter().clear());
@@ -140,7 +145,7 @@ public class ItemCockatriceScepter extends Item {
                 target.addEffect(new MobEffectInstance(MobEffects.WITHER, 40, 2));
 
                 if (caster.tickCount % 20 == 0) {
-                    specialWeaponDmg++;
+                    PENDING_DAMAGE.merge(caster, 1, Integer::sum);
                     target.hurt(caster.level().damageSources().wither(), 2);
                 }
 

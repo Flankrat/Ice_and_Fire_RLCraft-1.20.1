@@ -104,10 +104,14 @@ public class TileEntityDreadSpawner extends SpawnerBlockEntity {
         this.spawner.load(this.level, this.worldPosition, p_155760_);
     }
 
-    public CompoundTag save(CompoundTag p_59795_) {
-        super.saveAdditional(p_59795_);
-        this.spawner.save(p_59795_);
-        return p_59795_;
+    // Block entities write their data in saveAdditional on 1.20 (this used to be a save(CompoundTag) method that
+    // nothing called, so disk saves only had vanilla's unused spawner: RequiredSpawnCount and spawn egg changes
+    // were lost whenever the chunk reloaded)
+    @Override
+    protected void saveAdditional(@NotNull CompoundTag tag) {
+        super.saveAdditional(tag); // vanilla writes its own unused spawner here...
+        tag.remove("SpawnData"); // ...so drop its SpawnData in case this spawner has none
+        this.spawner.save(tag); // and write this spawner's state over it
     }
 
     public static void clientTick(Level p_155755_, BlockPos p_155756_, BlockState p_155757_, TileEntityDreadSpawner p_155758_) {
@@ -134,7 +138,7 @@ public class TileEntityDreadSpawner extends SpawnerBlockEntity {
 
     @Override
     public @NotNull CompoundTag getUpdateTag() {
-        CompoundTag compoundtag = this.save(new CompoundTag());
+        CompoundTag compoundtag = this.saveWithoutMetadata();
         compoundtag.remove("SpawnPotentials");
         return compoundtag;
     }

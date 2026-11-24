@@ -1,6 +1,7 @@
 package com.github.alexthe666.iceandfire.message;
 
 import com.github.alexthe666.iceandfire.IceAndFire;
+import com.github.alexthe666.iceandfire.entity.util.EntityUtil;
 import com.github.alexthe666.iceandfire.entity.EntityHydra;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
@@ -55,9 +56,8 @@ public class MessagePlayerHitMultipart {
                     Entity entity = player.level().getEntity(message.creatureID);
 
                     if (entity instanceof LivingEntity livingEntity) {
-                        double dist = player.distanceTo(livingEntity);
-
-                        if (dist < 100) {
+                        // Within reach of the creature or one of its parts (this was distanceTo() < 100: 100 blocks)
+                        if (EntityUtil.isInReachOfMultipart(player, livingEntity)) {
                             player.attack(livingEntity);
 
                             if (livingEntity instanceof EntityHydra hydra) {

@@ -26,14 +26,27 @@ import net.minecraftforge.common.util.NonNullLazy;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
 public class ItemDeathwormGauntlet extends Item {
 
-    private boolean deathwormReceded = true;
-    private boolean deathwormLaunched = false;
-    private int specialDamage = 0;
+    // Lunge state per player using a gauntlet. These were fields on the item, which every player shares (and the
+    // client and server threads too, in single player), so one player's lunge moved or damaged another's gauntlet.
+    private static final Map<Entity, LungeState> STATES = Collections.synchronizedMap(new WeakHashMap<>());
+
+    private static final class LungeState {
+        boolean deathwormReceded = true;
+        boolean deathwormLaunched = false;
+        int specialDamage = 0;
+    }
+
+    private static LungeState state(Entity entity) {
+        return STATES.computeIfAbsent(entity, e -> new LungeState());
+    }
 
     public ItemDeathwormGauntlet() {
         super(new Item.Properties().durability(500)/*.tab(IceAndFire.TAB_ITEMS)*/);
@@ -71,7 +84,8 @@ public class ItemDeathwormGauntlet extends Item {
 
     @Override
     public void onUseTick(@NotNull Level level, @NotNull LivingEntity entity, @NotNull ItemStack stack, int count) {
-        if (!deathwormReceded && !deathwormLaunched) {
+        LungeState state = state(entity);
+        if (!state.deathwormReceded && !state.deathwormLaunched) {
             if (entity instanceof Player player) {
                 CompoundTag tag = stack.getOrCreateTag();
 
@@ -82,8 +96,8 @@ public class ItemDeathwormGauntlet extends Item {
                 if (player.getCooldowns().getCooldownPercent(this, 0.0F) == 0) {
                     player.getCooldowns().addCooldown(this, 10);
                     player.playSound(IafSoundRegistry.DEATHWORM_ATTACK, 1F, 1F);
-                    deathwormReceded = false;
-                    deathwormLaunched = true;
+                    state.deathwormReceded = false;
+                    state.deathwormLaunched = true;
                 }
             }
         }
@@ -91,9 +105,10 @@ public class ItemDeathwormGauntlet extends Item {
 
     @Override
     public void releaseUsing(@NotNull ItemStack stack, @NotNull Level worldIn, @NotNull LivingEntity LivingEntity, int timeLeft) {
-        if (specialDamage > 0) {
-            stack.hurtAndBreak(specialDamage, LivingEntity, player -> player.broadcastBreakEvent(LivingEntity.getUsedItemHand()));
-            specialDamage = 0;
+        LungeState state = state(LivingEntity);
+        if (state.specialDamage > 0) {
+            stack.hurtAndBreak(state.specialDamage, LivingEntity, player -> player.broadcastBreakEvent(LivingEntity.getUsedItemHand()));
+            state.specialDamage = 0;
         }
 
         CompoundTag tag = stack.getOrCreateTag();
@@ -114,24 +129,25 @@ public class ItemDeathwormGauntlet extends Item {
             return;
         }
 
+        LungeState state = state(entity);
         EntityDataProvider.getCapability(entity).ifPresent(data -> {
             int tempLungeTicks = data.miscData.lungeTicks;
 
-            if (deathwormReceded) {
+            if (state.deathwormReceded) {
                 if (tempLungeTicks > 0) {
                     tempLungeTicks = tempLungeTicks - 4;
                 }
 
                 if (tempLungeTicks <= 0) {
                     tempLungeTicks = 0;
-                    deathwormReceded = false;
-                    deathwormLaunched = false;
+                    state.deathwormReceded = false;
+                    state.deathwormLaunched = false;
                 }
-            } else if (deathwormLaunched) {
+            } else if (state.deathwormLaunched) {
                 tempLungeTicks = 4 + tempLungeTicks;
 
                 if (tempLungeTicks > 20) {
-                    deathwormReceded = true;
+                    state.deathwormReceded = true;
                 }
             }
 
@@ -153,7 +169,7 @@ public class ItemDeathwormGauntlet extends Item {
                         boolean canSee = d1 > 1.0D - 0.5D / d0 && player.hasLineOfSight(livingEntity);
 
                         if (canSee) {
-                            specialDamage++;
+                            state.specialDamage++;
                             livingEntity.hurt(entity.level().damageSources().playerAttack((Player) entity), 3F);
                             livingEntity.knockback(0.5F, livingEntity.getX() - player.getX(), livingEntity.getZ() - player.getZ());
                         }

@@ -15,6 +15,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -298,7 +299,8 @@ public class MyrmexHive {
         }
         this.colonyName = compound.getString("ColonyName");
         this.villageRadius = compound.getInt("Radius");
-        if (compound.hasUUID("WanderRadius")) {
+        // Saved as an int (this checked hasUUID, which is never true for it, so the radius always reset to 16)
+        if (compound.contains("WanderRadius", Tag.TAG_INT)) {
             this.wanderRadius = compound.getInt("WanderRadius");
         }
         this.lastAddDoorTimestamp = compound.getInt("Stable");

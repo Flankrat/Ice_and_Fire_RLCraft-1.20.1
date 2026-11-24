@@ -4,6 +4,7 @@ import com.github.alexthe666.iceandfire.entity.EntityBlackFrostDragon;
 import com.github.alexthe666.iceandfire.entity.EntityDreadQueen;
 import net.minecraft.world.entity.ai.goal.Goal;
 
+import java.util.EnumSet;
 import java.util.List;
 
 /**
@@ -16,11 +17,18 @@ public class DreadAIDragonFindQueen extends Goal {
 
     public DreadAIDragonFindQueen(EntityBlackFrostDragon dragon) {
         this.dragon = dragon;
+        // It steers the dragon, so other movement/look goals have to wait (with no flags they ran alongside it and
+        // overrode where it was going)
+        this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
     @Override
     public boolean canUse() {
         if (this.dragon.isVehicle()) {
+            return false;
+        }
+        // The search covers a 257-block box: like vanilla's target goals, only look now and then (~every 10 ticks)
+        if (this.dragon.getRandom().nextInt(reducedTickDelay(10)) != 0) {
             return false;
         }
         List<EntityDreadQueen> list = this.dragon.level().getEntitiesOfClass(EntityDreadQueen.class, this.dragon.getBoundingBox().inflate(128.0D, 128.0D, 128.0D));

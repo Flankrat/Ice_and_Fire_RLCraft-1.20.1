@@ -1,6 +1,7 @@
 package com.github.alexthe666.iceandfire.message;
 
 import com.github.alexthe666.iceandfire.IceAndFire;
+import com.github.alexthe666.iceandfire.entity.util.EntityUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -50,16 +51,11 @@ public class MessageMultipartInteract {
                 if (player != null) {
                     Entity entity = player.level().getEntity(message.creatureID);
 
-                    if (entity instanceof LivingEntity livingEntity) {
-                        double dist = player.distanceTo(livingEntity);
-
-                        if (dist < 100) {
-                            if (message.dmg > 0F) {
-                                livingEntity.hurt(player.level().damageSources().mobAttack(player), message.dmg);
-                            } else {
-                                livingEntity.interact(player, InteractionHand.MAIN_HAND);
-                            }
-                        }
+                    // Only within reach of the creature or one of its parts. Damage is never taken from the client:
+                    // hits on parts already reach the server as a normal attack (ServerEvents.onPlayerAttackMob attacks
+                    // the parent with the server's own damage), so the client's number is ignored.
+                    if (entity instanceof LivingEntity livingEntity && message.dmg <= 0F && EntityUtil.isInReachOfMultipart(player, livingEntity)) {
+                        livingEntity.interact(player, InteractionHand.MAIN_HAND);
                     }
                 }
             });
