@@ -11,6 +11,7 @@ public class RenderDragonArrow extends ArrowRenderer<EntityDragonArrow> {
     private static final ResourceLocation FIRE = new ResourceLocation("iceandfire:textures/models/misc/dragonbone_arrow_fire.png");
     private static final ResourceLocation ICE = new ResourceLocation("iceandfire:textures/models/misc/dragonbone_arrow_ice.png");
     private static final ResourceLocation LIGHTNING = new ResourceLocation("iceandfire:textures/models/misc/dragonbone_arrow_lightning.png");
+    private static final ResourceLocation GOLD = new ResourceLocation("iceandfire:textures/models/misc/dragonbone_arrow_gold.png");
 
     public RenderDragonArrow(EntityRendererProvider.Context context) {
         super(context);
@@ -22,6 +23,7 @@ public class RenderDragonArrow extends ArrowRenderer<EntityDragonArrow> {
             case FIRE -> FIRE;
             case ICE -> ICE;
             case LIGHTNING -> LIGHTNING;
+            case GOLD -> GOLD;
             default -> DEFAULT;
         };
     }

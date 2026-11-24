@@ -24,6 +24,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = IceAndFire.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -132,18 +133,32 @@ public class IafBlockRegistry {
     public static final RegistryObject<Block> DRAGONFORGE_BRICK = register("dragonforge_brick", BlockDragonforgeBricks::new);
     public static final RegistryObject<Block> DRAGONFORGE_INPUT = register("dragonforge_input", BlockDragonforgeInput::new);
     public static final RegistryObject<Block> DRAGONFORGE_CORE = register("dragonforge_core", BlockDragonforgeCore::new);
-    public static final RegistryObject<Block> DRAGONFORGE_FIRE_BRICK = DRAGONFORGE_BRICK;
-    public static final RegistryObject<Block> DRAGONFORGE_ICE_BRICK = DRAGONFORGE_BRICK;
-    public static final RegistryObject<Block> DRAGONFORGE_LIGHTNING_BRICK = DRAGONFORGE_BRICK;
-    public static final RegistryObject<Block> DRAGONFORGE_FIRE_INPUT = DRAGONFORGE_INPUT;
-    public static final RegistryObject<Block> DRAGONFORGE_ICE_INPUT = DRAGONFORGE_INPUT;
-    public static final RegistryObject<Block> DRAGONFORGE_LIGHTNING_INPUT = DRAGONFORGE_INPUT;
-    public static final RegistryObject<Block> DRAGONFORGE_FIRE_CORE = DRAGONFORGE_CORE;
-    public static final RegistryObject<Block> DRAGONFORGE_ICE_CORE = DRAGONFORGE_CORE;
-    public static final RegistryObject<Block> DRAGONFORGE_LIGHTNING_CORE = DRAGONFORGE_CORE;
-    public static final RegistryObject<Block> DRAGONFORGE_FIRE_CORE_DISABLED = DRAGONFORGE_CORE;
-    public static final RegistryObject<Block> DRAGONFORGE_ICE_CORE_DISABLED = DRAGONFORGE_CORE;
-    public static final RegistryObject<Block> DRAGONFORGE_LIGHTNING_CORE_DISABLED = DRAGONFORGE_CORE;
+    // Per-type forge blocks for Dragonforge Mode "individual" (the 1.20 Ice and Fire layout: only that dragon type powers them).
+    // They are always registered so worlds keep them when the mode changes; the mode decides which forge assembles
+    // and which forge recipes load. The gold ones are hidden from the creative tab and JEI like the gold armor.
+    public static final RegistryObject<Block> DRAGONFORGE_FIRE_BRICK = register("dragonforge_fire_brick", () -> new BlockDragonforgeBricks(DragonForgeType.FIRE));
+    public static final RegistryObject<Block> DRAGONFORGE_ICE_BRICK = register("dragonforge_ice_brick", () -> new BlockDragonforgeBricks(DragonForgeType.ICE));
+    public static final RegistryObject<Block> DRAGONFORGE_LIGHTNING_BRICK = register("dragonforge_lightning_brick", () -> new BlockDragonforgeBricks(DragonForgeType.LIGHTNING));
+    public static final RegistryObject<Block> DRAGONFORGE_GOLD_BRICK = registerHidden("dragonforge_gold_brick", () -> new BlockDragonforgeBricks(DragonForgeType.GOLD));
+    public static final RegistryObject<Block> DRAGONFORGE_FIRE_INPUT = register("dragonforge_fire_input", () -> new BlockDragonforgeInput(DragonForgeType.FIRE));
+    public static final RegistryObject<Block> DRAGONFORGE_ICE_INPUT = register("dragonforge_ice_input", () -> new BlockDragonforgeInput(DragonForgeType.ICE));
+    public static final RegistryObject<Block> DRAGONFORGE_LIGHTNING_INPUT = register("dragonforge_lightning_input", () -> new BlockDragonforgeInput(DragonForgeType.LIGHTNING));
+    public static final RegistryObject<Block> DRAGONFORGE_GOLD_INPUT = registerHidden("dragonforge_gold_input", () -> new BlockDragonforgeInput(DragonForgeType.GOLD));
+    public static final RegistryObject<Block> DRAGONFORGE_FIRE_CORE = register("dragonforge_fire_core", () -> new BlockDragonforgeCore(DragonForgeType.FIRE));
+    public static final RegistryObject<Block> DRAGONFORGE_ICE_CORE = register("dragonforge_ice_core", () -> new BlockDragonforgeCore(DragonForgeType.ICE));
+    public static final RegistryObject<Block> DRAGONFORGE_LIGHTNING_CORE = register("dragonforge_lightning_core", () -> new BlockDragonforgeCore(DragonForgeType.LIGHTNING));
+    public static final RegistryObject<Block> DRAGONFORGE_GOLD_CORE = registerHidden("dragonforge_gold_core", () -> new BlockDragonforgeCore(DragonForgeType.GOLD));
+
+    /** The per-type forge blocks, as {vent, aperture, core}, for one dragon type. */
+    public static List<RegistryObject<Block>> typedForgeBlocks(DragonForgeType type) {
+        return switch (type) {
+            case FIRE -> List.of(DRAGONFORGE_FIRE_BRICK, DRAGONFORGE_FIRE_INPUT, DRAGONFORGE_FIRE_CORE);
+            case ICE -> List.of(DRAGONFORGE_ICE_BRICK, DRAGONFORGE_ICE_INPUT, DRAGONFORGE_ICE_CORE);
+            case LIGHTNING -> List.of(DRAGONFORGE_LIGHTNING_BRICK, DRAGONFORGE_LIGHTNING_INPUT, DRAGONFORGE_LIGHTNING_CORE);
+            case GOLD -> List.of(DRAGONFORGE_GOLD_BRICK, DRAGONFORGE_GOLD_INPUT, DRAGONFORGE_GOLD_CORE);
+            case NONE -> List.of(DRAGONFORGE_BRICK, DRAGONFORGE_INPUT, DRAGONFORGE_CORE);
+        };
+    }
     public static final RegistryObject<Block> EGG_IN_ICE = register("egginice", BlockEggInIce::new);
     public static final RegistryObject<Block> PIXIE_HOUSE_MUSHROOM_RED = registerWithRender(BlockPixieHouse.name("mushroom_red"), BlockPixieHouse::new);
     public static final RegistryObject<Block> PIXIE_HOUSE_MUSHROOM_BROWN = registerWithRender(BlockPixieHouse.name("mushroom_brown"), BlockPixieHouse::new);
@@ -196,6 +211,13 @@ public class IafBlockRegistry {
         RegistryObject<T> ret = BLOCKS.register(name, block);
         IafItemRegistry.registerItem(name, () -> new BlockItem(ret.get(), new Item.Properties()), false);
         IafTabRegistry.TAB_BLOCKS_LIST.add(ret);
+        return ret;
+    }
+
+    /** Like register, but the block item stays out of the creative tab. */
+    public static <T extends Block> RegistryObject<T> registerHidden(String name, Supplier<T> block) {
+        RegistryObject<T> ret = BLOCKS.register(name, block);
+        IafItemRegistry.registerItem(name, () -> new BlockItem(ret.get(), new Item.Properties()), false);
         return ret;
     }
 

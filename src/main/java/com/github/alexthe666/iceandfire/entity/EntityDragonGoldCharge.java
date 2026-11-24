@@ -57,7 +57,7 @@ public class EntityDragonGoldCharge extends EntityDragonCharge {
 
     @Override
     public DamageSource causeDamage(@Nullable Entity cause) {
-        return level().damageSources().magic();
+        return level().damageSources().indirectMagic(this, cause);
     }
 
     @Override

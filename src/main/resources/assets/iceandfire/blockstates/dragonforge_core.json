@@ -4,9 +4,11 @@
     "active=false,type=fire": { "model": "iceandfire:block/dragonforge_fire_core_disabled" },
     "active=false,type=ice": { "model": "iceandfire:block/dragonforge_ice_core_disabled" },
     "active=false,type=lightning": { "model": "iceandfire:block/dragonforge_lightning_core_disabled" },
+    "active=false,type=gold": { "model": "iceandfire:block/dragonforge_gold_core_disabled" },
     "active=true,type=none": { "model": "iceandfire:block/dragonforge_fire_core" },
     "active=true,type=fire": { "model": "iceandfire:block/dragonforge_fire_core" },
     "active=true,type=ice": { "model": "iceandfire:block/dragonforge_ice_core" },
-    "active=true,type=lightning": { "model": "iceandfire:block/dragonforge_lightning_core" }
+    "active=true,type=lightning": { "model": "iceandfire:block/dragonforge_lightning_core" },
+    "active=true,type=gold": { "model": "iceandfire:block/dragonforge_gold_core" }
   }
 }

@@ -1,0 +1,31 @@
+{
+  "conditions": [
+    {
+      "type": "iceandfire:dragonforge_mode",
+      "mode": "individual"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "D": {
+      "item": "iceandfire:dread_stone"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "S": {
+      "tag": "forge:storage_blocks/scales/dragon/ice"
+    }
+  },
+  "pattern": [
+    "DDD",
+    "ISI",
+    "DDD"
+  ],
+  "result": {
+    "count": 4,
+    "item": "iceandfire:dragonforge_ice_brick"
+  },
+  "show_notification": true
+}

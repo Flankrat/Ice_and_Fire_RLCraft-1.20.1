@@ -1,6 +1,7 @@
 package com.github.alexthe666.iceandfire.entity;
 
 import com.github.alexthe666.iceandfire.api.ChainLightningUtils;
+import com.github.alexthe666.iceandfire.IafConfig;
 import com.github.alexthe666.iceandfire.item.IafItemRegistry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -29,13 +30,15 @@ public class EntityDragonArrow extends AbstractArrow {
             SynchedEntityData.defineId(EntityDragonArrow.class, EntityDataSerializers.INT);
 
     public enum ArrowType {
-        DEFAULT, FIRE, ICE, LIGHTNING;
+        // GOLD last, so the saved ordinals of the others don't change
+        DEFAULT, FIRE, ICE, LIGHTNING, GOLD;
 
         public Item getArrowItem() {
             return switch (this) {
                 case FIRE -> IafItemRegistry.DRAGONBONE_ARROW_FIRE.get();
                 case ICE -> IafItemRegistry.DRAGONBONE_ARROW_ICE.get();
                 case LIGHTNING -> IafItemRegistry.DRAGONBONE_ARROW_LIGHTNING.get();
+                case GOLD -> IafItemRegistry.DRAGONBONE_ARROW_GOLD.get();
                 default -> IafItemRegistry.DRAGONBONE_ARROW.get();
             };
         }
@@ -87,6 +90,7 @@ public class EntityDragonArrow extends AbstractArrow {
                     case FIRE -> this.level().addParticle(ParticleTypes.FLAME, x, y, z, 0.0D, 0.0D, 0.0D);
                     case ICE -> this.level().addParticle(ParticleTypes.SNOWFLAKE, x, y, z, 0.0D, 0.0D, 0.0D);
                     case LIGHTNING -> this.level().addParticle(ParticleTypes.ELECTRIC_SPARK, x, y, z, 0.0D, 0.0D, 0.0D);
+                    case GOLD -> this.level().addParticle(ParticleTypes.ENCHANT, x, y, z, 0.0D, 0.0D, 0.0D);
                     default -> { }
                 }
             }
@@ -123,6 +127,15 @@ public class EntityDragonArrow extends AbstractArrow {
                 }
                 if (owner instanceof LivingEntity livingOwner) {
                     ChainLightningUtils.createChainLightning(this.level(), target, livingOwner, (float) this.getBaseDamage(), false);
+                }
+            }
+            case GOLD -> {
+                // like the lightning arrow: a small bonus against the elemental dragons, and the bow isn't put on cooldown
+                if (target instanceof EntityFireDragon || target instanceof EntityIceDragon || target instanceof EntityLightningDragon) {
+                    target.hurt(this.level().damageSources().magic(), 4.0F);
+                }
+                if (owner instanceof LivingEntity livingOwner && IafConfig.dragonWeaponGoldAbility) {
+                    com.github.alexthe666.iceandfire.api.ArcaneBurstUtils.createArcaneBurst(this.level(), target, livingOwner, false);
                 }
             }
             default -> { }

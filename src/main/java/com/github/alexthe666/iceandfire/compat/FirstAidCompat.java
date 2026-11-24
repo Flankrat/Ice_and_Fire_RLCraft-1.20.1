@@ -51,9 +51,6 @@ public final class FirstAidCompat {
             }
             MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, eventClass, event -> {
                 try {
-                    if (!BloodedDefendEffect.isDefendMode()) {
-                        return;
-                    }
                     DamageSource damageSource = (DamageSource) source.invoke(event);
                     Player wearer = (Player) player.invoke(event);
                     if (wearer.level().isClientSide || !BloodedDefendEffect.isMeleeHit(damageSource)) {

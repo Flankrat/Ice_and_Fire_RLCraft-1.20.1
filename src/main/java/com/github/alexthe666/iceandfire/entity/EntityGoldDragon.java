@@ -336,7 +336,8 @@ public class EntityGoldDragon extends EntityDragonBase {
                             new Vec3(this.getX(), this.getY() + this.getEyeHeight(), this.getZ()),
                             new Vec3(progressX, progressY, progressZ),
                             ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
-                    // 不调用destroyArea，金龙吐息不破坏
+                    // 不调用destroyArea，金龙吐息不破坏 (destroyAreaBreath only powers dragon forges for gold dragons)
+                    IafDragonDestructionManager.destroyAreaBreath(level(), BlockPos.containing(result.getLocation()), this);
                 }
             }
         }
@@ -347,8 +348,13 @@ public class EntityGoldDragon extends EntityDragonBase {
                     new net.minecraft.world.phys.AABB(burnX - range, burnY - range, burnZ - range,
                             burnX + range, burnY + range, burnZ + range))) {
                 if (target != this && !target.isAlliedTo(this) && !((Object) target instanceof EntityDragonPart)) {
-                    target.hurt(level().damageSources().magic(), (float) (this.getDragonStage() * 2));
+                    target.hurt(level().damageSources().indirectMagic(this, this), (float) (this.getDragonStage() * 2));
                 }
+            }
+            // the breath reaching its target powers a dragon forge input there, like the fire dragon's breath does
+            // (the loop above only reaches destroyAreaBreath where the breath is blocked short of the target)
+            if (canPositionBeSeen(burnX, burnY, burnZ)) {
+                IafDragonDestructionManager.destroyAreaBreath(level(), BlockPos.containing(burnX, burnY, burnZ), this);
             }
             // 附魔粒子爆发
             if (level().isClientSide) {

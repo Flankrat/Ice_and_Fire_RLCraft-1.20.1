@@ -19,11 +19,16 @@ public class BloodedArmorMaterial {
             "iceandfire:blooded_lightning", 43, PROTECTION, 25,
             SoundEvents.ARMOR_EQUIP_LEATHER, 2.0F);
 
+    public static final IafArmorMaterial GOLD = new IafArmorMaterial(
+            "iceandfire:blooded_gold", 43, PROTECTION, 25,
+            SoundEvents.ARMOR_EQUIP_LEATHER, 2.0F);
+
     public static IafArmorMaterial fromElement(BloodedDragonType.DragonElement element) {
         return switch (element) {
             case FIRE -> FIRE;
             case ICE -> ICE;
             case LIGHTNING -> LIGHTNING;
+            case GOLD -> GOLD;
         };
     }
 }

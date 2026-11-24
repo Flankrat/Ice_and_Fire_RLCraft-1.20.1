@@ -18,7 +18,11 @@
         "items": [
           {
             "items": [
-              "iceandfire:dragonforge_brick"
+              "iceandfire:dragonforge_brick",
+              "iceandfire:dragonforge_fire_brick",
+              "iceandfire:dragonforge_ice_brick",
+              "iceandfire:dragonforge_lightning_brick",
+              "iceandfire:dragonforge_gold_brick"
             ]
           }
         ]

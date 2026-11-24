@@ -61,39 +61,48 @@ public class ItemBloodedArmor extends ArmorItem implements IProtectAgainstDragon
             case FIRE -> ChatFormatting.DARK_RED;
             case ICE -> ChatFormatting.AQUA;
             case LIGHTNING -> ChatFormatting.LIGHT_PURPLE;
+            case GOLD -> ChatFormatting.GOLD;
         };
 
         tooltip.add(Component.translatable("dragon." + dragonType.getColorName())
                 .withStyle(dragonType.getColor()));
         tooltip.add(Component.translatable("item.blooded_armor.desc")
                 .withStyle(elementColor));
+        if (dragonType.getElement() == BloodedDragonType.DragonElement.GOLD) {
+            int cut = (int) Math.round((1.0D - com.github.alexthe666.iceandfire.IafConfig.bloodedGoldElementalBreathMultiplier) * 100.0D);
+            tooltip.add(Component.translatable("item.blooded_armor.gold_desc", cut).withStyle(elementColor));
+        }
         tooltip.add(Component.empty());
 
+        // The armor only strikes back when the wearer is hit in melee. With First Aid each piece works on its own;
+        // without it a random piece fires, once all four armor slots hold blooded pieces (any elements).
+        boolean perPiece = com.github.alexthe666.iceandfire.compat.FirstAidCompat.isLoaded();
         int wornCount = countWornPiecesClient(level);
-        boolean fullSet = wornCount >= 4;
+        boolean active = perPiece || wornCount >= 4;
 
         tooltip.add(Component.translatable("item.iceandfire.blooded_set.title")
                 .withStyle(ChatFormatting.GRAY));
 
-        ChatFormatting descColor = fullSet ? elementColor : ChatFormatting.GRAY;
+        ChatFormatting descColor = active ? elementColor : ChatFormatting.GRAY;
         String effectKey = switch (dragonType.getElement()) {
             case FIRE -> "item.iceandfire.blooded_set.fire";
             case ICE -> "item.iceandfire.blooded_set.ice";
             case LIGHTNING -> "item.iceandfire.blooded_set.lightning";
+            case GOLD -> "item.iceandfire.blooded_set.gold";
         };
-        tooltip.add(
-                Component.literal(wornCount + "/4: ").append(Component.translatable(effectKey)).withStyle(descColor));
+        tooltip.add((perPiece ? Component.empty() : Component.literal(wornCount + "/4: "))
+                .append(Component.translatable(effectKey)).withStyle(descColor));
     }
 
     private int countWornPiecesClient(@Nullable Level level) {
         if (level == null || !level.isClientSide()) return 0;
-        BloodedDragonType.DragonElement myElement = dragonType.getElement();
         return DistExecutor.unsafeCallWhenOn(Dist.CLIENT,
-                () -> () -> ClientBloodedHelper.countWornPieces(myElement));
+                () -> () -> ClientBloodedHelper.countWornPieces());
     }
 
     private static class ClientBloodedHelper {
-        static int countWornPieces(BloodedDragonType.DragonElement element) {
+        // blooded pieces of any element: they all count toward the four needed without First Aid
+        static int countWornPieces() {
             try {
                 net.minecraft.world.entity.player.Player player =
                         net.minecraft.client.Minecraft.getInstance().player;
@@ -103,8 +112,7 @@ public class ItemBloodedArmor extends ArmorItem implements IProtectAgainstDragon
                         EquipmentSlot.HEAD, EquipmentSlot.CHEST,
                         EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
                     ItemStack equipped = player.getItemBySlot(slot);
-                    if (equipped.getItem() instanceof ItemBloodedArmor armor
-                            && armor.getDragonType().getElement() == element) {
+                    if (equipped.getItem() instanceof ItemBloodedArmor) {
                         count++;
                     }
                 }
@@ -149,7 +157,8 @@ public class ItemBloodedArmor extends ArmorItem implements IProtectAgainstDragon
             }
             boolean inner = slot == EquipmentSlot.LEGS || slot == EquipmentSlot.HEAD;
             return switch (armor.getDragonType().getElement()) {
-                case FIRE -> new com.github.alexthe666.iceandfire.client.model.armor.ModelBloodedFireArmor(inner);
+                // gold has no model of its own yet, so it uses the fire dragon's shape
+                case FIRE, GOLD -> new com.github.alexthe666.iceandfire.client.model.armor.ModelBloodedFireArmor(inner);
                 case ICE -> new com.github.alexthe666.iceandfire.client.model.armor.ModelBloodedIceArmor(inner);
                 case LIGHTNING ->
                         new com.github.alexthe666.iceandfire.client.model.armor.ModelBloodedLightningArmor(inner);

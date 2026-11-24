@@ -25,6 +25,7 @@ public class GuiDragonForge extends AbstractContainerScreen<ContainerDragonForge
     private static final ResourceLocation TEXTURE_FIRE = new ResourceLocation("iceandfire:textures/gui/dragonforge_fire.png");
     private static final ResourceLocation TEXTURE_ICE = new ResourceLocation("iceandfire:textures/gui/dragonforge_ice.png");
     private static final ResourceLocation TEXTURE_LIGHTNING = new ResourceLocation("iceandfire:textures/gui/dragonforge_lightning.png");
+    private static final ResourceLocation TEXTURE_GOLD = new ResourceLocation("iceandfire:textures/gui/dragonforge_gold.png");
     private static final ResourceLocation TEXTURE_EMPTY = new ResourceLocation("iceandfire:textures/gui/dragonforge_fire.png");
     private final ContainerDragonForge tileFurnace;
 
@@ -55,6 +56,8 @@ public class GuiDragonForge extends AbstractContainerScreen<ContainerDragonForge
             texture = TEXTURE_ICE;
         } else if (dragonType == 2) {
             texture = TEXTURE_LIGHTNING;
+        } else if (dragonType == 3) {
+            texture = TEXTURE_GOLD;
         }
 
         int k = (this.width - this.imageWidth) / 2;

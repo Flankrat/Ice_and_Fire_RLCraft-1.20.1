@@ -17,7 +17,10 @@ public enum BloodedDragonType {
     LIGHTNING_AMETHYST("lightning_amethyst", "amethyst", "shocked", DragonElement.LIGHTNING,
             ChatFormatting.LIGHT_PURPLE),
     LIGHTNING_COPPER("lightning_copper", "copper", "shocked", DragonElement.LIGHTNING, ChatFormatting.GOLD),
-    LIGHTNING_BLACK("lightning_black", "black", "shocked", DragonElement.LIGHTNING, ChatFormatting.DARK_GRAY);
+    LIGHTNING_BLACK("lightning_black", "black", "shocked", DragonElement.LIGHTNING, ChatFormatting.DARK_GRAY),
+
+    // Gold dragonscale armor forged with gold dragon blood in a gold dragon's forge (hidden from JEI and the creative tab)
+    GOLD_GOLD("gold_gold", "gold", "gilded", DragonElement.GOLD, ChatFormatting.YELLOW);
 
     private final String id;
     private final String colorName;
@@ -57,7 +60,8 @@ public enum BloodedDragonType {
     public enum DragonElement {
         FIRE("fire_dragon_blood"),
         ICE("ice_dragon_blood"),
-        LIGHTNING("lightning_dragon_blood");
+        LIGHTNING("lightning_dragon_blood"),
+        GOLD("gold_dragon_blood");
 
         private final String repairItemId;
 

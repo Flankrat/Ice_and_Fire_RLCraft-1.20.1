@@ -53,7 +53,7 @@ public class LayerBloodedArmorOverlay<T extends LivingEntity, M extends Humanoid
 
     private static HumanoidModel<?> createElement(BloodedDragonType.DragonElement element, boolean inner) {
         return switch (element) {
-            case FIRE -> new ModelBloodedFireArmor(inner);
+            case FIRE, GOLD -> new ModelBloodedFireArmor(inner);
             case ICE -> new ModelBloodedIceArmor(inner);
             case LIGHTNING -> new ModelBloodedLightningArmor(inner);
         };

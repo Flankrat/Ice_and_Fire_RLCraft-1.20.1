@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "active=false": {
+      "model": "iceandfire:block/dragonforge_gold_core_disabled"
+    },
+    "active=true": {
+      "model": "iceandfire:block/dragonforge_gold_core"
+    }
+  }
+}

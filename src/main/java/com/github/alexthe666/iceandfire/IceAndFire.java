@@ -89,6 +89,15 @@ public class IceAndFire {
                 PROXY.init();
 
                 MinecraftForge.EVENT_BUS.addListener(IceAndFire::onServerStarted);
+                // send Dragonforge Mode to a joining player, or to everyone on /reload, before recipes and tags
+                MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.OnDatapackSyncEvent event) -> {
+                        MessageSyncDragonforgeMode message = new MessageSyncDragonforgeMode("individual".equalsIgnoreCase(IafConfig.dragonforgeMode));
+                        if (event.getPlayer() != null) {
+                                sendMSGToPlayer(message, event.getPlayer());
+                        } else {
+                                event.getPlayerList().getPlayers().forEach(player -> sendMSGToPlayer(message, player));
+                        }
+                });
 
                 final DeferredRegister<Codec<? extends BiomeModifier>> biomeModifiers = DeferredRegister
                                 .create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, IceAndFire.MODID);
@@ -110,6 +119,14 @@ public class IceAndFire {
                 IafStructurePieceTypes.PIECE_TYPES.register(modBus);
                 IafContainerRegistry.CONTAINERS.register(modBus);
                 IafRecipeSerializers.SERIALIZERS.register(modBus);
+                // gilded dragon bone weapons for Spartan Weaponry, only when the Spartan mods are installed
+                com.github.alexthe666.iceandfire.compat.spartan.SpartanCompat.init(modBus);
+                // recipe condition that loads only the current Dragonforge Mode's forge block recipes
+                modBus.addListener((net.minecraftforge.registries.RegisterEvent event) -> {
+                        if (event.getRegistryKey().equals(ForgeRegistries.Keys.RECIPE_SERIALIZERS)) {
+                                net.minecraftforge.common.crafting.CraftingHelper.register(com.github.alexthe666.iceandfire.recipe.DragonforgeModeCondition.Serializer.INSTANCE);
+                        }
+                });
                 IafProcessors.PROCESSORS.register(modBus);
 
                 IafVillagerRegistry.POI_TYPES.register(modBus);
@@ -227,6 +244,11 @@ public class IceAndFire {
                         PROXY.setup();
                         IafLootRegistry.init();
                 });
+                // Dragonforge Mode sync, server to client only (a client can't send it to the server). Registered after
+                // the other messages, so it takes the next packet id.
+                NETWORK_WRAPPER.registerMessage(packetsRegistered++, MessageSyncDragonforgeMode.class,
+                                MessageSyncDragonforgeMode::write, MessageSyncDragonforgeMode::read,
+                                MessageSyncDragonforgeMode::handle, java.util.Optional.of(NetworkDirection.PLAY_TO_CLIENT));
                 ModCompatList.isEVon = ModList.get().isLoaded("enhancedvisuals");
                 if (ModList.get().isLoaded("firstaid")) {
                         FirstAidCompat.init();

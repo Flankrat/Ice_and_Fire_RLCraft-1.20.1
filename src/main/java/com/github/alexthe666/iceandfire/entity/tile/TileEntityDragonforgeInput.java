@@ -14,6 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
@@ -54,9 +55,10 @@ public class TileEntityDragonforgeInput extends BlockEntity {
     private void updateInputType(DragonForgeType type) {
         if (level == null) return;
         BlockState state = level.getBlockState(worldPosition);
-        if (state.getBlock() instanceof BlockDragonforgeInput && type != null) {
+        if (state.getBlock() instanceof BlockDragonforgeInput input && type != null) {
+            // a per-type aperture always shows its own type
             BlockState newState = state
-                .setValue(BlockDragonforgeInput.TYPE, type)
+                .setValue(BlockDragonforgeInput.TYPE, input.getFixedType() != null ? input.getFixedType() : type)
                 .setValue(BlockDragonforgeInput.ACTIVE, true);
             if (state != newState) {
                 level.setBlockAndUpdate(worldPosition, newState);
@@ -144,7 +146,7 @@ public class TileEntityDragonforgeInput extends BlockEntity {
         boolean dragonSelected = false;
 
         for (EntityDragonBase dragon : level.getEntitiesOfClass(EntityDragonBase.class, searchArea)) {
-            if (!dragonSelected && (dragon.isChained() || dragon.isTame()) && canSeeInput(dragon, targetPosition)) {
+            if (!dragonSelected && (dragon.isChained() || dragon.isTame()) && core.acceptsBreathFrom(DragonForgeType.fromDragonType(dragon.dragonType)) && canSeeInput(dragon, targetPosition)) {
                 dragon.burningTarget = this.worldPosition;
                 dragonSelected = true;
             } else if (dragon.burningTarget == this.worldPosition) {
@@ -155,7 +157,7 @@ public class TileEntityDragonforgeInput extends BlockEntity {
     }
 
     public boolean isAssembled() {
-        return (core != null && core.assembled() && core.canSmelt());
+        return (core != null && core.assembled() && core.canSmeltForAnyDragon());
     }
 
     public void resetCore() {
@@ -167,7 +169,10 @@ public class TileEntityDragonforgeInput extends BlockEntity {
             HitResult rayTrace = this.level.clip(new ClipContext(dragon.getHeadPosition(), target, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, dragon));
             double distance = dragon.getHeadPosition().distanceTo(rayTrace.getLocation());
 
-            return distance < 10.0F + dragon.getBbWidth();
+            // the line of sight must end on this input (as in 1.12); otherwise any block near the dragon's head
+            // counted as "seeing" every forge within the lure range, and nearby forges stole the dragon from each other
+            return rayTrace instanceof BlockHitResult blockHit && blockHit.getType() == HitResult.Type.BLOCK
+                    && blockHit.getBlockPos().equals(this.worldPosition) && distance < 10.0F + dragon.getBbWidth();
         }
 
         return false;
@@ -180,7 +185,9 @@ public class TileEntityDragonforgeInput extends BlockEntity {
 
     private TileEntityDragonforge getConnectedTileEntity(final BlockPos position) {
         for (Direction facing : HORIZONTALS) {
-            if (level.getBlockEntity(position.relative(facing)) instanceof TileEntityDragonforge forge) {
+            // only a core of the same kind as this aperture (shared with shared, fire with fire, ...)
+            if (level.getBlockEntity(position.relative(facing)) instanceof TileEntityDragonforge forge
+                    && level.getBlockState(position).getBlock() instanceof BlockDragonforgeInput input && forge.getFixedType() == input.getFixedType()) {
                 return forge;
             }
         }

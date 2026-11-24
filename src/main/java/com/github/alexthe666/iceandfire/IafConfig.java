@@ -137,6 +137,9 @@ public class IafConfig {
     public static boolean explosiveDragonBreath = false;
     public static double weezerTinkersDisarmChance = 0.2F;
     public static boolean chunkLoadSummonCrystal = true;
+    public static boolean dragonforgeInvalidRecipesMakeAsh = true;
+    public static String dragonforgeMode = "global";
+    public static double bloodedGoldElementalBreathMultiplier = 0.5D;
     public static double dangerousWorldGenDistanceLimit = 200;
     public static double dangerousWorldGenSeparationLimit = 300;
     public static double dragonFlightSpeedMod = 1F;
@@ -153,6 +156,7 @@ public class IafConfig {
     public static boolean dragonWeaponFireAbility = true;
     public static boolean dragonWeaponIceAbility = true;
     public static boolean dragonWeaponLightningAbility = true;
+    public static boolean dragonWeaponGoldAbility = true;
     public static int villagerHouseWeight = 5;
     public static int villageAnimalFarmWeight = 5;
     public static boolean allowAttributeOverriding = true;
@@ -216,6 +220,9 @@ public class IafConfig {
     public static float[] chainLightningDamagePerHop = {5.0F, 4.0F, 3.0F, 2.0F, 1.0F};
     public static boolean chainLightningBypassesArmor = true;
     public static int chainLightningCooldown = 10;
+    public static double arcaneBurstDamage = 4.0D;
+    public static double arcaneBurstRadius = 3.0D;
+    public static int arcaneBurstCooldown = 10;
     public static Set<ResourceLocation> chainLightningEntityBlacklist = Set.of();
     public static boolean chainLightningParalysis = false;
     public static int[] chainLightningParalysisTicksPerHop = {10, 8, 6, 4, 2};
@@ -230,7 +237,6 @@ public class IafConfig {
     public static double tideTridentUnderwaterDamageMultiplier = 1;
     public static double fishingSpearThrownDamage = 5;
     public static boolean fishingSpearCatchesFish = true;
-    public static String bloodedArmorSetEffectMode = "attack";
     public static int bloodedDragonArmorSetEffectCooldown = 0;
 
     public static void bakeClient(final ModConfig config) {
@@ -367,6 +373,9 @@ public class IafConfig {
             explosiveDragonBreath = ConfigHolder.SERVER.explosiveDragonBreath.get();
             weezerTinkersDisarmChance = ConfigHolder.SERVER.weezerTinkersDisarmChance.get();
             chunkLoadSummonCrystal = ConfigHolder.SERVER.chunkLoadSummonCrystal.get();
+            dragonforgeInvalidRecipesMakeAsh = ConfigHolder.SERVER.dragonforgeInvalidRecipesMakeAsh.get();
+            dragonforgeMode = ConfigHolder.SERVER.dragonforgeMode.get();
+            bloodedGoldElementalBreathMultiplier = ConfigHolder.SERVER.bloodedGoldElementalBreathMultiplier.get();
             dangerousWorldGenDistanceLimit = ConfigHolder.SERVER.dangerousWorldGenDistanceLimit.get();
             dangerousWorldGenSeparationLimit = ConfigHolder.SERVER.dangerousWorldGenSeparationLimit.get();
             dragonFlightSpeedMod = ConfigHolder.SERVER.dragonFlightSpeedMod.get();
@@ -381,6 +390,7 @@ public class IafConfig {
             dragonWeaponFireAbility = ConfigHolder.SERVER.dragonWeaponFireAbility.get();
             dragonWeaponIceAbility = ConfigHolder.SERVER.dragonWeaponIceAbility.get();
             dragonWeaponLightningAbility = ConfigHolder.SERVER.dragonWeaponLightningAbility.get();
+            dragonWeaponGoldAbility = ConfigHolder.SERVER.dragonWeaponGoldAbility.get();
             villagerHouseWeight = ConfigHolder.SERVER.villagerHouseWeight.get();
             villageAnimalFarmWeight = ConfigHolder.SERVER.villageAnimalFarmWeight.get();
             allowAttributeOverriding = ConfigHolder.SERVER.allowAttributeOverriding.get();
@@ -444,6 +454,9 @@ public class IafConfig {
             chainLightningDamagePerHop = toFloatArray(ConfigHolder.SERVER.chainLightningDamagePerHop.get());
             chainLightningBypassesArmor = ConfigHolder.SERVER.chainLightningBypassesArmor.get();
             chainLightningCooldown = ConfigHolder.SERVER.chainLightningCooldown.get();
+            arcaneBurstDamage = ConfigHolder.SERVER.arcaneBurstDamage.get();
+            arcaneBurstRadius = ConfigHolder.SERVER.arcaneBurstRadius.get();
+            arcaneBurstCooldown = ConfigHolder.SERVER.arcaneBurstCooldown.get();
             chainLightningEntityBlacklist = parseIds(ConfigHolder.SERVER.chainLightningEntityBlacklist.get(), "Chain Lightning Entity Blacklist");
             chainLightningParalysis = ConfigHolder.SERVER.chainLightningParalysis.get();
             chainLightningParalysisTicksPerHop = ConfigHolder.SERVER.chainLightningParalysisTicksPerHop.get().stream().mapToInt(Integer::intValue).toArray();
@@ -458,7 +471,6 @@ public class IafConfig {
             tideTridentUnderwaterDamageMultiplier = ConfigHolder.SERVER.tideTridentUnderwaterDamageMultiplier.get();
             fishingSpearThrownDamage = ConfigHolder.SERVER.fishingSpearThrownDamage.get();
             fishingSpearCatchesFish = ConfigHolder.SERVER.fishingSpearCatchesFish.get();
-            bloodedArmorSetEffectMode = ConfigHolder.SERVER.bloodedArmorSetEffectMode.get();
             bloodedDragonArmorSetEffectCooldown = ConfigHolder.SERVER.bloodedDragonArmorSetEffectCooldown.get();
         } catch (Exception e) {
             IceAndFire.LOGGER.warn("An exception was caused trying to load the common config for Ice and Fire.");
