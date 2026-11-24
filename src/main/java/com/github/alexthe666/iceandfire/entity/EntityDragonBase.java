@@ -608,6 +608,15 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
         return 0;
     }
 
+    /** The look of the armor piece in this stack ("0" for none), see {@link ItemDragonArmor#getDragonArmorKey()} */
+    public String getArmorKey(ItemStack stack) {
+        // getArmorOrdinal is the switch for "this dragon wears no armor" (dragons that can't wear any return 0)
+        if (getArmorOrdinal(stack) != 0 && stack.getItem() instanceof ItemDragonArmor armorItem) {
+            return armorItem.getDragonArmorKey();
+        }
+        return "0";
+    }
+
     @Override
     public boolean isNoAi() {
         return this.isModelDead() || super.isNoAi();
@@ -913,10 +922,10 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
 
     protected void updateAttributes() {
         prevArmorResLoc = armorResLoc;
-        final int armorHead = this.getArmorOrdinal(this.getItemBySlot(EquipmentSlot.HEAD));
-        final int armorNeck = this.getArmorOrdinal(this.getItemBySlot(EquipmentSlot.CHEST));
-        final int armorLegs = this.getArmorOrdinal(this.getItemBySlot(EquipmentSlot.LEGS));
-        final int armorFeet = this.getArmorOrdinal(this.getItemBySlot(EquipmentSlot.FEET));
+        final String armorHead = this.getArmorKey(this.getItemBySlot(EquipmentSlot.HEAD));
+        final String armorNeck = this.getArmorKey(this.getItemBySlot(EquipmentSlot.CHEST));
+        final String armorLegs = this.getArmorKey(this.getItemBySlot(EquipmentSlot.LEGS));
+        final String armorFeet = this.getArmorKey(this.getItemBySlot(EquipmentSlot.FEET));
         armorResLoc = dragonType.getName() + "|" + armorHead + "|" + armorNeck + "|" + armorLegs + "|" + armorFeet;
         IceAndFire.PROXY.updateDragonArmorRender(armorResLoc);
 
@@ -1084,12 +1093,10 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
         double val = 1D;
         final EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
         for (EquipmentSlot slot : slots) {
-            switch (getArmorOrdinal(getItemBySlot(slot))) {
-                case 1 -> val += 2D;
-                case 2, 4 -> val += 3D;
-                case 3 -> val += 5D;
-                case 5, 6, 8 -> val += 10D;
-                case 7 -> val += 1.5D;
+            ItemStack stack = getItemBySlot(slot);
+            // the piece decides its own value, so addon dragon armor counts too
+            if (getArmorOrdinal(stack) != 0 && stack.getItem() instanceof ItemDragonArmor armorItem) {
+                val += armorItem.getDragonArmorModifier();
             }
         }
         return val;
