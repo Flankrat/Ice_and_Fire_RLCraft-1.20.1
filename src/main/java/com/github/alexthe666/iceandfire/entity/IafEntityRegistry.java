@@ -186,6 +186,11 @@ public class IafEntityRegistry {
     public static final RegistryObject<EntityType<EntityTideTrident>> TIDE_TRIDENT = registerEntity(
             EntityType.Builder.<EntityTideTrident>of(EntityTideTrident::new, MobCategory.MISC).sized(0.85F, 0.5F),
             "tide_trident");
+    // Thrown fishing spear (a weaker trident); same hitbox and tracking as a vanilla thrown trident
+    public static final RegistryObject<EntityType<EntityFishingSpear>> FISHING_SPEAR = registerEntity(
+            EntityType.Builder.<EntityFishingSpear>of(EntityFishingSpear::new, MobCategory.MISC).sized(0.5F, 0.5F)
+                    .clientTrackingRange(4).updateInterval(20),
+            "fishing_spear");
     public static final RegistryObject<EntityType<EntityMobSkull>> MOB_SKULL = registerEntity(
             EntityType.Builder.of(EntityMobSkull::new, MobCategory.MISC).sized(0.85F, 0.85F), "mob_skull");
     public static final RegistryObject<EntityType<EntityDreadThrall>> DREAD_THRALL = registerEntity(

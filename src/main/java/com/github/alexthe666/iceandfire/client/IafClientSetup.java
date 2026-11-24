@@ -130,6 +130,7 @@ public class IafClientSetup {
         EntityRenderers.register(IafEntityRegistry.CHAIN_TIE.get(), RenderChainTie::new);
         EntityRenderers.register(IafEntityRegistry.PIXIE_CHARGE.get(), RenderNothing::new);
         EntityRenderers.register(IafEntityRegistry.TIDE_TRIDENT.get(), RenderTideTrident::new);
+        EntityRenderers.register(IafEntityRegistry.FISHING_SPEAR.get(), RenderFishingSpear::new);
         EntityRenderers.register(IafEntityRegistry.MOB_SKULL.get(),
                 manager -> new RenderMobSkull(manager, SEA_SERPENT_BASE_MODEL));
         EntityRenderers.register(IafEntityRegistry.DREAD_SCUTTLER.get(), RenderDreadScuttler::new);
