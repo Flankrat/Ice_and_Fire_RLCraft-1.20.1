@@ -373,8 +373,29 @@ public class EntitySnowVillager extends AbstractVillager {
             this.workTicks = 0;
             BlockPos site = this.villager.getJobSite();
             if (site != null) {
-                this.villager.getNavigation().moveTo(site.getX() + 0.5D, site.getY(), site.getZ() + 0.5D, 0.35D);
+                // Walk to the floor beside the block, not onto it
+                BlockPos spot = this.findStandingSpot(site);
+                this.villager.getNavigation().moveTo(spot.getX() + 0.5D, spot.getY(), spot.getZ() + 0.5D, 0.35D);
             }
+        }
+
+        // The free spot next to the job site (air with solid floor) closest to the villager; the block itself if none
+        private BlockPos findStandingSpot(BlockPos site) {
+            Level level = this.villager.level();
+            BlockPos best = site;
+            double bestDist = Double.MAX_VALUE;
+            for (Direction side : Direction.Plane.HORIZONTAL) {
+                BlockPos spot = site.relative(side);
+                boolean free = level.getBlockState(spot).getCollisionShape(level, spot).isEmpty()
+                        && level.getBlockState(spot.above()).getCollisionShape(level, spot.above()).isEmpty()
+                        && level.getBlockState(spot.below()).isFaceSturdy(level, spot.below(), Direction.UP);
+                double dist = spot.distToCenterSqr(this.villager.position());
+                if (free && dist < bestDist) {
+                    best = spot;
+                    bestDist = dist;
+                }
+            }
+            return best;
         }
 
         @Override
