@@ -209,6 +209,9 @@ public abstract class EntityDragonBase extends TamableAnimal implements IPassabi
     public float prevDragonPitch;
     public boolean attackDecision;
     public BlockPos airTarget;
+    // added to airTarget by the flight move control: DragonFlyingPathNavigation's side-to-side sway while the dragon
+    // breathes on its target from right above it (zero otherwise)
+    public Vec3 airTargetSway = Vec3.ZERO;
     public DragonAnimationManager animationManager;
     public DragonServerTickManager serverTickManager;
     public DragonCombatManager combatManager;
