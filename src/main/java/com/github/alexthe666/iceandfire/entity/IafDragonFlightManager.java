@@ -178,9 +178,11 @@ public class IafDragonFlightManager {
             if (dragon.airTarget == null) {
                 return;
             }
-            final double dx = dragon.airTarget.getX() - dragon.getX();
-            final double dy = dragon.airTarget.getY() - dragon.getY();
-            final double dz = dragon.airTarget.getZ() - dragon.getZ();
+            // the air target plus the navigator's breath sway (zero unless it's breathing from right above its target)
+            final Vec3 sway = dragon.airTargetSway;
+            final double dx = dragon.airTarget.getX() + sway.x - dragon.getX();
+            final double dy = dragon.airTarget.getY() + sway.y - dragon.getY();
+            final double dz = dragon.airTarget.getZ() + sway.z - dragon.getZ();
 
             final double distanceSqr = dx * dx + dy * dy + dz * dz;
 

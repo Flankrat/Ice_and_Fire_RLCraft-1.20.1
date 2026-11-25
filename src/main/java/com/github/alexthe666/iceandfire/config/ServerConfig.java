@@ -113,6 +113,7 @@ public class ServerConfig {
     public final ForgeConfigSpec.BooleanValue canDragonsDespawn;
     public final ForgeConfigSpec.BooleanValue doDragonsSleep;
     public final ForgeConfigSpec.BooleanValue dragonDigWhenStuck;
+    public final ForgeConfigSpec.BooleanValue dragonBreathSway;
     public final ForgeConfigSpec.IntValue dragonBreakBlockCooldown;
     public final ForgeConfigSpec.BooleanValue dragonDropSkull;
     public final ForgeConfigSpec.BooleanValue dragonDropHeart;
@@ -308,6 +309,7 @@ public class ServerConfig {
         this.canDragonsDespawn = buildBoolean(builder, "Dragons Despawn", "all", true, "True if dragons can despawn. Note that if this is false there may be SERIOUS lag issues.");
         this.doDragonsSleep = buildBoolean(builder, "Tamed Dragons Sleep", "all", true, "True if tamed dragons go to sleep at night.");
         this.dragonDigWhenStuck = buildBoolean(builder, "Dragons Dig When Stuck", "all", true, "True if dragons can break blocks if they get stuck. Turn this off if your dragons randomly explode.");
+        this.dragonBreathSway = buildBoolean(builder, "Dragon Breath Sway", "all", true, "True if a dragon attacking with its breath from right above its target sways slowly from side to side instead of hovering straight above it.");
         this.dragonDropSkull = buildBoolean(builder, "Dragons Drop Skull", "all", true, "True if dragons can drop their skull on death.");
         this.dragonDropHeart = buildBoolean(builder, "Dragons Drop Heart", "all", true, "True if dragons can drop their heart on death.");
         this.dragonDropBlood = buildBoolean(builder, "Dragons Drop Blood", "all", true, "True if dragons can drop their blood on death.");
