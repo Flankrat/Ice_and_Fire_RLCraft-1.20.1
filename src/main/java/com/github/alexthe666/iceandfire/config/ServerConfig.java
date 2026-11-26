@@ -359,7 +359,7 @@ public class ServerConfig {
         this.deathWormMaxHealth = buildDouble(builder, "Death Worm Base Health", "all", 10, 1, 10000, "Default deathworm health, this is scaled to the worm's particular size");
         this.deathWormAttackStrength = buildDouble(builder, "Death Worm Base Attack Strength", "all", 3, 1, 10000, "Default deathworm attack strength, this is scaled to the worm's particular size");
         this.deathWormAttackMonsters = buildBoolean(builder, "Death Worms Target Monsters", "all", true, "True if wild deathworms are allowed to target and attack monsters");
-        this.deathWormSpawnRate = buildInt(builder, "Death Worm Spawn Weight", "all", 30, 1, 10000, "Deathworm spawn weight. Higher = lower chance to spawn");
+        this.deathWormSpawnRate = buildInt(builder, "Death Worm Spawn Weight", "all", 2, 1, 10000, "Death worm spawn weight in the natural creature spawns of death worm biomes. Higher = more death worms");
         this.spawnDeathWorm = buildBoolean(builder, "Spawn Death Worms", "all", true, "Whether to spawn death worms during world generation or not");
         this.deathWormSpawnCheckChance = buildInt(builder, "Death Worm Spawn Check Rechecks", "all", 0, 0, 10, "Extra 1 out of (this + 1) chance a death worm spawn has to pass. Higher = fewer death worms");
         builder.pop();

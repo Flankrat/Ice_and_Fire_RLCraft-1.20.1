@@ -78,7 +78,7 @@ public class IafConfig {
     public static double deathWormMaxHealth = 10D;
     public static double deathWormAttackStrength = 3D;
     public static boolean deathWormAttackMonsters = true;
-    public static int deathWormSpawnRate = 30;
+    public static int deathWormSpawnRate = 2;
     public static int cockatriceChickenSearchLength = 32;
     public static int cockatriceEggChance = 30;
     public static double cockatriceMaxHealth = 40.0D;

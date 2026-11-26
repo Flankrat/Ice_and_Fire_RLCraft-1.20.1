@@ -31,6 +31,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -141,6 +142,18 @@ public class EntityDeathWorm extends TamableAnimal implements ISyncMount, ICusto
                 return false;
             }
         }));
+    }
+
+    /**
+     * Natural spawns, as in 1.12: only on sand (any sand, including red sand), in daylight-level light (above 8, so not
+     * in caves), and only 1 in (Death Worm Spawn Check Rechecks + 1) attempts passes. Spawners are not limited.
+     */
+    public static boolean canDeathWormSpawnOn(EntityType<EntityDeathWorm> type, ServerLevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource random) {
+        if (reason == MobSpawnType.SPAWNER) return Mob.checkMobSpawnRules(type, level, reason, pos, random);
+        return level.getBlockState(pos.below()).is(BlockTags.SAND)
+                && level.getRawBrightness(pos, 0) > 8
+                && random.nextInt(IafConfig.deathWormSpawnCheckChance + 1) == 0
+                && Mob.checkMobSpawnRules(type, level, reason, pos, random);
     }
 
     public static AttributeSupplier.Builder bakeAttributes() {
