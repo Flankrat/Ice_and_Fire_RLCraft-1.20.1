@@ -8,6 +8,7 @@ version = "${file.jarVersion}" #mandatory
 displayName = "Ice and Fire" #mandatory
 displayURL = "https://www.curseforge.com/minecraft/mc-mods/ice-and-fire-dragons" #optional
 authors = "Alexthe666, TheBv" #optional
+credits = "Gold dragon textures by artsy" #optional
 description = '''Dragons and other mythological creatures in minecraft.'''
 
 [[mixins]]

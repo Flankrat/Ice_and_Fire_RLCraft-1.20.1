@@ -6,6 +6,9 @@
 
 Ice and Fire is a minecraft mod created by Raptorfarian and Alexthe666 which adds various mythical creatures like dragons, hypogriffs, faries and many more to the game!
 
+## Credits
+- Gold dragon textures by artsy
+
 ## Reporting issues
 If you encounter any bugs or problems with the mod you can open an issue [here](https://github.com/Alex-the-666/Ice_and_Fire/issues).
 **Please make sure that the issue you are encountering hasn't been reported yet.**
