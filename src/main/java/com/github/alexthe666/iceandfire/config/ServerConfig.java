@@ -260,7 +260,7 @@ public class ServerConfig {
         this.generateGraveyards = buildBoolean(builder, "Generate Graveyards", "all", true, "Whether to generate graveyards or not");
 
         this.generateGorgonTemple = buildBoolean(builder, "Generate Gorgon Temple", "all", true, "True if gorgon temples are allowed to spawn");
-        this.generateGorgonTempleChance = buildInt(builder, "Generate Gorgon Temple Chance", "all", 75, 1, 10000, "About one gorgon temple per this many beach chunks. Lower = more common");
+        this.generateGorgonTempleChance = buildInt(builder, "Generate Gorgon Temple Chance", "all", 75, 1, 10000, "1 in this many beach chunks gets a gorgon temple, if the ground there passes 1.12's check (solid under the whole building, not water), like 1.12's Spawn Gorgon Chance. Lower = more common");
 
         this.chunkGenDimensionList = buildStringList(builder, "World Gen Dimension List", List.of("minecraft:overworld"), "Dimensions (like minecraft:overworld) for all Ice and Fire world gen features. A whitelist or blacklist depending on World Gen Dimension Use Whitelist");
         this.chunkGenDimensionWhitelist = buildBoolean(builder, "World Gen Dimension Use Whitelist", "all", true, "If true, Ice and Fire world gen features only generate in the World Gen Dimension List. If false, they generate everywhere except those dimensions");
