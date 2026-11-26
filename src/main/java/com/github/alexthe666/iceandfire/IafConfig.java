@@ -57,6 +57,7 @@ public class IafConfig {
     public static boolean spawnHippogryphs = true;
     public static int hippogryphSpawnRate = 2;
     public static boolean generateGorgonTemple = true;
+    public static int generateGorgonTempleChance = 75;
     public static double gorgonMaxHealth = 100D;
     public static int spawnPixiesChance = 60;
     public static int pixieVillageSize = 5;
@@ -78,7 +79,7 @@ public class IafConfig {
     public static double deathWormMaxHealth = 10D;
     public static double deathWormAttackStrength = 3D;
     public static boolean deathWormAttackMonsters = true;
-    public static int deathWormSpawnRate = 30;
+    public static int deathWormSpawnRate = 2;
     public static int cockatriceChickenSearchLength = 32;
     public static int cockatriceEggChance = 30;
     public static double cockatriceMaxHealth = 40.0D;
@@ -300,6 +301,7 @@ public class IafConfig {
             spawnHippogryphs = ConfigHolder.SERVER.spawnHippogryphs.get();
             hippogryphSpawnRate = ConfigHolder.SERVER.hippogryphSpawnRate.get();
             generateGorgonTemple = ConfigHolder.SERVER.generateGorgonTemple.get();
+            generateGorgonTempleChance = ConfigHolder.SERVER.generateGorgonTempleChance.get();
             gorgonMaxHealth = ConfigHolder.SERVER.gorgonMaxHealth.get();
             spawnPixiesChance = ConfigHolder.SERVER.spawnPixiesChance.get();
             pixieVillageSize = ConfigHolder.SERVER.pixieVillageSize.get();

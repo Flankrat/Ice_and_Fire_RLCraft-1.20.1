@@ -124,6 +124,7 @@ public class ServerConfig {
     public final ForgeConfigSpec.BooleanValue spawnHippogryphs;
     public final ForgeConfigSpec.IntValue hippogryphSpawnRate;
     public final ForgeConfigSpec.BooleanValue generateGorgonTemple;
+    public final ForgeConfigSpec.IntValue generateGorgonTempleChance;
     public final ForgeConfigSpec.DoubleValue gorgonMaxHealth;
     public final ForgeConfigSpec.IntValue spawnPixiesChance;
     public final ForgeConfigSpec.IntValue pixieVillageSize;
@@ -259,6 +260,7 @@ public class ServerConfig {
         this.generateGraveyards = buildBoolean(builder, "Generate Graveyards", "all", true, "Whether to generate graveyards or not");
 
         this.generateGorgonTemple = buildBoolean(builder, "Generate Gorgon Temple", "all", true, "True if gorgon temples are allowed to spawn");
+        this.generateGorgonTempleChance = buildInt(builder, "Generate Gorgon Temple Chance", "all", 75, 1, 10000, "1 in this many beach chunks gets a gorgon temple, if the ground there passes 1.12's check (solid under the whole building, not water), like 1.12's Spawn Gorgon Chance. Lower = more common");
 
         this.chunkGenDimensionList = buildStringList(builder, "World Gen Dimension List", List.of("minecraft:overworld"), "Dimensions (like minecraft:overworld) for all Ice and Fire world gen features. A whitelist or blacklist depending on World Gen Dimension Use Whitelist");
         this.chunkGenDimensionWhitelist = buildBoolean(builder, "World Gen Dimension Use Whitelist", "all", true, "If true, Ice and Fire world gen features only generate in the World Gen Dimension List. If false, they generate everywhere except those dimensions");
@@ -359,7 +361,7 @@ public class ServerConfig {
         this.deathWormMaxHealth = buildDouble(builder, "Death Worm Base Health", "all", 10, 1, 10000, "Default deathworm health, this is scaled to the worm's particular size");
         this.deathWormAttackStrength = buildDouble(builder, "Death Worm Base Attack Strength", "all", 3, 1, 10000, "Default deathworm attack strength, this is scaled to the worm's particular size");
         this.deathWormAttackMonsters = buildBoolean(builder, "Death Worms Target Monsters", "all", true, "True if wild deathworms are allowed to target and attack monsters");
-        this.deathWormSpawnRate = buildInt(builder, "Death Worm Spawn Weight", "all", 30, 1, 10000, "Deathworm spawn weight. Higher = lower chance to spawn");
+        this.deathWormSpawnRate = buildInt(builder, "Death Worm Spawn Weight", "all", 2, 1, 10000, "Death worm spawn weight in the natural creature spawns of death worm biomes. Higher = more death worms");
         this.spawnDeathWorm = buildBoolean(builder, "Spawn Death Worms", "all", true, "Whether to spawn death worms during world generation or not");
         this.deathWormSpawnCheckChance = buildInt(builder, "Death Worm Spawn Check Rechecks", "all", 0, 0, 10, "Extra 1 out of (this + 1) chance a death worm spawn has to pass. Higher = fewer death worms");
         builder.pop();

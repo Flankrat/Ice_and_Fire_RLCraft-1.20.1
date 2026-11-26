@@ -36,6 +36,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -88,8 +89,11 @@ public class EntityDreadLich extends EntityDreadMob implements IAnimatedEntity, 
     }
 
     public static boolean canLichSpawnOn(EntityType<? extends Mob> typeIn, ServerLevelAccessor worldIn, MobSpawnType reason, BlockPos pos, RandomSource randomIn) {
-        BlockPos blockpos = pos.below();
-        return reason == MobSpawnType.SPAWNER || worldIn.getBlockState(blockpos).isValidSpawn(worldIn, blockpos, typeIn) && randomIn.nextInt(IafConfig.lichSpawnChance) == 0;
+        // Natural spawns follow the normal monster rule (dark enough, not peaceful, valid ground), like 1.12's EntityMob
+        // rule, plus the 1 in "Lich Spawn Chance" roll (1 = no extra roll)
+        @SuppressWarnings("unchecked")
+        EntityType<? extends Monster> monsterType = (EntityType<? extends Monster>) typeIn;
+        return reason == MobSpawnType.SPAWNER || Monster.checkMonsterSpawnRules(monsterType, worldIn, reason, pos, randomIn) && randomIn.nextInt(IafConfig.lichSpawnChance) == 0;
     }
 
     @Override

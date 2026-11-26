@@ -5,9 +5,14 @@ import com.github.alexthe666.iceandfire.IceAndFire;
 import com.github.alexthe666.iceandfire.config.BiomeConfig;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -289,15 +294,27 @@ public class IafEntityRegistry {
     @SubscribeEvent
     public static void commonSetup(final FMLCommonSetupEvent event) {
         SpawnPlacements.register(HIPPOGRYPH.get(), SpawnPlacements.Type.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EntityHippogryph::checkMobSpawnRules);
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, IafEntityRegistry::checkSurfaceAnimalSpawnRules);
         SpawnPlacements.register(TROLL.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 EntityTroll::canTrollSpawnOn);
         SpawnPlacements.register(DREAD_LICH.get(), SpawnPlacements.Type.ON_GROUND,
                 Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EntityDreadLich::canLichSpawnOn);
         SpawnPlacements.register(COCKATRICE.get(), SpawnPlacements.Type.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EntityCockatrice::checkMobSpawnRules);
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, IafEntityRegistry::checkSurfaceAnimalSpawnRules);
+        SpawnPlacements.register(DEATH_WORM.get(), SpawnPlacements.Type.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EntityDeathWorm::canDeathWormSpawnOn);
         SpawnPlacements.register(AMPHITHERE.get(), SpawnPlacements.Type.NO_RESTRICTIONS,
                 Heightmap.Types.MOTION_BLOCKING, EntityAmphithere::canAmphithereSpawnOn);
+    }
+
+    /**
+     * Natural spawns of surface animals (hippogryphs, cockatrices): like 1.12's animal rule, they need daylight-level
+     * light (above 8), so they never spawn in dark caves. Any normal spawnable ground counts, not only grass, because the
+     * 1.20 hills, peaks and badlands they live in are mostly stone, snow and terracotta. Spawners are not limited.
+     */
+    public static <T extends Mob> boolean checkSurfaceAnimalSpawnRules(EntityType<T> type, ServerLevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource random) {
+        return Mob.checkMobSpawnRules(type, level, reason, pos, random)
+                && (reason == MobSpawnType.SPAWNER || level.getRawBrightness(pos, 0) > 8);
     }
 
     public static HashMap<String, Boolean> LOADED_ENTITIES;
@@ -334,11 +351,18 @@ public class IafEntityRegistry {
                     IafEntityRegistry.AMPHITHERE.get(), IafConfig.amphithereSpawnRate, 1, 3));
             LOADED_ENTITIES.put("AMPHITHERE", true);
         }
+        // Death worms are part of the biome's natural spawns (as in 1.12), so they spawn with the chunk and keep
+        // turning up over time, instead of only once when the chunk generates
+        if (IafConfig.spawnDeathWorm && BiomeConfig.test(BiomeConfig.deathwormBiomes, biome)) {
+            builder.getMobSpawnSettings().getSpawner(MobCategory.CREATURE).add(new MobSpawnSettings.SpawnerData(
+                    IafEntityRegistry.DEATH_WORM.get(), IafConfig.deathWormSpawnRate, 1, 3));
+            LOADED_ENTITIES.put("DEATH_WORM", true);
+        }
         if (IafConfig.spawnTrolls && (BiomeConfig.test(BiomeConfig.forestTrollBiomes, biome) ||
                 BiomeConfig.test(BiomeConfig.snowyTrollBiomes, biome) ||
                 BiomeConfig.test(BiomeConfig.mountainTrollBiomes, biome))) {
             builder.getMobSpawnSettings().getSpawner(MobCategory.MONSTER).add(
-                    new MobSpawnSettings.SpawnerData(IafEntityRegistry.TROLL.get(), IafConfig.trollSpawnRate, 1, 3));
+                    new MobSpawnSettings.SpawnerData(IafEntityRegistry.TROLL.get(), IafConfig.trollSpawnRate, 1, 1)); // trolls spawn alone, as in 1.12
             if (BiomeConfig.test(BiomeConfig.forestTrollBiomes, biome))
                 LOADED_ENTITIES.put("TROLL_F", true);
             if (BiomeConfig.test(BiomeConfig.snowyTrollBiomes, biome))
