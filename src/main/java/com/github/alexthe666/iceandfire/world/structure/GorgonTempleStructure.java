@@ -28,6 +28,9 @@ import java.util.HashMap;
 import java.util.Optional;
 
 public class GorgonTempleStructure extends IafStructure {
+    // Chunks per structure set cell (spacing 8 in worldgen/structure_set/gorgon_temple.json)
+    private static final int CHUNKS_PER_CELL = 64;
+
 
     public static final Codec<GorgonTempleStructure> CODEC = RecordCodecBuilder.<GorgonTempleStructure>mapCodec(instance ->
             instance.group(GorgonTempleStructure.settingsCodec(instance),
@@ -46,6 +49,10 @@ public class GorgonTempleStructure extends IafStructure {
     @Override
     protected Optional<GenerationStub> findGenerationPoint(GenerationContext pContext) {
         if (!IafConfig.generateGorgonTemple)
+            return Optional.empty();
+        // The structure set offers one spot per 8x8 chunk cell; keep it with a chance of 64 / "Generate Gorgon Temple
+        // Chance", so temples are about as common per beach chunk as 1.12's 1 in N per chunk
+        if (IafConfig.generateGorgonTempleChance > CHUNKS_PER_CELL && pContext.random().nextInt(IafConfig.generateGorgonTempleChance) >= CHUNKS_PER_CELL)
             return Optional.empty();
         ChunkPos pos = pContext.chunkPos();
         BlockPos blockpos = pos.getMiddleBlockPosition(1);

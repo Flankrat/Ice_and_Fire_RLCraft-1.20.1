@@ -28,6 +28,7 @@ public class IafStructureSets {
         context.register(MAUSOLEUM, new StructureSet(structures.getOrThrow(IafStructures.MAUSOLEUM), new RandomSpreadStructurePlacement(32, 12, RandomSpreadType.LINEAR, 14200531)));
         // One spot per 12x12 chunks; SnowVillageStructure keeps 144 / "Generate Snow Village Chance" of them. The salt is the 1.12 village seed
         context.register(SNOW_VILLAGE, new StructureSet(structures.getOrThrow(IafStructures.SNOW_VILLAGE), new RandomSpreadStructurePlacement(12, 6, RandomSpreadType.LINEAR, 10387312)));
-        context.register(GORGON_TEMPLE, new StructureSet(structures.getOrThrow(IafStructures.GORGON_TEMPLE), new RandomSpreadStructurePlacement(32, 12, RandomSpreadType.LINEAR, 76489509)));
+        // One spot per 8x8 chunks; GorgonTempleStructure keeps 64 / "Generate Gorgon Temple Chance" of them
+        context.register(GORGON_TEMPLE, new StructureSet(structures.getOrThrow(IafStructures.GORGON_TEMPLE), new RandomSpreadStructurePlacement(8, 4, RandomSpreadType.LINEAR, 76489509)));
     }
 }

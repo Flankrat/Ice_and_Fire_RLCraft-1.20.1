@@ -124,6 +124,7 @@ public class ServerConfig {
     public final ForgeConfigSpec.BooleanValue spawnHippogryphs;
     public final ForgeConfigSpec.IntValue hippogryphSpawnRate;
     public final ForgeConfigSpec.BooleanValue generateGorgonTemple;
+    public final ForgeConfigSpec.IntValue generateGorgonTempleChance;
     public final ForgeConfigSpec.DoubleValue gorgonMaxHealth;
     public final ForgeConfigSpec.IntValue spawnPixiesChance;
     public final ForgeConfigSpec.IntValue pixieVillageSize;
@@ -259,6 +260,7 @@ public class ServerConfig {
         this.generateGraveyards = buildBoolean(builder, "Generate Graveyards", "all", true, "Whether to generate graveyards or not");
 
         this.generateGorgonTemple = buildBoolean(builder, "Generate Gorgon Temple", "all", true, "True if gorgon temples are allowed to spawn");
+        this.generateGorgonTempleChance = buildInt(builder, "Generate Gorgon Temple Chance", "all", 75, 1, 10000, "About one gorgon temple per this many beach chunks. Lower = more common");
 
         this.chunkGenDimensionList = buildStringList(builder, "World Gen Dimension List", List.of("minecraft:overworld"), "Dimensions (like minecraft:overworld) for all Ice and Fire world gen features. A whitelist or blacklist depending on World Gen Dimension Use Whitelist");
         this.chunkGenDimensionWhitelist = buildBoolean(builder, "World Gen Dimension Use Whitelist", "all", true, "If true, Ice and Fire world gen features only generate in the World Gen Dimension List. If false, they generate everywhere except those dimensions");
