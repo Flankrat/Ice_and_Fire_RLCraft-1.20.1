@@ -83,7 +83,7 @@ public class GorgonTempleStructure extends IafStructure {
     }
 
     /**
-     * The 1.12.2 placement rules (StructureGenerator in Ice and Fire 1.7.1 for RLCraft), on the bare terrain:
+     * The 1.12.2 placement rules (StructureGenerator in the 1.12.2 version, 1.7.1), on the bare terrain:
      * the biome at the spot itself must be a gorgon temple biome (not just one within 16 blocks), the top block
      * must be solid ground (not water), and the ground must be solid under all four corners of the 32x32 building
      * and 9 blocks under its middle, where the basement goes. Beaches are thin strips by the sea, so most beach
