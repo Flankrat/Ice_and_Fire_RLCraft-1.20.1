@@ -10,10 +10,17 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
+import net.minecraft.core.QuartPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.NoiseColumn;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.heightproviders.ConstantHeight;
@@ -51,14 +58,11 @@ public class GorgonTempleStructure extends IafStructure {
         if (!IafConfig.generateGorgonTemple)
             return Optional.empty();
         // The structure set offers one spot per 8x8 chunk cell; keep it with a chance of 64 / "Generate Gorgon Temple
-        // Chance", so temples are about as common per beach chunk as 1.12's 1 in N per chunk
+        // Chance", so each beach chunk gets about 1.12's 1 in N roll (the ground check below does the rest)
         if (IafConfig.generateGorgonTempleChance > CHUNKS_PER_CELL && pContext.random().nextInt(IafConfig.generateGorgonTempleChance) >= CHUNKS_PER_CELL)
             return Optional.empty();
         ChunkPos pos = pContext.chunkPos();
         BlockPos blockpos = pos.getMiddleBlockPosition(1);
-
-        if (!isBiomeValid(pContext, BiomeConfig.gorgonTempleBiomes, blockpos))
-            return Optional.empty();
 
         Optional<Structure.GenerationStub> structurePiecesGenerator =
                 JigsawPlacement.addPieces(
@@ -74,7 +78,47 @@ public class GorgonTempleStructure extends IafStructure {
                         // Definitely keep this false when placing structures in the nether as otherwise, heightmap placing will put the structure on the Bedrock roof.
                         this.maxDistanceFromCenter);
 
-        return structurePiecesGenerator;
+        // 1.12's rules, checked where the temple really sits: the stub's x/z is the centre of the 32x32 building
+        return structurePiecesGenerator.filter(stub -> isGoodSpot(pContext, stub.position().getX(), stub.position().getZ()));
+    }
+
+    /**
+     * The 1.12.2 placement rules (StructureGenerator in Ice and Fire 1.7.1 for RLCraft), on the bare terrain:
+     * the biome at the spot itself must be a gorgon temple biome (not just one within 16 blocks), the top block
+     * must be solid ground (not water), and the ground must be solid under all four corners of the 32x32 building
+     * and 9 blocks under its middle, where the basement goes. Beaches are thin strips by the sea, so most beach
+     * spots fail the corner check; that is what kept 1.12's temples rare.
+     */
+    private static boolean isGoodSpot(GenerationContext context, int x, int z) {
+        ChunkGenerator generator = context.chunkGenerator();
+        LevelHeightAccessor level = context.heightAccessor();
+        RandomState random = context.randomState();
+        // First free block above the top block; water counts as a block here, like 1.12's height map
+        int surface = generator.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, level, random);
+
+        Holder<Biome> biome = context.biomeSource().getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(surface - 1),
+                QuartPos.fromBlock(z), random.sampler());
+        if (!BiomeConfig.test(BiomeConfig.gorgonTempleBiomes, biome))
+            return false;
+
+        // Top block at the middle must be ground (sea water fails), and the basement spot under it too
+        NoiseColumn middle = generator.getBaseColumn(x, z, level, random);
+        if (!isGround(middle.getBlock(surface - 1)) || !isGround(middle.getBlock(surface - 9)))
+            return false;
+        // All four corners of the building at the same level (half of 32 = 16 blocks out, minus the centre block)
+        for (int dx : CORNERS)
+            for (int dz : CORNERS)
+                if (!isGround(generator.getBaseColumn(x + dx, z + dz, level, random).getBlock(surface - 1)))
+                    return false;
+        return true;
+    }
+
+    // Offsets from the building's centre to its corners
+    private static final int[] CORNERS = {-16, 15};
+
+    // Bare terrain is only stone, fluid and air, so "ground" = not air and not a fluid
+    private static boolean isGround(BlockState state) {
+        return !state.isAir() && state.getFluidState().isEmpty();
     }
 
     @Override
