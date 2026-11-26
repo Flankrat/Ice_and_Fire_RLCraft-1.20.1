@@ -123,7 +123,9 @@ public class EntityAmphithere extends TamableAnimal implements ISyncMount, IAnim
     public static boolean canAmphithereSpawnOn(EntityType<EntityAmphithere> parrotIn, ServerLevelAccessor worldIn, MobSpawnType reason, BlockPos p_223317_3_, RandomSource random) {
         BlockState blockState = worldIn.getBlockState(p_223317_3_.below());
         Block block = blockState.getBlock();
-        return (blockState.is(BlockTags.LEAVES)
+        // as in 1.12, natural spawns need open sky above them, so amphitheres don't spawn in caves
+        boolean openSky = reason == MobSpawnType.SPAWNER || worldIn.canSeeSky(p_223317_3_.above());
+        return openSky && (blockState.is(BlockTags.LEAVES)
                 || block == Blocks.GRASS_BLOCK
                 || blockState.is(BlockTags.LOGS)
                 || block == Blocks.AIR);
